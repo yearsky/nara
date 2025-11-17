@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,6 +14,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
+      <head>
+        {/* Cubism SDK - perlu download dan host sendiri atau gunakan CDN yang tersedia */}
+        <Script
+          src="https://cdn.jsdelivr.net/npm/live2dcubismcore@4.0.0/dist/live2dcubismcore.min.js"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body className="antialiased">{children}</body>
     </html>
   );

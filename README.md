@@ -28,6 +28,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 Pastikan file model Live2D ada di `/public/models/nara/hiyori_free_t08.model3.json`
 
+**Catatan:** Cubism SDK dimuat dari CDN. Jika ada error "Could not find Cubism runtime", download Cubism SDK dari [Live2D](https://www.live2d.com/download/cubism-sdk/) dan host file `live2dcubismcore.min.js` di `/public/cubism/`, lalu update script di `app/layout.tsx`.
+
 ## Development
 
 **Menggunakan Yarn:**

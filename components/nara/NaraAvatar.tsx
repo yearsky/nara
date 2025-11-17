@@ -6,10 +6,42 @@ import { useNaraEmotionStore } from "@/stores/naraEmotionStore";
 
 // Dynamic import untuk Live2D (code splitting)
 const loadLive2D = async () => {
-  const [{ Application }, { Live2DModel }] = await Promise.all([
+  // Wait for Cubism SDK to be loaded (from layout script)
+  if (typeof window !== "undefined") {
+    // Check for different possible global names
+    const cubismGlobal = (window as any).Live2DCubismCore || (window as any).CubismCore;
+    
+    if (!cubismGlobal) {
+      await new Promise((resolve) => {
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds max
+        
+        const checkCubism = setInterval(() => {
+          attempts++;
+          const cubism = (window as any).Live2DCubismCore || (window as any).CubismCore;
+          
+          if (cubism || attempts >= maxAttempts) {
+            clearInterval(checkCubism);
+            resolve(true);
+          }
+        }, 100);
+      });
+    }
+  }
+  
+  const [{ Application }, pixiLive2D] = await Promise.all([
     import("pixi.js"),
     import("pixi-live2d-display"),
   ]);
+  
+  const { Live2DModel } = pixiLive2D;
+  
+  // Setup Cubism SDK path if needed
+  if (typeof window !== "undefined" && (window as any).Live2DCubismCore) {
+    // Configure pixi-live2d-display to use the loaded Cubism SDK
+    (Live2DModel as any).cubismCore = (window as any).Live2DCubismCore;
+  }
+  
   return { Application, Live2DModel };
 };
 
@@ -33,13 +65,12 @@ export const NaraAvatar = ({ className }: NaraAvatarProps) => {
       try {
         const { Application, Live2DModel } = await loadLive2D();
         
-        const app = new Application();
-        await app.init({
+        const app = new Application({
           view: canvasRef.current!,
           backgroundColor: 0xffffff,
           resolution: window.devicePixelRatio || 1,
           autoDensity: true,
-          resizeTo: canvasRef.current.parentElement || window,
+          resizeTo: canvasRef.current?.parentElement || window,
         });
 
         appRef.current = app;
