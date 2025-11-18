@@ -8,11 +8,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+
+// Dynamic import for FullScreenChat
+const FullScreenChat = dynamic(() => import("@/components/nara/FullScreenChat"), {
+  ssr: false,
+});
 
 export default function Home() {
   const { user } = useUserStore();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showFullScreenChat, setShowFullScreenChat] = useState(false);
 
   useEffect(() => {
     // Simulate auth check
@@ -208,6 +215,13 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Full Screen Chat Modal - Can be triggered from anywhere */}
+      <FullScreenChat
+        isOpen={showFullScreenChat}
+        onClose={() => setShowFullScreenChat(false)}
+        avatarType="video"
+      />
     </main>
   );
 }
