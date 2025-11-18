@@ -3,16 +3,15 @@
 import { motion } from "framer-motion";
 import { MessageCircle, Sparkles, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function TryChatButton() {
   const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
 
   const handleClick = () => {
-    // Scroll to chat section or open full-screen chat
-    const chatSection = document.getElementById("try-chat-section");
-    if (chatSection) {
-      chatSection.scrollIntoView({ behavior: "smooth" });
-    }
+    // Redirect to dedicated video call page
+    router.push("/chat");
   };
 
   return (

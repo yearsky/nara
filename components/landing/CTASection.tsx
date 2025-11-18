@@ -1,25 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MessageCircle, Sparkles, ArrowRight, Zap } from "lucide-react";
-import dynamic from "next/dynamic";
+import { MessageCircle, Sparkles, ArrowRight, Zap, Video } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-// Dynamic import untuk NaraChatBox
-const NaraChatBox = dynamic(
-  () => import("@/components/nara/NaraChatBox").then((mod) => ({ default: mod.NaraChatBox })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary" />
-      </div>
-    ),
-  }
-);
-
 export function CTASection() {
-  const [showChat, setShowChat] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
+
+  const handleStartVideoCall = () => {
+    // Redirect to dedicated full-screen video call page
+    router.push("/chat");
+  };
 
   return (
     <section
@@ -84,7 +77,7 @@ export function CTASection() {
             {/* Features List */}
             <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
               {[
-                "💬 Chat Real-time",
+                "🎥 Video Call",
                 "🎙️ Voice Input",
                 "🤖 AI Powered",
                 "🎨 Interactive",
@@ -102,126 +95,82 @@ export function CTASection() {
               ))}
             </div>
 
-            {/* CTA Button */}
-            {!showChat && (
+            {/* CTA Button - Video Call */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <motion.button
-                onClick={() => setShowChat(true)}
+                onClick={handleStartVideoCall}
+                onHoverStart={() => setIsHovered(true)}
+                onHoverEnd={() => setIsHovered(false)}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="group inline-flex items-center gap-3 px-8 py-5 bg-white text-brand-primary rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transition-all"
+                className="group relative px-8 py-5 bg-white text-brand-primary rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transition-all overflow-hidden"
               >
-                <MessageCircle className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-                Mulai Chat Sekarang
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                {/* Shimmer Effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-light/20 to-transparent"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: isHovered ? "200%" : "-100%" }}
+                  transition={{ duration: 0.8 }}
+                />
+
+                {/* Button Content */}
+                <div className="relative flex items-center gap-3">
+                  <Video className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  <span>Mulai Video Call Sekarang</span>
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                </div>
+
+                {/* Glow Effect */}
+                <motion.div
+                  className="absolute inset-0 -z-10 bg-white opacity-0 blur-xl"
+                  animate={{
+                    opacity: isHovered ? 0.5 : 0,
+                  }}
+                  transition={{ duration: 0.3 }}
+                />
               </motion.button>
-            )}
+            </div>
+
+            {/* Info Text */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="mt-6 text-white/70 text-sm"
+            >
+              💡 <span className="font-semibold">Full-screen immersive experience</span> dengan Nara AI companion
+            </motion.p>
           </motion.div>
 
-          {/* Chat Interface */}
-          {showChat && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="max-w-4xl mx-auto"
-            >
-              <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border-4 border-white/50">
-                {/* Chat Header */}
-                <div className="bg-gradient-to-r from-brand-primary to-brand-accent p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <img
-                        src="https://ui-avatars.com/api/?name=Nara+AI&size=48&background=fff&color=C2410C&bold=true&format=svg"
-                        alt="Nara"
-                        className="w-12 h-12 rounded-full border-2 border-white"
-                      />
-                      <motion.div
-                        className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"
-                        animate={{
-                          scale: [1, 1.2, 1],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <h3 className="text-white font-bold">Nara AI</h3>
-                      <p className="text-white/80 text-sm">
-                        AI Cultural Companion
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowChat(false)}
-                    className="text-white/80 hover:text-white transition-colors"
-                  >
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Chat Content */}
-                <div className="h-[500px]">
-                  <NaraChatBox onCreditWarning={() => {}} />
-                </div>
-
-                {/* Chat Footer Info */}
-                <div className="bg-gray-50 p-4 border-t border-gray-200">
-                  <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-                    <Sparkles className="w-4 h-4 text-brand-primary" />
-                    <span>
-                      Nara dapat membuat kesalahan. Mohon verifikasi informasi
-                      penting.
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
           {/* Trust Badges */}
-          {!showChat && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-16 flex flex-wrap items-center justify-center gap-8 text-white/80"
-            >
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">100%</div>
-                <div className="text-sm">Gratis</div>
-              </div>
-              <div className="w-px h-8 bg-white/30" />
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">24/7</div>
-                <div className="text-sm">Tersedia</div>
-              </div>
-              <div className="w-px h-8 bg-white/30" />
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">Aman</div>
-                <div className="text-sm">& Privasi</div>
-              </div>
-              <div className="w-px h-8 bg-white/30" />
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">Indonesia</div>
-                <div className="text-sm">Fokus</div>
-              </div>
-            </motion.div>
-          )}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mt-16 flex flex-wrap items-center justify-center gap-8 text-white/80"
+          >
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">100%</div>
+              <div className="text-sm">Gratis</div>
+            </div>
+            <div className="w-px h-8 bg-white/30" />
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">24/7</div>
+              <div className="text-sm">Tersedia</div>
+            </div>
+            <div className="w-px h-8 bg-white/30" />
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">Aman</div>
+              <div className="text-sm">& Privasi</div>
+            </div>
+            <div className="w-px h-8 bg-white/30" />
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">Indonesia</div>
+              <div className="text-sm">Fokus</div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
