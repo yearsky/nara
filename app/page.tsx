@@ -1,92 +1,213 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { FeatureShowcase } from "@/components/landing/FeatureShowcase";
+import { CTASection } from "@/components/landing/CTASection";
+import { useUserStore } from "@/stores/userStore";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Modal } from "@/components/ui/Modal";
-import { useState } from "react";
-import { useCreditStore } from "@/stores/creditStore";
-import { ArrowRight, LayoutDashboard } from "lucide-react";
-
-// Dynamic imports untuk code splitting
-const NaraAvatar = dynamic(() => import("@/components/nara/NaraAvatar").then((mod) => ({ default: mod.NaraAvatar })), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-full">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B4513]" />
-    </div>
-  ),
-});
-
-const NaraChatBox = dynamic(() => import("@/components/nara/NaraChatBox").then((mod) => ({ default: mod.NaraChatBox })), {
-  ssr: false,
-});
+import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Home() {
-  const [showCreditModal, setShowCreditModal] = useState(false);
-  const { isLowCredits } = useCreditStore();
+  const { user } = useUserStore();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleCreditWarning = () => {
-    if (isLowCredits()) {
-      setShowCreditModal(true);
-    }
-  };
+  useEffect(() => {
+    // Simulate auth check
+    // For now, we'll show landing page for all users
+    // In the future, implement proper auth logic here
 
-  return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white pb-20">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold text-[#8B4513] mb-2">
-            Nara.ai
-          </h1>
-          <p className="text-gray-600 mb-4">
-            Belajar Budaya Indonesia dengan AI Companion
-          </p>
+    // Check if user wants to see landing page (for demo purposes)
+    const showLanding = true; // Set to false to see old dashboard
 
-          {/* Dashboard Link */}
-          <div className="flex justify-center gap-4 mb-6">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 bg-brand-primary hover:bg-brand-dark text-white px-6 py-3 rounded-full font-semibold transition-all shadow-md hover:shadow-lg"
-            >
-              <LayoutDashboard className="w-5 h-5" />
-              Dashboard Live2D
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/dashboard-video"
-              className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-semibold transition-all shadow-md hover:shadow-lg"
-            >
-              <LayoutDashboard className="w-5 h-5" />
-              Dashboard Video
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
+    setIsAuthenticated(!showLanding);
+    setIsLoading(false);
+  }, [user]);
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-          {/* NARA Avatar Section */}
-          <div className="h-[400px] md:h-[500px]">
-            <NaraAvatar className="w-full h-full" />
-          </div>
-
-          {/* Chat Section */}
-          <div className="h-[400px] md:h-[500px]">
-            <NaraChatBox onCreditWarning={handleCreditWarning} />
-          </div>
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50">
+        <div className="text-center">
+          <motion.div
+            className="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-brand-primary border-t-transparent"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+          <p className="text-gray-600 font-semibold">Memuat Nara...</p>
         </div>
       </div>
+    );
+  }
 
-      <Modal
-        isOpen={showCreditModal}
-        onClose={() => setShowCreditModal(false)}
-        title="Credits Hampir Habis"
-      >
-        <p className="text-gray-700">
-          Credits kamu hampir habis. Silakan top up untuk melanjutkan percakapan
-          dengan Nara.
-        </p>
-      </Modal>
+  // For authenticated users, redirect to dashboard
+  if (isAuthenticated) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-3xl md:text-4xl font-heading font-bold text-brand-primary mb-4">
+              Selamat Datang Kembali!
+            </h1>
+            <p className="text-gray-600 mb-8">
+              Kamu sudah login. Langsung ke dashboard untuk melanjutkan belajar.
+            </p>
+            <div className="flex justify-center gap-4">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 bg-brand-primary hover:bg-brand-dark text-white px-6 py-3 rounded-full font-semibold transition-all shadow-md hover:shadow-lg"
+              >
+                Ke Dashboard
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Landing page for non-authenticated users
+  return (
+    <main className="min-h-screen">
+      {/* Navigation Bar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center">
+                <span className="text-white font-bold text-lg">N</span>
+              </div>
+              <span className="font-heading font-bold text-xl text-gray-900">
+                Nara.ai
+              </span>
+            </Link>
+
+            {/* Navigation Links */}
+            <div className="hidden md:flex items-center gap-8">
+              <a
+                href="#features"
+                className="text-gray-600 hover:text-brand-primary transition-colors font-semibold"
+              >
+                Fitur
+              </a>
+              <a
+                href="#try-chat-section"
+                className="text-gray-600 hover:text-brand-primary transition-colors font-semibold"
+              >
+                Coba Sekarang
+              </a>
+              <Link
+                href="/dashboard"
+                className="text-gray-600 hover:text-brand-primary transition-colors font-semibold"
+              >
+                Dashboard
+              </Link>
+            </div>
+
+            {/* CTA Button */}
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 bg-brand-primary hover:bg-brand-dark text-white px-4 py-2 rounded-full font-semibold transition-all shadow-md hover:shadow-lg text-sm"
+            >
+              Mulai Belajar
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <HeroSection />
+
+      {/* Feature Showcase */}
+      <div id="features">
+        <FeatureShowcase />
+      </div>
+
+      {/* CTA Section with Chat */}
+      <CTASection />
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8">
+            {/* Brand */}
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">N</span>
+                </div>
+                <span className="font-heading font-bold text-xl">Nara.ai</span>
+              </div>
+              <p className="text-gray-400 mb-4 max-w-md">
+                AI companion yang membantu kamu belajar dan mengenal budaya
+                Indonesia dengan cara yang menyenangkan dan interaktif.
+              </p>
+              <p className="text-gray-500 text-sm">
+                © 2025 Nara.ai. All rights reserved.
+              </p>
+            </div>
+
+            {/* Links */}
+            <div>
+              <h3 className="font-bold mb-4">Fitur</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Nara Map
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Nara Verse
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Aksara Nusantara
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Nara Symphony
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Social & Contact */}
+            <div>
+              <h3 className="font-bold mb-4">Hubungi Kami</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Twitter
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Instagram
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    GitHub
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Email
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
-
