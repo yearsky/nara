@@ -53,24 +53,24 @@
 
 ## 🎙️ Audio Recording Integration
 
-### 3. Voice Input for Chat
-- [ ] Implement audio recording functionality (Web Audio API)
-- [ ] Add microphone button to chat input
-- [ ] Create recording UI indicator (waveform animation)
-- [ ] Integrate speech-to-text API:
-  - Consider: OpenAI Whisper API
-  - Alternative: Web Speech API (browser native)
-- [ ] Add permission handling for microphone access
-- [ ] Show recording duration timer
-- [ ] Add cancel and send recording buttons
-- [ ] Convert audio to text and send to chat API
-- [ ] Store audio recordings (optional playback)
+### ~~3. Voice Input for Chat~~ ✅ <completed in claude/pull-origin-main-01YStAxpNtPtkNpxmcedMksP>
+- [x] Implement audio recording functionality (Web Audio API)
+- [x] Add microphone button to chat input
+- [x] Create recording UI indicator (waveform animation)
+- [x] Integrate speech-to-text API:
+  - ✅ OpenAI Whisper API (with fallback for missing API key)
+  - ✅ Graceful degradation when API key not configured
+- [x] Add permission handling for microphone access
+- [x] Show recording duration timer
+- [x] Add cancel and send recording buttons
+- [x] Convert audio to text and send to chat API
+- [x] Store audio recordings (optional playback)
 
-**Components to create**:
-- `components/nara/VoiceRecorder.tsx` - Recording UI
-- `components/nara/AudioWaveform.tsx` - Visual feedback
-- `app/api/speech-to-text/route.ts` - STT API endpoint
-- `lib/audioRecorder.ts` - Audio recording utilities
+**Components created**:
+- ✅ `components/nara/VoiceRecorder.tsx` - Recording UI with controls
+- ✅ `components/nara/AudioWaveform.tsx` - Visual feedback with bars/line modes
+- ✅ `app/api/speech-to-text/route.ts` - STT API endpoint (OpenAI Whisper)
+- ✅ `lib/audioRecorder.ts` - Audio recording utilities with RecordRTC
 
 ---
 
