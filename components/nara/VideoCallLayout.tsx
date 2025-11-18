@@ -1,14 +1,22 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useCallStore } from '@/stores/callStore'
 import { useCallTimer } from '@/hooks/useCallTimer'
 import { useAutoHideControls } from '@/hooks/useAutoHideControls'
 import VideoPlaceholder from './VideoPlaceholder'
 import CallHeader from './CallHeader'
-import VideoCallControls from './VideoCallControls'
-import LiveChatOverlay from './LiveChatOverlay'
+import ChatMessagesOverlay from './ChatMessagesOverlay'
+import BottomControlsBar from './BottomControlsBar'
+
+interface Message {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  audioUrl?: string
+  timestamp: number
+}
 
 interface VideoCallLayoutProps {
   characterName?: string
@@ -41,6 +49,8 @@ export default function VideoCallLayout({
 
   const { formatted: callDuration } = useCallTimer(isCallActive)
   const { isVisible, showControls } = useAutoHideControls(3000)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   // Start call on mount
   useEffect(() => {
@@ -75,17 +85,19 @@ export default function VideoCallLayout({
       {/* Top Header Overlay (Name + Timer) */}
       <CallHeader name={characterName} duration={callDuration} isVisible={isVisible} />
 
-      {/* Live Chat Overlay - TikTok Style */}
-      <LiveChatOverlay />
+      {/* Chat Messages Overlay - TikTok Style */}
+      <ChatMessagesOverlay messages={messages} isLoading={isLoading} />
 
-      {/* Bottom Control Bar */}
-      <VideoCallControls
+      {/* Bottom Controls Bar - Combined Mic, Camera, and Chat Input */}
+      <BottomControlsBar
         isCameraOn={isCameraOn}
         isMicOn={isMicOn}
-        isVisible={isVisible}
         onCameraToggle={toggleCamera}
         onMicToggle={toggleMic}
-        onEndCall={handleEndCall}
+        messages={messages}
+        setMessages={setMessages}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
       />
     </div>
   )
