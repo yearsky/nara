@@ -1,9 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Modal } from "@/components/ui/Modal";
 import { useState } from "react";
 import { useCreditStore } from "@/stores/creditStore";
+import { ArrowRight, LayoutDashboard } from "lucide-react";
 
 // Dynamic imports untuk code splitting
 const NaraAvatar = dynamic(() => import("@/components/nara/NaraAvatar").then((mod) => ({ default: mod.NaraAvatar })), {
@@ -36,9 +38,21 @@ export default function Home() {
           <h1 className="text-3xl md:text-4xl font-heading font-bold text-[#8B4513] mb-2">
             Nara.ai
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-4">
             Belajar Budaya Indonesia dengan AI Companion
           </p>
+
+          {/* Dashboard Link */}
+          <div className="flex justify-center gap-4 mb-6">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 bg-brand-primary hover:bg-brand-dark text-white px-6 py-3 rounded-full font-semibold transition-all shadow-md hover:shadow-lg"
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              Lihat Dashboard Baru
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
