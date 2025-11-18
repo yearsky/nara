@@ -22,9 +22,10 @@ const loadLive2D = async () => {
   console.log("Setting up pixi-live2d-display with Cubism SDK...");
   
   // Import pixi-live2d-display AFTER Cubism SDK is loaded
+  // IMPORTANT: Use /cubism4 path for Cubism 4 SDK support
   const [{ Application }, pixiLive2D] = await Promise.all([
     import("pixi.js"),
-    import("pixi-live2d-display-lipsyncpatch"),
+    import("pixi-live2d-display-lipsyncpatch/cubism4"),
   ]);
   
   const { Live2DModel } = pixiLive2D;
