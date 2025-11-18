@@ -181,7 +181,7 @@ export default function BottomControlsBar({
 
           {/* Chat Input - 1/3 */}
           <motion.div
-            className="flex-1 flex items-center gap-2 bg-white/20 backdrop-blur-xl rounded-full px-3 md:px-4 py-2 md:py-3 shadow-lg"
+            className="flex-1 h-14 md:h-16 flex items-center gap-2 bg-white/20 backdrop-blur-xl rounded-full px-3 md:px-4 shadow-lg"
             whileHover={{ scale: 1.02 }}
           >
             <input

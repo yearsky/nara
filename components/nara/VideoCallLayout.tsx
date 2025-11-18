@@ -83,7 +83,12 @@ export default function VideoCallLayout({
       <VideoPlaceholder />
 
       {/* Top Header Overlay (Name + Timer) */}
-      <CallHeader name={characterName} duration={callDuration} isVisible={isVisible} />
+      <CallHeader
+        name={characterName}
+        duration={callDuration}
+        isVisible={isVisible}
+        onBack={handleEndCall}
+      />
 
       {/* Chat Messages Overlay - TikTok Style */}
       <ChatMessagesOverlay messages={messages} isLoading={isLoading} />
