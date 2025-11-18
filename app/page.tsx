@@ -49,7 +49,15 @@ export default function Home() {
               className="inline-flex items-center gap-2 bg-brand-primary hover:bg-brand-dark text-white px-6 py-3 rounded-full font-semibold transition-all shadow-md hover:shadow-lg"
             >
               <LayoutDashboard className="w-5 h-5" />
-              Lihat Dashboard Baru
+              Dashboard Live2D
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/dashboard-video"
+              className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-semibold transition-all shadow-md hover:shadow-lg"
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              Dashboard Video
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
