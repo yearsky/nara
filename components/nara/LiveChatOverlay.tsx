@@ -128,8 +128,8 @@ export default function LiveChatOverlay() {
   return (
     <>
       {/* Messages Overlay - TikTok Live Style (Left Side) */}
-      <div className="absolute left-4 bottom-24 md:bottom-32 max-w-xs md:max-w-sm w-full pointer-events-none z-30">
-        <div className="space-y-2 max-h-[50vh] overflow-y-auto pointer-events-auto scrollbar-hide">
+      <div className="absolute left-4 bottom-32 md:bottom-36 max-w-xs md:max-w-sm w-full pointer-events-none z-30">
+        <div className="space-y-2 max-h-[45vh] overflow-y-auto pointer-events-auto scrollbar-hide">
           <AnimatePresence>
             {messages.slice(-10).map((message) => (
               <motion.div
@@ -186,11 +186,11 @@ export default function LiveChatOverlay() {
       </div>
 
       {/* Input Box - Bottom Center (TikTok Style) */}
-      <div className="absolute bottom-4 left-4 right-4 md:left-8 md:right-8 z-30 pointer-events-auto">
+      <div className="absolute bottom-24 left-4 right-4 md:left-8 md:right-8 z-50 pointer-events-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 bg-black/40 backdrop-blur-xl rounded-full px-4 py-3 shadow-2xl border border-white/10"
+          className="flex items-center gap-2 bg-black/50 backdrop-blur-xl rounded-full px-4 py-3 shadow-2xl border border-white/20"
         >
           <input
             ref={inputRef}
