@@ -24,56 +24,29 @@ const loadLive2D = async () => {
   // Import pixi-live2d-display AFTER Cubism SDK is loaded
   const [{ Application }, pixiLive2D] = await Promise.all([
     import("pixi.js"),
-    import("pixi-live2d-display"),
+    import("pixi-live2d-display-lipsyncpatch"),
   ]);
   
   const { Live2DModel } = pixiLive2D;
-  
+
   // Check if this version supports Cubism 3/4
-  // Some versions have a different API
-  console.log("pixi-live2d-display version info:", {
+  console.log("pixi-live2d-display-lipsyncpatch version info:", {
     Live2DModel: typeof Live2DModel,
     hasFrom: typeof (Live2DModel as any).from === "function",
     hasCubismCore: !!(Live2DModel as any).cubismCore,
   });
-  
-  // CRITICAL: Setup Cubism SDK untuk pixi-live2d-display
-  // Must be set before loading any models
+
+  // CRITICAL: Setup Cubism SDK untuk pixi-live2d-display-lipsyncpatch
+  // This package supports Cubism 4 SDK
   if (Live2DModel && cubismCore) {
-    // Set cubismCore on the class (not instance)
-    (Live2DModel as any).cubismCore = cubismCore;
-    
-    // Also set on prototype if needed
-    if ((Live2DModel as any).prototype) {
-      (Live2DModel as any).prototype.cubismCore = cubismCore;
-    }
-    
-    // Try setting it globally for the library to find
-    (window as any).Live2DCubismCore = cubismCore;
-    
-    // Some versions of pixi-live2d-display still look for Cubism 2
-    // Try to set a compatibility shim
-    if (!(window as any).Live2D) {
-      (window as any).Live2D = {
-        cubismCore: cubismCore,
-        // Compatibility shim
-        getError: () => null,
-      };
-    }
-    
-    // Some versions need registerTicker
+    // Register the ticker for animations
     if (typeof (Live2DModel as any).registerTicker === "function") {
       (Live2DModel as any).registerTicker(Application);
-      console.log("Registered ticker with Application");
+      console.log("✓ Registered ticker with Application");
     }
-    
-    // Try setting cubismCore on window for library to find
-    if (!(window as any).CubismCore) {
-      (window as any).CubismCore = cubismCore;
-    }
-    
-    console.log("✓ Cubism SDK configured for pixi-live2d-display", {
-      hasCubismCore: !!(Live2DModel as any).cubismCore,
+
+    console.log("✓ Cubism 4 SDK ready for pixi-live2d-display-lipsyncpatch", {
+      cubismCoreAvailable: !!cubismCore,
       cubismCoreType: typeof cubismCore,
     });
   } else {
@@ -125,23 +98,7 @@ export const NaraAvatar = ({ className }: NaraAvatarProps) => {
         appRef.current = app;
 
         // Load Live2D model
-        console.log("Loading Live2D model...");
-        console.log("Live2DModel cubismCore check:", {
-          hasCubismCore: !!(Live2DModel as any).cubismCore,
-          cubismCore: (Live2DModel as any).cubismCore,
-        });
-        
-        // Double-check cubismCore is set before loading
-        if (!(Live2DModel as any).cubismCore) {
-          const cubismCore = (window as any).Live2DCubismCore || (window as any).CubismCore;
-          if (cubismCore) {
-            (Live2DModel as any).cubismCore = cubismCore;
-            console.log("Re-set cubismCore before loading model");
-          } else {
-            throw new Error("Cubism SDK tidak tersedia saat akan load model");
-          }
-        }
-        
+        console.log("Loading Live2D model from: /models/nara/hiyori_free_t08.model3.json");
         const model = await Live2DModel.from("/models/nara/hiyori_free_t08.model3.json");
         modelRef.current = model;
 
