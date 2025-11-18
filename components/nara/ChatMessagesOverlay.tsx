@@ -37,7 +37,7 @@ export default function ChatMessagesOverlay({
   return (
     <>
       {/* Messages Overlay - TikTok Live Style (Left Side) */}
-      <div className="absolute left-4 bottom-32 md:bottom-36 max-w-xs md:max-w-sm w-full pointer-events-none z-30">
+      <div className="absolute left-4 bottom-24 md:bottom-28 max-w-xs md:max-w-sm w-full pointer-events-none z-30">
         <div className="space-y-2 max-h-[45vh] overflow-y-auto pointer-events-auto scrollbar-hide">
           <AnimatePresence>
             {messages.slice(-10).map((message) => (
