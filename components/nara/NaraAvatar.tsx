@@ -3,32 +3,25 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useNaraEmotionStore } from "@/stores/naraEmotionStore";
+import { setupCubismSDK } from "@/lib/cubismSetup";
 
 // Dynamic import untuk Live2D (code splitting)
 const loadLive2D = async () => {
-  // Wait for Cubism SDK to be loaded (from layout script)
-  if (typeof window !== "undefined") {
-    // Check for different possible global names
-    const cubismGlobal = (window as any).Live2DCubismCore || (window as any).CubismCore;
-    
-    if (!cubismGlobal) {
-      await new Promise((resolve) => {
-        let attempts = 0;
-        const maxAttempts = 50; // 5 seconds max
-        
-        const checkCubism = setInterval(() => {
-          attempts++;
-          const cubism = (window as any).Live2DCubismCore || (window as any).CubismCore;
-          
-          if (cubism || attempts >= maxAttempts) {
-            clearInterval(checkCubism);
-            resolve(true);
-          }
-        }, 100);
-      });
-    }
+  // Wait for Cubism SDK to be loaded FIRST
+  const cubismLoaded = await setupCubismSDK();
+  if (!cubismLoaded) {
+    throw new Error("Cubism SDK tidak berhasil dimuat. Pastikan script dimuat di layout.tsx");
   }
   
+  // Get Cubism Core before importing pixi-live2d-display
+  const cubismCore = (window as any).Live2DCubismCore || (window as any).CubismCore;
+  if (!cubismCore) {
+    throw new Error("Live2DCubismCore tidak ditemukan di window object");
+  }
+  
+  console.log("Setting up pixi-live2d-display with Cubism SDK...");
+  
+  // Import pixi-live2d-display AFTER Cubism SDK is loaded
   const [{ Application }, pixiLive2D] = await Promise.all([
     import("pixi.js"),
     import("pixi-live2d-display"),
@@ -36,10 +29,55 @@ const loadLive2D = async () => {
   
   const { Live2DModel } = pixiLive2D;
   
-  // Setup Cubism SDK path if needed
-  if (typeof window !== "undefined" && (window as any).Live2DCubismCore) {
-    // Configure pixi-live2d-display to use the loaded Cubism SDK
-    (Live2DModel as any).cubismCore = (window as any).Live2DCubismCore;
+  // Check if this version supports Cubism 3/4
+  // Some versions have a different API
+  console.log("pixi-live2d-display version info:", {
+    Live2DModel: typeof Live2DModel,
+    hasFrom: typeof (Live2DModel as any).from === "function",
+    hasCubismCore: !!(Live2DModel as any).cubismCore,
+  });
+  
+  // CRITICAL: Setup Cubism SDK untuk pixi-live2d-display
+  // Must be set before loading any models
+  if (Live2DModel && cubismCore) {
+    // Set cubismCore on the class (not instance)
+    (Live2DModel as any).cubismCore = cubismCore;
+    
+    // Also set on prototype if needed
+    if ((Live2DModel as any).prototype) {
+      (Live2DModel as any).prototype.cubismCore = cubismCore;
+    }
+    
+    // Try setting it globally for the library to find
+    (window as any).Live2DCubismCore = cubismCore;
+    
+    // Some versions of pixi-live2d-display still look for Cubism 2
+    // Try to set a compatibility shim
+    if (!(window as any).Live2D) {
+      (window as any).Live2D = {
+        cubismCore: cubismCore,
+        // Compatibility shim
+        getError: () => null,
+      };
+    }
+    
+    // Some versions need registerTicker
+    if (typeof (Live2DModel as any).registerTicker === "function") {
+      (Live2DModel as any).registerTicker(Application);
+      console.log("Registered ticker with Application");
+    }
+    
+    // Try setting cubismCore on window for library to find
+    if (!(window as any).CubismCore) {
+      (window as any).CubismCore = cubismCore;
+    }
+    
+    console.log("✓ Cubism SDK configured for pixi-live2d-display", {
+      hasCubismCore: !!(Live2DModel as any).cubismCore,
+      cubismCoreType: typeof cubismCore,
+    });
+  } else {
+    throw new Error("Failed to configure Cubism SDK for Live2DModel");
   }
   
   return { Application, Live2DModel };
@@ -63,8 +101,19 @@ export const NaraAvatar = ({ className }: NaraAvatarProps) => {
 
     const initPixi = async () => {
       try {
+        console.log("Loading Live2D libraries...");
         const { Application, Live2DModel } = await loadLive2D();
         
+        // Check if Cubism SDK is available
+        if (typeof window !== "undefined" && !(window as any).Live2DCubismCore) {
+          throw new Error(
+            "Cubism SDK tidak ditemukan. " +
+            "Download dari https://www.live2d.com/download/cubism-sdk/ " +
+            "dan copy live2dcubismcore.min.js ke /public/cubism/"
+          );
+        }
+        
+        console.log("Initializing PixiJS Application...");
         const app = new Application({
           view: canvasRef.current!,
           backgroundColor: 0xffffff,
@@ -76,6 +125,23 @@ export const NaraAvatar = ({ className }: NaraAvatarProps) => {
         appRef.current = app;
 
         // Load Live2D model
+        console.log("Loading Live2D model...");
+        console.log("Live2DModel cubismCore check:", {
+          hasCubismCore: !!(Live2DModel as any).cubismCore,
+          cubismCore: (Live2DModel as any).cubismCore,
+        });
+        
+        // Double-check cubismCore is set before loading
+        if (!(Live2DModel as any).cubismCore) {
+          const cubismCore = (window as any).Live2DCubismCore || (window as any).CubismCore;
+          if (cubismCore) {
+            (Live2DModel as any).cubismCore = cubismCore;
+            console.log("Re-set cubismCore before loading model");
+          } else {
+            throw new Error("Cubism SDK tidak tersedia saat akan load model");
+          }
+        }
+        
         const model = await Live2DModel.from("/models/nara/hiyori_free_t08.model3.json");
         modelRef.current = model;
 
@@ -118,9 +184,10 @@ export const NaraAvatar = ({ className }: NaraAvatarProps) => {
           clearInterval(idleInterval);
           window.removeEventListener("resize", resizeModel);
         };
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to initialize Live2D:", err);
-        setError("Gagal memuat avatar Nara");
+        const errorMessage = err?.message || "Gagal memuat avatar Nara";
+        setError(errorMessage);
         setIsLoading(false);
       }
     };

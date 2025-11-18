@@ -24,11 +24,21 @@ OPENROUTER_API_KEY=your_openrouter_api_key_here
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-### Live2D Model
+### Live2D Model & Cubism SDK
 
-Pastikan file model Live2D ada di `/public/models/nara/hiyori_free_t08.model3.json`
+1. **Model Live2D:** Pastikan file model ada di `/public/models/nara/hiyori_free_t08.model3.json`
 
-**Catatan:** Cubism SDK dimuat dari CDN. Jika ada error "Could not find Cubism runtime", download Cubism SDK dari [Live2D](https://www.live2d.com/download/cubism-sdk/) dan host file `live2dcubismcore.min.js` di `/public/cubism/`, lalu update script di `app/layout.tsx`.
+2. **Cubism SDK (WAJIB):**
+   - Download Cubism SDK dari [Live2D](https://www.live2d.com/download/cubism-sdk/) (perlu registrasi)
+   - Extract dan cari file `live2dcubismcore.min.js` di folder `Core/live2dcubismcore/min/`
+   - Copy file tersebut ke `/public/cubism/live2dcubismcore.min.js`
+   - Script akan otomatis load dari local file
+
+**Catatan Penting:** 
+- Model Hiyori menggunakan Cubism 3.0 (`.model3.json`, `.moc3`)
+- `pixi-live2d-display` v0.5.0 mungkin masih mencari Cubism 2 runtime
+- Jika error "Could not find Cubism 2 runtime", pastikan Cubism SDK sudah dimuat dengan benar
+- Cek console browser untuk log loading Cubism SDK
 
 ## Development
 

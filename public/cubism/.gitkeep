@@ -1,0 +1,6 @@
+# Place Cubism SDK file here
+# 
+# Download Cubism SDK from: https://www.live2d.com/download/cubism-sdk/
+# Extract and find: Core/live2dcubismcore/min/live2dcubismcore.min.js
+# Copy that file here as: live2dcubismcore.min.js
+
