@@ -16,8 +16,16 @@ export default function VideoPlaceholder() {
     // Check if video file exists
     const checkVideo = async () => {
       try {
-        const response = await fetch('/videos/nara-placeholder.mp4', { method: 'HEAD' })
-        setHasVideo(response.ok)
+        // Try the new video file from public folder first
+        const videoPath = '/WhatsApp Video 2025-11-18 at 17.47.34.mp4'
+        const response = await fetch(videoPath, { method: 'HEAD' })
+        if (response.ok) {
+          setHasVideo(true)
+        } else {
+          // Fallback to old path
+          const fallbackResponse = await fetch('/videos/nara-placeholder.mp4', { method: 'HEAD' })
+          setHasVideo(fallbackResponse.ok)
+        }
       } catch (error) {
         setHasVideo(false)
       } finally {
@@ -48,6 +56,9 @@ export default function VideoPlaceholder() {
           className="w-full h-full object-cover"
           onError={() => setHasVideo(false)}
         >
+          {/* Try new video from public folder first */}
+          <source src="/WhatsApp Video 2025-11-18 at 17.47.34.mp4" type="video/mp4" />
+          {/* Fallback to old path */}
           <source src="/videos/nara-placeholder.mp4" type="video/mp4" />
         </video>
 

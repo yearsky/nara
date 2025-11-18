@@ -116,7 +116,7 @@ export function CTASection() {
                 {/* Button Content */}
                 <div className="relative flex items-center gap-3">
                   <Video className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                  <span>Mulai Video Call Sekarang</span>
+                  <span>Tanya Nara</span>
                   <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 </div>
 

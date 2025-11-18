@@ -8,6 +8,7 @@ import { useAutoHideControls } from '@/hooks/useAutoHideControls'
 import VideoPlaceholder from './VideoPlaceholder'
 import CallHeader from './CallHeader'
 import VideoCallControls from './VideoCallControls'
+import LiveChatOverlay from './LiveChatOverlay'
 
 interface VideoCallLayoutProps {
   characterName?: string
@@ -74,6 +75,9 @@ export default function VideoCallLayout({
       {/* Top Header Overlay (Name + Timer) */}
       <CallHeader name={characterName} duration={callDuration} isVisible={isVisible} />
 
+      {/* Live Chat Overlay - TikTok Style */}
+      <LiveChatOverlay />
+
       {/* Bottom Control Bar */}
       <VideoCallControls
         isCameraOn={isCameraOn}
@@ -83,18 +87,6 @@ export default function VideoCallLayout({
         onMicToggle={toggleMic}
         onEndCall={handleEndCall}
       />
-
-      {/* Tap instruction (shows briefly on mount, optional) */}
-      {isCallActive && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 1, 1, 0] }}
-          transition={{ duration: 4, times: [0, 0.1, 0.9, 1] }}
-          className="absolute bottom-32 left-0 right-0 text-center pointer-events-none"
-        >
-          <p className="text-white/60 text-sm font-medium">Tap to show controls</p>
-        </motion.div>
-      )}
     </div>
   )
 }
