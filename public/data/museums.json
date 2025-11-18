@@ -1,0 +1,396 @@
+{
+  "museums": [
+    {
+      "id": "museum-nasional",
+      "name": "Museum Nasional Indonesia",
+      "category": "museum",
+      "coordinates": [-6.1761, 106.8220],
+      "address": "Jl. Medan Merdeka Barat No.12, Jakarta Pusat",
+      "city": "Jakarta",
+      "province": "DKI Jakarta",
+      "region": "Jawa",
+      "description": "Museum Nasional Indonesia atau Museum Gajah adalah museum yang menyimpan koleksi prasejarah, arkeologi, etnografi, dan numismatik terlengkap di Indonesia.",
+      "images": [
+        "https://picsum.photos/seed/museum-nasional-1/800/600",
+        "https://picsum.photos/seed/museum-nasional-2/800/600"
+      ],
+      "hours": {
+        "weekday": "08:00 - 16:00",
+        "weekend": "08:00 - 17:00",
+        "closed": "Senin"
+      },
+      "website": "https://www.museumnasional.or.id",
+      "phone": "+62 21 3868172",
+      "ticketPrice": {
+        "domestic": "Rp 5.000",
+        "foreign": "Rp 10.000"
+      }
+    },
+    {
+      "id": "borobudur",
+      "name": "Candi Borobudur",
+      "category": "heritage",
+      "coordinates": [-7.6079, 110.2038],
+      "address": "Jl. Badrawati, Borobudur, Magelang",
+      "city": "Magelang",
+      "province": "Jawa Tengah",
+      "region": "Jawa",
+      "description": "Candi Borobudur adalah candi Buddha terbesar di dunia dan merupakan salah satu situs warisan dunia UNESCO. Dibangun pada abad ke-8 dan ke-9 di bawah dinasti Syailendra.",
+      "images": [
+        "https://picsum.photos/seed/borobudur-1/800/600",
+        "https://picsum.photos/seed/borobudur-2/800/600",
+        "https://picsum.photos/seed/borobudur-3/800/600"
+      ],
+      "hours": {
+        "weekday": "06:30 - 17:00",
+        "weekend": "06:30 - 17:00",
+        "closed": "-"
+      },
+      "website": "https://borobudurpark.com",
+      "phone": "+62 293 788266",
+      "ticketPrice": {
+        "domestic": "Rp 50.000",
+        "foreign": "$25"
+      }
+    },
+    {
+      "id": "prambanan",
+      "name": "Candi Prambanan",
+      "category": "heritage",
+      "coordinates": [-7.7520, 110.4915],
+      "address": "Jl. Raya Solo - Yogyakarta, Prambanan",
+      "city": "Sleman",
+      "province": "DI Yogyakarta",
+      "region": "Jawa",
+      "description": "Candi Prambanan adalah kompleks candi Hindu terbesar di Indonesia yang dibangun pada abad ke-9. Merupakan situs warisan dunia UNESCO.",
+      "images": [
+        "https://picsum.photos/seed/prambanan-1/800/600",
+        "https://picsum.photos/seed/prambanan-2/800/600"
+      ],
+      "hours": {
+        "weekday": "06:00 - 17:30",
+        "weekend": "06:00 - 17:30",
+        "closed": "-"
+      },
+      "website": "https://prambanan.id",
+      "phone": "+62 274 496401",
+      "ticketPrice": {
+        "domestic": "Rp 50.000",
+        "foreign": "$25"
+      }
+    },
+    {
+      "id": "museum-sri-baduga",
+      "name": "Museum Sri Baduga",
+      "category": "museum",
+      "coordinates": [-6.9148, 107.6098],
+      "address": "Jl. BKR No.185, Bandung",
+      "city": "Bandung",
+      "province": "Jawa Barat",
+      "region": "Jawa",
+      "description": "Museum Sri Baduga adalah museum yang menyimpan koleksi budaya Sunda, termasuk wayang golek, alat musik tradisional, dan artefak sejarah Kerajaan Pajajaran.",
+      "images": [
+        "https://picsum.photos/seed/sri-baduga-1/800/600",
+        "https://picsum.photos/seed/sri-baduga-2/800/600"
+      ],
+      "hours": {
+        "weekday": "08:00 - 16:00",
+        "weekend": "08:00 - 16:00",
+        "closed": "Senin"
+      },
+      "website": "https://www.sribadugamuseum.com",
+      "phone": "+62 22 5200980",
+      "ticketPrice": {
+        "domestic": "Rp 3.000",
+        "foreign": "Rp 10.000"
+      }
+    },
+    {
+      "id": "museum-bali",
+      "name": "Museum Bali",
+      "category": "museum",
+      "coordinates": [-8.6570, 115.2164],
+      "address": "Jl. Mayor Wisnu No.1, Denpasar",
+      "city": "Denpasar",
+      "province": "Bali",
+      "region": "Bali-Nusa Tenggara",
+      "description": "Museum Bali menyimpan koleksi seni dan budaya Bali dari prasejarah hingga modern, termasuk patung, lukisan, tekstil, dan peralatan upacara.",
+      "images": [
+        "https://picsum.photos/seed/museum-bali-1/800/600",
+        "https://picsum.photos/seed/museum-bali-2/800/600"
+      ],
+      "hours": {
+        "weekday": "08:00 - 15:30",
+        "weekend": "08:00 - 15:30",
+        "closed": "Hari Raya Nyepi"
+      },
+      "website": "https://museumbali.id",
+      "phone": "+62 361 222680",
+      "ticketPrice": {
+        "domestic": "Rp 50.000",
+        "foreign": "Rp 100.000"
+      }
+    },
+    {
+      "id": "taman-mini",
+      "name": "Taman Mini Indonesia Indah",
+      "category": "cultural-park",
+      "coordinates": [-6.3025, 106.8950],
+      "address": "Jl. Raya Taman Mini, Jakarta Timur",
+      "city": "Jakarta",
+      "province": "DKI Jakarta",
+      "region": "Jawa",
+      "description": "Taman Mini Indonesia Indah adalah taman budaya yang menampilkan miniatur arsitektur tradisional dari 34 provinsi di Indonesia serta berbagai museum.",
+      "images": [
+        "https://picsum.photos/seed/tmii-1/800/600",
+        "https://picsum.photos/seed/tmii-2/800/600",
+        "https://picsum.photos/seed/tmii-3/800/600"
+      ],
+      "hours": {
+        "weekday": "07:00 - 21:00",
+        "weekend": "07:00 - 21:00",
+        "closed": "-"
+      },
+      "website": "https://www.tamanmini.com",
+      "phone": "+62 21 8779214",
+      "ticketPrice": {
+        "domestic": "Rp 25.000",
+        "foreign": "Rp 50.000"
+      }
+    },
+    {
+      "id": "museum-aceh",
+      "name": "Museum Aceh",
+      "category": "museum",
+      "coordinates": [5.5483, 95.3238],
+      "address": "Jl. Sultan Alaidin Mahmudsyah No.10, Banda Aceh",
+      "city": "Banda Aceh",
+      "province": "Aceh",
+      "region": "Sumatera",
+      "description": "Museum Aceh adalah museum yang menyimpan koleksi sejarah dan budaya Aceh, termasuk artefak Kerajaan Aceh dan peninggalan tsunami 2004.",
+      "images": [
+        "https://picsum.photos/seed/museum-aceh-1/800/600",
+        "https://picsum.photos/seed/museum-aceh-2/800/600"
+      ],
+      "hours": {
+        "weekday": "08:00 - 12:00, 14:00 - 16:00",
+        "weekend": "08:00 - 12:00",
+        "closed": "Senin, Hari Libur Nasional"
+      },
+      "website": "https://museumaceh.id",
+      "phone": "+62 651 22795",
+      "ticketPrice": {
+        "domestic": "Rp 3.000",
+        "foreign": "Rp 10.000"
+      }
+    },
+    {
+      "id": "rumah-gadang-museum",
+      "name": "Museum Adityawarman",
+      "category": "museum",
+      "coordinates": [-0.9170, 100.3640],
+      "address": "Jl. Diponegoro No.10, Padang",
+      "city": "Padang",
+      "province": "Sumatera Barat",
+      "region": "Sumatera",
+      "description": "Museum Adityawarman berbentuk Rumah Gadang dan menyimpan koleksi budaya Minangkabau, termasuk tekstil, senjata tradisional, dan peralatan upacara adat.",
+      "images": [
+        "https://picsum.photos/seed/adityawarman-1/800/600",
+        "https://picsum.photos/seed/adityawarman-2/800/600"
+      ],
+      "hours": {
+        "weekday": "08:00 - 16:00",
+        "weekend": "08:00 - 16:00",
+        "closed": "Senin"
+      },
+      "website": "https://museumadityawarman.id",
+      "phone": "+62 751 33549",
+      "ticketPrice": {
+        "domestic": "Rp 5.000",
+        "foreign": "Rp 10.000"
+      }
+    },
+    {
+      "id": "museum-kalimantan-barat",
+      "name": "Museum Kalimantan Barat",
+      "category": "museum",
+      "coordinates": [-0.0263, 109.3425],
+      "address": "Jl. Jenderal Ahmad Yani, Pontianak",
+      "city": "Pontianak",
+      "province": "Kalimantan Barat",
+      "region": "Kalimantan",
+      "description": "Museum yang menyimpan koleksi budaya Dayak dan sejarah Kalimantan Barat, termasuk mandau, peralatan berburu, dan keramik kuno.",
+      "images": [
+        "https://picsum.photos/seed/museum-kalbar-1/800/600",
+        "https://picsum.photos/seed/museum-kalbar-2/800/600"
+      ],
+      "hours": {
+        "weekday": "08:00 - 15:00",
+        "weekend": "08:00 - 14:00",
+        "closed": "Senin"
+      },
+      "website": "https://museumkalbar.id",
+      "phone": "+62 561 736251",
+      "ticketPrice": {
+        "domestic": "Rp 2.000",
+        "foreign": "Rp 5.000"
+      }
+    },
+    {
+      "id": "museum-sulawesi-utara",
+      "name": "Museum Negeri Sulawesi Utara",
+      "category": "museum",
+      "coordinates": [1.4748, 124.8421],
+      "address": "Jl. W.R. Supratman, Manado",
+      "city": "Manado",
+      "province": "Sulawesi Utara",
+      "region": "Sulawesi",
+      "description": "Museum yang menampilkan koleksi budaya Minahasa dan Sulawesi Utara, termasuk waruga (sarcophagus batu), tekstil, dan peralatan tradisional.",
+      "images": [
+        "https://picsum.photos/seed/museum-sulut-1/800/600",
+        "https://picsum.photos/seed/museum-sulut-2/800/600"
+      ],
+      "hours": {
+        "weekday": "08:00 - 14:00",
+        "weekend": "08:00 - 14:00",
+        "closed": "Senin"
+      },
+      "website": "https://museumsulut.id",
+      "phone": "+62 431 862359",
+      "ticketPrice": {
+        "domestic": "Rp 3.000",
+        "foreign": "Rp 10.000"
+      }
+    },
+    {
+      "id": "museum-papua",
+      "name": "Museum Loka Budaya Papua",
+      "category": "museum",
+      "coordinates": [-2.5920, 140.6721],
+      "address": "Jl. Raya Abepura, Jayapura",
+      "city": "Jayapura",
+      "province": "Papua",
+      "region": "Papua-Maluku",
+      "description": "Museum yang menyimpan koleksi budaya Papua, termasuk ukiran asmat, koteka, peralatan berburu, dan alat musik tradisional.",
+      "images": [
+        "https://picsum.photos/seed/museum-papua-1/800/600",
+        "https://picsum.photos/seed/museum-papua-2/800/600"
+      ],
+      "hours": {
+        "weekday": "08:00 - 15:00",
+        "weekend": "08:00 - 14:00",
+        "closed": "Senin"
+      },
+      "website": "https://museumlbp.id",
+      "phone": "+62 967 585489",
+      "ticketPrice": {
+        "domestic": "Rp 5.000",
+        "foreign": "Rp 10.000"
+      }
+    },
+    {
+      "id": "museum-tekstil",
+      "name": "Museum Tekstil",
+      "category": "museum",
+      "coordinates": [-6.1872, 106.8137],
+      "address": "Jl. KS Tubun No.2-4, Jakarta Pusat",
+      "city": "Jakarta",
+      "province": "DKI Jakarta",
+      "region": "Jawa",
+      "description": "Museum yang menampilkan koleksi tekstil tradisional Indonesia dari berbagai daerah, termasuk batik, songket, tenun ikat, dan ulos.",
+      "images": [
+        "https://picsum.photos/seed/museum-tekstil-1/800/600",
+        "https://picsum.photos/seed/museum-tekstil-2/800/600"
+      ],
+      "hours": {
+        "weekday": "09:00 - 15:00",
+        "weekend": "09:00 - 15:00",
+        "closed": "Senin, Hari Libur Nasional"
+      },
+      "website": "https://museumtekstiljakarta.com",
+      "phone": "+62 21 5603751",
+      "ticketPrice": {
+        "domestic": "Rp 5.000",
+        "foreign": "Rp 10.000"
+      }
+    },
+    {
+      "id": "sangiran",
+      "name": "Museum Sangiran",
+      "category": "heritage",
+      "coordinates": [-7.4340, 110.8300],
+      "address": "Krikilan, Kalijambe, Sragen",
+      "city": "Sragen",
+      "province": "Jawa Tengah",
+      "region": "Jawa",
+      "description": "Museum Sangiran adalah situs prasejarah yang menyimpan fosil manusia purba dan merupakan salah satu situs warisan dunia UNESCO.",
+      "images": [
+        "https://picsum.photos/seed/sangiran-1/800/600",
+        "https://picsum.photos/seed/sangiran-2/800/600"
+      ],
+      "hours": {
+        "weekday": "08:00 - 16:00",
+        "weekend": "08:00 - 16:00",
+        "closed": "Senin"
+      },
+      "website": "https://sangiran.id",
+      "phone": "+62 271 6811050",
+      "ticketPrice": {
+        "domestic": "Rp 7.500",
+        "foreign": "Rp 15.000"
+      }
+    },
+    {
+      "id": "museum-wayang",
+      "name": "Museum Wayang",
+      "category": "museum",
+      "coordinates": [-6.1355, 106.8133],
+      "address": "Jl. Pintu Besar Utara No.27, Jakarta Barat",
+      "city": "Jakarta",
+      "province": "DKI Jakarta",
+      "region": "Jawa",
+      "description": "Museum Wayang menyimpan koleksi wayang dari berbagai daerah di Indonesia dan mancanegara, termasuk wayang kulit, wayang golek, dan wayang beber.",
+      "images": [
+        "https://picsum.photos/seed/museum-wayang-1/800/600",
+        "https://picsum.photos/seed/museum-wayang-2/800/600"
+      ],
+      "hours": {
+        "weekday": "09:00 - 15:00",
+        "weekend": "09:00 - 15:00",
+        "closed": "Senin"
+      },
+      "website": "https://www.museumwayang.com",
+      "phone": "+62 21 6929560",
+      "ticketPrice": {
+        "domestic": "Rp 5.000",
+        "foreign": "Rp 10.000"
+      }
+    },
+    {
+      "id": "ratu-boko",
+      "name": "Situs Ratu Boko",
+      "category": "heritage",
+      "coordinates": [-7.7705, 110.4892],
+      "address": "Ratu Boko, Prambanan, Sleman",
+      "city": "Sleman",
+      "province": "DI Yogyakarta",
+      "region": "Jawa",
+      "description": "Situs Ratu Boko adalah kompleks keraton yang dibangun pada abad ke-8, menawarkan pemandangan sunset spektakuler dan reruntuhan istana kuno.",
+      "images": [
+        "https://picsum.photos/seed/ratu-boko-1/800/600",
+        "https://picsum.photos/seed/ratu-boko-2/800/600"
+      ],
+      "hours": {
+        "weekday": "06:00 - 17:30",
+        "weekend": "06:00 - 17:30",
+        "closed": "-"
+      },
+      "website": "https://borobudurpark.com/candi/ratu-boko",
+      "phone": "+62 274 496401",
+      "ticketPrice": {
+        "domestic": "Rp 40.000",
+        "foreign": "$15"
+      }
+    }
+  ]
+}
