@@ -6,6 +6,7 @@ import { Send, Mic, MicOff, Video, VideoOff, Square } from 'lucide-react'
 import { useNaraChat } from '@/hooks/useNaraChat'
 import { useLiveTranscription } from '@/hooks/useLiveTranscription'
 import { useVoiceChatStore } from '@/stores/voiceChatStore'
+import TopicChips from './TopicChips'
 
 interface BottomControlsBarProps {
   isCameraOn: boolean
@@ -30,11 +31,19 @@ export default function BottomControlsBar({
   isDesktopMode = false,
 }: BottomControlsBarProps) {
   const [input, setInput] = useState('')
+  const [showTopicChips, setShowTopicChips] = useState(true)
   const inputRef = useRef<HTMLInputElement>(null)
   const currentUserMessageIdRef = useRef<string | null>(null)
 
   // Use Nara Chat hook for message orchestration
-  const { handleSendMessage, getNaraResponse, isLoading, credits, isLowCredits, error } = useNaraChat()
+  const { handleSendMessage, getNaraResponse, isLoading, credits, isLowCredits, error, messages } = useNaraChat()
+
+  // Hide topic chips after first message
+  useEffect(() => {
+    if (messages.length > 0) {
+      setShowTopicChips(false)
+    }
+  }, [messages])
 
   // Use Live Transcription hook for real-time speech-to-text
   const {
@@ -83,7 +92,14 @@ export default function BottomControlsBar({
     if (!content || isLoading) return
 
     setInput('')
+    setShowTopicChips(false) // Hide topic chips after sending
     await handleSendMessage(content)
+  }
+
+  // Handle topic chip selection
+  const handleTopicSelect = async (prompt: string) => {
+    setShowTopicChips(false)
+    await handleSendMessage(prompt)
   }
 
   // Handle voice/mic toggle - now uses live transcription with real-time chat bubbles
@@ -123,6 +139,13 @@ export default function BottomControlsBar({
 
   return (
     <>
+      {/* Topic Chips - Show before first message */}
+      {showTopicChips && !isDesktopMode && (
+        <div className="absolute bottom-24 left-0 right-0 z-40">
+          <TopicChips onTopicSelect={handleTopicSelect} />
+        </div>
+      )}
+
       {/* Bottom Controls Container - 3 Floating Sections */}
       <div
         className={isDesktopMode ? "relative w-full z-50 pointer-events-auto" : "absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 z-50 pointer-events-auto"}

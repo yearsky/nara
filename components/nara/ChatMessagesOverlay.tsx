@@ -1,8 +1,10 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import NaraTypingIndicator from './NaraTypingIndicator'
+import SuggestedReplies from './SuggestedReplies'
+import { useNaraChat } from '@/hooks/useNaraChat'
 
 interface Message {
   id: string
@@ -26,6 +28,8 @@ export default function ChatMessagesOverlay({
   isLoading,
 }: ChatMessagesOverlayProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const { handleSendMessage, streamingResponse } = useNaraChat()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -34,6 +38,48 @@ export default function ChatMessagesOverlay({
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Show suggestions after Nara's response
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1]
+    if (lastMessage && lastMessage.role === 'assistant' && lastMessage.content !== '...' && !isLoading) {
+      setShowSuggestions(true)
+      // Auto-hide after 10 seconds
+      const timer = setTimeout(() => setShowSuggestions(false), 10000)
+      return () => clearTimeout(timer)
+    } else {
+      setShowSuggestions(false)
+    }
+  }, [messages, isLoading])
+
+  // Generate contextual suggestions based on last message
+  const generateSuggestions = (): string[] => {
+    const lastMessage = messages[messages.length - 1]
+    if (!lastMessage || lastMessage.role !== 'assistant') return []
+
+    const content = lastMessage.content.toLowerCase()
+
+    // Contextual suggestions based on keywords
+    if (content.includes('batik')) {
+      return ['Bagaimana cara membuat batik?', 'Ceritakan lebih lanjut', 'Apa jenis batik lainnya?']
+    } else if (content.includes('wayang')) {
+      return ['Siapa tokoh wayang terkenal?', 'Jelaskan lebih detail', 'Bagaimana pertunjukannya?']
+    } else if (content.includes('musik') || content.includes('gamelan')) {
+      return ['Alat musik apa saja?', 'Bagaimana cara memainkannya?', 'Ceritakan lebih banyak']
+    } else if (content.includes('kuliner') || content.includes('makanan')) {
+      return ['Bagaimana cara membuatnya?', 'Apa makanan lainnya?', 'Ceritakan sejarahnya']
+    } else if (content.includes('aksara') || content.includes('huruf')) {
+      return ['Bagaimana cara menulisnya?', 'Apa aksara lainnya?', 'Jelaskan lebih lanjut']
+    }
+
+    // Default suggestions
+    return ['Ceritakan lebih lanjut', 'Apa contohnya?', 'Jelaskan lebih detail']
+  }
+
+  const handleSuggestionSelect = async (suggestion: string) => {
+    setShowSuggestions(false)
+    await handleSendMessage(suggestion)
+  }
 
   return (
     <>
@@ -63,7 +109,20 @@ export default function ChatMessagesOverlay({
               >
                 {/* Check if this is a placeholder message */}
                 {message.role === 'assistant' && message.content === '...' ? (
-                  <NaraTypingIndicator variant="thinking" mode="mobile" />
+                  // Show streaming response if available, otherwise show typing indicator
+                  streamingResponse ? (
+                    <div className="rounded-2xl px-4 py-2 backdrop-blur-md bg-orange-500/30 text-white shadow-lg">
+                      <div className="flex items-start gap-2">
+                        <span className="text-xs font-bold text-orange-200">Nara:</span>
+                        <p className="text-sm font-medium leading-snug flex-1 break-words">
+                          {streamingResponse}
+                          <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <NaraTypingIndicator variant="thinking" mode="mobile" />
+                  )
                 ) : (
                   <div className="flex items-start gap-2">
                     {message.role === 'assistant' && (
@@ -79,6 +138,17 @@ export default function ChatMessagesOverlay({
           </AnimatePresence>
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Suggested Replies - Below messages */}
+        {showSuggestions && !isLoading && (
+          <div className="mt-2">
+            <SuggestedReplies
+              suggestions={generateSuggestions()}
+              onSelect={handleSuggestionSelect}
+              isVisible={showSuggestions}
+            />
+          </div>
+        )}
       </div>
 
       {/* Custom scrollbar hide */}

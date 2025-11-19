@@ -45,7 +45,7 @@ export default function VideoCallLayout({
   const { isVisible, showControls } = useAutoHideControls(3000)
 
   // Use new Nara Chat hook for message orchestration
-  const { messages, isLoading } = useNaraChat()
+  const { messages, isLoading, streamingResponse } = useNaraChat()
 
   // Ref for auto-scrolling chat in desktop mode
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -144,7 +144,18 @@ export default function VideoCallLayout({
                 >
                   {/* Check if this is a placeholder message */}
                   {message.role === 'assistant' && message.content === '...' ? (
-                    <NaraTypingIndicator variant="thinking" />
+                    // Show streaming response if available, otherwise show typing indicator
+                    streamingResponse ? (
+                      <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-white/10 text-white backdrop-blur-sm">
+                        <p className="text-xs font-bold text-orange-300 mb-1">Nara</p>
+                        <p className="text-sm leading-relaxed break-words">
+                          {streamingResponse}
+                          <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
+                        </p>
+                      </div>
+                    ) : (
+                      <NaraTypingIndicator variant="thinking" />
+                    )
                   ) : (
                     <div
                       className={`max-w-[80%] rounded-2xl px-4 py-3 ${
