@@ -17,8 +17,9 @@ import {
 import MuseumList from '@/components/museum/MuseumList';
 import MuseumFilter from '@/components/museum/MuseumFilter';
 import MuseumDetail from '@/components/museum/MuseumDetail';
-import BottomNav from '@/components/navigation/BottomNav';
-import { MapPin, Map, List, ArrowLeft, Loader2, Search, SlidersHorizontal, X } from 'lucide-react';
+import SubmoduleHeader from '@/components/learn/SubmoduleHeader';
+import GlassFooter from '@/components/learn/GlassFooter';
+import { MapPin, Map, List, Loader2, Search, SlidersHorizontal, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Dynamic import for MuseumMap to avoid SSR issues with Leaflet
@@ -122,103 +123,57 @@ export default function NaraMapPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-emerald-50 pb-24">
-      {/* Header - Simple for Mobile */}
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-green-600 to-emerald-700 text-white shadow-lg">
-        <div className="max-w-screen-xl mx-auto px-4 py-4">
-          {/* Top Row: Back Button, Title, View Toggle */}
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => router.push('/learn')}
-              className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-semibold hidden sm:inline">Kembali</span>
-            </button>
-
-            <div className="flex items-center gap-2">
-              <MapPin className="w-6 h-6" />
-              <h1 className="text-lg md:text-xl font-bold">Nara Map</h1>
-            </div>
-
-            {/* View Mode Toggle */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setViewMode('map')}
-                className={`p-2 rounded-lg transition-all ${
-                  viewMode === 'map'
-                    ? 'bg-white text-green-600 shadow-lg'
-                    : 'bg-white/20 text-white hover:bg-white/30'
-                }`}
-                aria-label="Tampilan Peta"
-              >
-                <Map className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-all ${
-                  viewMode === 'list'
-                    ? 'bg-white text-green-600 shadow-lg'
-                    : 'bg-white/20 text-white hover:bg-white/30'
-                }`}
-                aria-label="Tampilan Daftar"
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
+    <div className="min-h-screen bg-gradient-to-b from-green-50/30 to-emerald-50/30 pb-32 pt-6">
+      {/* Header */}
+      <SubmoduleHeader
+        title="Nara Map"
+        subtitle="Jelajahi museum & heritage"
+        icon={MapPin}
+        gradientFrom="#10B981"
+        gradientTo="#059669"
+      >
+        {/* Search Bar and View Toggle */}
+        <div className="flex items-center gap-2 mt-4">
           {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-300" />
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari museum atau situs..."
-              className="w-full pl-10 pr-4 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-green-200 focus:bg-white/30 focus:outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/50 text-stone-900 placeholder:text-stone-400 focus:bg-white/90 focus:outline-none focus:ring-2 focus:ring-green-400/30 transition-all"
             />
           </div>
 
-          {/* Desktop Tabs - Hidden on Mobile */}
-          <div className="hidden md:block mt-4 space-y-3">
-            {/* Category Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {categoryTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSelectedCategory(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all flex-shrink-0 ${
-                    selectedCategory === tab.id
-                      ? 'bg-white text-green-700 font-semibold shadow-md'
-                      : 'bg-white/20 text-white hover:bg-white/30'
-                  }`}
-                >
-                  <span>{tab.icon}</span>
-                  <span className="text-sm">{tab.label}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Region Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {regionTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSelectedRegion(tab.id)}
-                  className={`px-4 py-2 rounded-full whitespace-nowrap transition-all flex-shrink-0 text-sm ${
-                    selectedRegion === tab.id
-                      ? 'bg-white text-green-700 font-semibold shadow-md'
-                      : 'bg-white/20 text-white hover:bg-white/30'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+          {/* View Mode Toggle */}
+          <div className="flex gap-1 bg-white/70 backdrop-blur-sm rounded-2xl p-1 border border-white/50">
+            <button
+              onClick={() => setViewMode('map')}
+              className={`p-2 rounded-xl transition-all ${
+                viewMode === 'map'
+                  ? 'bg-green-600 text-white shadow-md'
+                  : 'text-stone-600 hover:bg-white/50'
+              }`}
+              aria-label="Tampilan Peta"
+            >
+              <Map className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-xl transition-all ${
+                viewMode === 'list'
+                  ? 'bg-green-600 text-white shadow-md'
+                  : 'text-stone-600 hover:bg-white/50'
+              }`}
+              aria-label="Tampilan Daftar"
+            >
+              <List className="w-4 h-4" />
+            </button>
           </div>
         </div>
-      </header>
+
+      </SubmoduleHeader>
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
@@ -396,8 +351,8 @@ export default function NaraMapPage() {
         )}
       </AnimatePresence>
 
-      {/* Bottom Navigation */}
-      <BottomNav />
+      {/* Glass Footer */}
+      <GlassFooter />
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   Music,
   Play,
   Pause,
@@ -12,7 +11,8 @@ import {
   Share2,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import BottomNav from "@/components/navigation/BottomNav";
+import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
+import GlassFooter from "@/components/learn/GlassFooter";
 import Image from "next/image";
 
 const musicCategories = [
@@ -101,33 +101,15 @@ export default function SymphonyPage() {
   const [playingTrack, setPlayingTrack] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-rose-50 pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-pink-50/30 to-rose-50/30 pb-32 pt-6">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg">
-        <div className="max-w-screen-xl mx-auto px-4 py-6">
-          <button
-            onClick={() => router.push("/learn")}
-            className="flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-semibold">Kembali ke Belajar</span>
-          </button>
-
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
-              <Music className="w-8 h-8 text-white" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                Nara Symphony
-              </h1>
-              <p className="text-pink-100">
-                Dengarkan dan pelajari musik tradisional nusantara
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <SubmoduleHeader
+        title="Nara Symphony"
+        subtitle="Dengarkan dan pelajari musik tradisional nusantara"
+        icon={Music}
+        gradientFrom="#EC4899"
+        gradientTo="#F43F5E"
+      />
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6 space-y-8">
@@ -271,7 +253,8 @@ export default function SymphonyPage() {
         </motion.div>
       </main>
 
-      <BottomNav />
+      {/* Glass Footer */}
+      <GlassFooter />
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   BookOpen,
   Play,
   CheckCircle,
@@ -12,7 +11,8 @@ import {
   Award,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import BottomNav from "@/components/navigation/BottomNav";
+import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
+import GlassFooter from "@/components/learn/GlassFooter";
 
 const lessons = [
   {
@@ -115,62 +115,42 @@ export default function AksaraPage() {
   const totalXP = lessons.filter((l) => l.isCompleted).reduce((sum, l) => sum + l.xp, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/30 to-indigo-50/30 pb-32 pt-6">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
-        <div className="max-w-screen-xl mx-auto px-4 py-6">
-          {/* Back Button */}
-          <button
-            onClick={() => router.push("/learn")}
-            className="flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-semibold">Kembali ke Belajar</span>
-          </button>
-
-          {/* Module Title */}
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
-              <BookOpen className="w-8 h-8 text-white" />
+      <SubmoduleHeader
+        title="Aksara Nusantara"
+        subtitle="Pelajari 8+ aksara tradisional Indonesia"
+        icon={BookOpen}
+        gradientFrom="#3B82F6"
+        gradientTo="#4F46E5"
+      >
+        {/* Progress Stats */}
+        <div className="grid grid-cols-3 gap-3 mt-4">
+          <div className="backdrop-blur-sm bg-white/50 rounded-2xl p-3 text-center border border-white/30">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+              <span className="text-xs text-stone-600">Progress</span>
             </div>
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                Aksara Nusantara
-              </h1>
-              <p className="text-blue-100">
-                Pelajari 8+ aksara tradisional Indonesia
-              </p>
-            </div>
+            <p className="text-xl font-bold text-stone-900">{progress}%</p>
           </div>
-
-          {/* Progress Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <BookOpen className="w-4 h-4" />
-                <span className="text-sm opacity-90">Progress</span>
-              </div>
-              <p className="text-2xl font-bold">{progress}%</p>
+          <div className="backdrop-blur-sm bg-white/50 rounded-2xl p-3 text-center border border-white/30">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+              <span className="text-xs text-stone-600">Selesai</span>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle className="w-4 h-4" />
-                <span className="text-sm opacity-90">Selesai</span>
-              </div>
-              <p className="text-2xl font-bold">
-                {completedLessons}/{totalLessons}
-              </p>
+            <p className="text-xl font-bold text-stone-900">
+              {completedLessons}/{totalLessons}
+            </p>
+          </div>
+          <div className="backdrop-blur-sm bg-white/50 rounded-2xl p-3 text-center border border-white/30">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Star className="w-3.5 h-3.5 text-yellow-500" />
+              <span className="text-xs text-stone-600">Total XP</span>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Star className="w-4 h-4" />
-                <span className="text-sm opacity-90">Total XP</span>
-              </div>
-              <p className="text-2xl font-bold">{totalXP}</p>
-            </div>
+            <p className="text-xl font-bold text-stone-900">{totalXP}</p>
           </div>
         </div>
-      </header>
+      </SubmoduleHeader>
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
@@ -298,8 +278,8 @@ export default function AksaraPage() {
         </motion.div>
       </main>
 
-      {/* Bottom Navigation */}
-      <BottomNav />
+      {/* Glass Footer */}
+      <GlassFooter />
     </div>
   );
 }
