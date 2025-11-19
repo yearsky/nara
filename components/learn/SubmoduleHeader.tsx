@@ -30,6 +30,8 @@ export default function SubmoduleHeader({
 
   // Detect scroll position
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };

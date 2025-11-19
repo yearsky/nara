@@ -49,8 +49,7 @@ export default function NaraAssistant({
           message: getGreetingMessage(),
         });
         setShowBubble(true);
-        const bubbleTimer = setTimeout(() => setShowBubble(false), 5000);
-        return () => clearTimeout(bubbleTimer);
+        setTimeout(() => setShowBubble(false), 5000);
       }, 2000);
 
       return () => clearTimeout(greetTimer);
