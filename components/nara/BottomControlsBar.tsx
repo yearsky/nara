@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Mic, MicOff, Video, VideoOff, Square } from 'lucide-react'
 import { useNaraChat } from '@/hooks/useNaraChat'
-import { useVoiceRecorder } from '@/hooks/useVoiceRecorder'
+import { useLiveTranscription } from '@/hooks/useLiveTranscription'
 
 interface BottomControlsBarProps {
   isCameraOn: boolean
@@ -30,17 +30,20 @@ export default function BottomControlsBar({
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Use Nara Chat hook for message orchestration
-  const { handleSendMessage, handleVoiceRecord, isLoading, credits, isLowCredits, error } =
-    useNaraChat()
+  const { handleSendMessage, isLoading, credits, isLowCredits, error } = useNaraChat()
 
-  // Use Voice Recorder hook for voice recording
+  // Use Live Transcription hook for real-time speech-to-text
   const {
-    isRecording,
-    recordingTime,
-    startRecording,
-    stopRecording,
-    error: recorderError,
-  } = useVoiceRecorder()
+    isListening,
+    transcript,
+    interimTranscript,
+    fullTranscript,
+    error: transcriptError,
+    isSupported,
+    startListening,
+    stopListening,
+    resetTranscript,
+  } = useLiveTranscription('id-ID')
 
   // Handle text message send
   const handleSend = async () => {
@@ -51,17 +54,21 @@ export default function BottomControlsBar({
     await handleSendMessage(content)
   }
 
-  // Handle voice recording toggle
+  // Handle voice/mic toggle - now uses live transcription
   const handleMicClick = async () => {
-    if (isRecording) {
-      // Stop recording and send
-      const audioBlob = await stopRecording()
-      if (audioBlob) {
-        await handleVoiceRecord(audioBlob)
+    if (isListening) {
+      // Stop listening and send transcript
+      stopListening()
+
+      const finalTranscript = fullTranscript.trim()
+      if (finalTranscript) {
+        await handleSendMessage(finalTranscript)
+        resetTranscript()
       }
     } else {
-      // Start recording
-      await startRecording()
+      // Start listening
+      resetTranscript()
+      startListening()
     }
   }
 
@@ -80,23 +87,24 @@ export default function BottomControlsBar({
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <div className="flex items-center gap-3 md:gap-4 max-w-4xl mx-auto">
-          {/* Voice Recording Control - 1/3 */}
+          {/* Voice/Mic Control - 1/3 (Live Transcription) */}
           <motion.button
             onClick={handleMicClick}
-            disabled={isLoading}
+            disabled={isLoading || !isSupported}
             className={`flex-1 h-14 md:h-16 rounded-full flex items-center justify-center gap-2 transition-all duration-200 backdrop-blur-xl shadow-lg ${
-              isRecording
-                ? 'bg-red-500/80 hover:bg-red-600/80'
+              isListening
+                ? 'bg-red-500/80 hover:bg-red-600/80 animate-pulse'
                 : 'bg-white/30 hover:bg-white/40'
-            } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            whileHover={{ scale: isLoading ? 1 : 1.05 }}
-            whileTap={{ scale: isLoading ? 1 : 0.95 }}
-            aria-label={isRecording ? 'Stop Recording' : 'Start Recording'}
+            } ${isLoading || !isSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
+            whileHover={{ scale: isLoading || !isSupported ? 1 : 1.05 }}
+            whileTap={{ scale: isLoading || !isSupported ? 1 : 0.95 }}
+            aria-label={isListening ? 'Stop Listening' : 'Start Voice Input'}
+            title={!isSupported ? 'Speech recognition not supported in this browser' : ''}
           >
-            {isRecording ? (
+            {isListening ? (
               <>
                 <Square className="w-4 h-4 md:w-5 md:h-5 text-white fill-white" />
-                <span className="text-xs text-white font-mono">{recordingTime}s</span>
+                <span className="text-xs text-white font-medium">Listening...</span>
               </>
             ) : (
               <Mic className="w-5 h-5 md:w-6 md:h-6 text-white" />
@@ -133,13 +141,13 @@ export default function BottomControlsBar({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={isRecording ? 'Recording...' : 'Tanya...'}
-              disabled={isLoading || isRecording}
+              placeholder={isListening ? 'Listening...' : 'Tanya...'}
+              disabled={isLoading || isListening}
               className="flex-1 bg-transparent text-white placeholder-white/50 outline-none text-xs md:text-sm disabled:opacity-50"
             />
             <button
               onClick={handleSend}
-              disabled={isLoading || isRecording || !input.trim()}
+              disabled={isLoading || isListening || !input.trim()}
               className="p-1.5 md:p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-orange-500 hover:scale-110 active:scale-95 flex-shrink-0"
               aria-label="Send message"
             >
@@ -148,8 +156,31 @@ export default function BottomControlsBar({
           </motion.div>
         </div>
 
+        {/* Live Transcript Display (Google Meet style) */}
+        <AnimatePresence>
+          {isListening && (transcript || interimTranscript) && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="mt-3 max-w-4xl mx-auto"
+            >
+              <div className="bg-black/60 backdrop-blur-md rounded-2xl px-4 py-3 border border-white/10">
+                <p className="text-sm text-white leading-relaxed">
+                  {/* Final transcript (confirmed) */}
+                  {transcript && <span className="text-white">{transcript}</span>}
+                  {/* Interim transcript (being spoken, lighter color) */}
+                  {interimTranscript && (
+                    <span className="text-white/60 italic">{interimTranscript}</span>
+                  )}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Credit indicator & Error messages */}
-        {(isLowCredits || error || recorderError) && (
+        {(isLowCredits || error || transcriptError) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -160,9 +191,9 @@ export default function BottomControlsBar({
                 Credits: {credits}
               </span>
             )}
-            {(error || recorderError) && (
+            {(error || transcriptError) && (
               <span className="block text-xs text-red-400 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full">
-                {error || recorderError}
+                {error || transcriptError}
               </span>
             )}
           </motion.div>
