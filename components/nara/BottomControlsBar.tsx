@@ -32,18 +32,12 @@ export default function BottomControlsBar({
 }: BottomControlsBarProps) {
   const [input, setInput] = useState('')
   const [showTopicChips, setShowTopicChips] = useState(true)
+  const [hasInteracted, setHasInteracted] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const currentUserMessageIdRef = useRef<string | null>(null)
 
   // Use Nara Chat hook for message orchestration
   const { handleSendMessage, getNaraResponse, isLoading, credits, isLowCredits, error, messages } = useNaraChat()
-
-  // Hide topic chips after first message
-  useEffect(() => {
-    if (messages.length > 0) {
-      setShowTopicChips(false)
-    }
-  }, [messages])
 
   // Use Live Transcription hook for real-time speech-to-text
   const {
@@ -92,12 +86,16 @@ export default function BottomControlsBar({
     if (!content || isLoading) return
 
     setInput('')
-    setShowTopicChips(false) // Hide topic chips after sending
+    if (!hasInteracted) {
+      setHasInteracted(true)
+      setShowTopicChips(false) // Hide topic chips after first interaction
+    }
     await handleSendMessage(content)
   }
 
   // Handle topic chip selection
   const handleTopicSelect = async (prompt: string) => {
+    setHasInteracted(true)
     setShowTopicChips(false)
     await handleSendMessage(prompt)
   }
@@ -115,6 +113,10 @@ export default function BottomControlsBar({
 
       // Send to Gemini after delay (800ms) - user message already added in real-time
       if (finalTranscript) {
+        if (!hasInteracted) {
+          setHasInteracted(true)
+          setShowTopicChips(false) // Hide topic chips after first voice interaction
+        }
         setTimeout(async () => {
           await getNaraResponse(finalTranscript)
           resetTranscript()

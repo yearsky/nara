@@ -41,12 +41,31 @@ export default function ChatMessagesOverlay({
 
   // Show suggestions after Nara's response
   useEffect(() => {
+    if (messages.length === 0) {
+      setShowSuggestions(false)
+      return
+    }
+
     const lastMessage = messages[messages.length - 1]
-    if (lastMessage && lastMessage.role === 'assistant' && lastMessage.content !== '...' && !isLoading) {
-      setShowSuggestions(true)
+
+    // Show suggestions only after assistant's complete message (not placeholder)
+    if (
+      lastMessage &&
+      lastMessage.role === 'assistant' &&
+      lastMessage.content !== '...' &&
+      lastMessage.content.length > 10 && // Ensure it's a real message, not just placeholder
+      !isLoading
+    ) {
+      // Small delay to ensure message is fully rendered
+      const showTimer = setTimeout(() => setShowSuggestions(true), 300)
+
       // Auto-hide after 10 seconds
-      const timer = setTimeout(() => setShowSuggestions(false), 10000)
-      return () => clearTimeout(timer)
+      const hideTimer = setTimeout(() => setShowSuggestions(false), 10000)
+
+      return () => {
+        clearTimeout(showTimer)
+        clearTimeout(hideTimer)
+      }
     } else {
       setShowSuggestions(false)
     }
@@ -140,14 +159,19 @@ export default function ChatMessagesOverlay({
         </div>
 
         {/* Suggested Replies - Below messages */}
-        {showSuggestions && !isLoading && (
-          <div className="mt-2">
+        {showSuggestions && !isLoading && messages.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="mt-2"
+          >
             <SuggestedReplies
               suggestions={generateSuggestions()}
               onSelect={handleSuggestionSelect}
               isVisible={showSuggestions}
             />
-          </div>
+          </motion.div>
         )}
       </div>
 
