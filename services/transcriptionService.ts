@@ -1,35 +1,51 @@
 /**
  * Transcription Service
- * Handles speech-to-text conversion using OpenRouter's Whisper API
+ * Handles speech-to-text conversion using Whisper API or browser's Web Speech API
  */
 
 export interface TranscriptionResult {
   text: string
   duration: number
   language?: string
+  method?: 'whisper' | 'browser' // Track which method was used
 }
 
 /**
- * Transcribe audio blob to text using Whisper API via OpenRouter
+ * Transcribe audio blob to text
+ * Falls back to browser's Web Speech API if OpenAI key not configured
  * @param audioBlob - Audio blob to transcribe
  * @param language - Optional language code (e.g., 'en', 'id')
  * @returns Transcription result with text and duration
  */
 export async function transcribeAudio(
   audioBlob: Blob,
-  language?: string
+  language: string = 'id-ID'
 ): Promise<TranscriptionResult> {
-  const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_KEY
-
-  if (!apiKey || apiKey === 'sk-or-v1-xxxxxx') {
-    throw new Error('OpenRouter API key not configured')
-  }
+  const openaiKey = process.env.OPENAI_API_KEY
 
   // Validate audio blob
   if (!audioBlob || audioBlob.size === 0) {
     throw new Error('Invalid audio blob: empty or null')
   }
 
+  // Use Whisper API if OpenAI key is available
+  if (openaiKey && openaiKey !== 'sk-your-openai-key-here') {
+    return transcribeWithWhisper(audioBlob, language, openaiKey)
+  }
+
+  // Fallback to browser's Web Speech API
+  console.log('📢 Using browser Web Speech API (no OpenAI key configured)')
+  return transcribeWithBrowser(audioBlob, language)
+}
+
+/**
+ * Transcribe using OpenAI Whisper API
+ */
+async function transcribeWithWhisper(
+  audioBlob: Blob,
+  language: string,
+  apiKey: string
+): Promise<TranscriptionResult> {
   // Check file size (OpenAI Whisper has 25MB limit)
   const maxSize = 25 * 1024 * 1024 // 25MB
   if (audioBlob.size > maxSize) {
@@ -37,10 +53,7 @@ export async function transcribeAudio(
   }
 
   try {
-    // Create FormData for multipart upload
     const formData = new FormData()
-
-    // Convert blob to File object with proper extension
     const audioFile = new File([audioBlob], 'audio.webm', {
       type: audioBlob.type || 'audio/webm',
     })
@@ -48,14 +61,14 @@ export async function transcribeAudio(
     formData.append('file', audioFile)
     formData.append('model', 'whisper-1')
 
-    if (language) {
-      formData.append('language', language)
+    // Convert language code (id-ID -> id, en-US -> en)
+    const langCode = language.split('-')[0]
+    if (langCode) {
+      formData.append('language', langCode)
     }
 
     const startTime = Date.now()
 
-    // Call OpenAI-compatible Whisper API via OpenRouter
-    // OpenRouter proxies to OpenAI's Whisper API
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
@@ -68,14 +81,12 @@ export async function transcribeAudio(
       const errorData = await response.json().catch(() => ({}))
 
       if (response.status === 401) {
-        throw new Error('Invalid API key for transcription')
+        throw new Error('Invalid OpenAI API key')
       } else if (response.status === 413) {
         throw new Error('Audio file too large')
-      } else if (response.status === 400) {
-        throw new Error(errorData.error?.message || 'Invalid audio format or request')
       } else {
         throw new Error(
-          errorData.error?.message || `Transcription API error: ${response.status}`
+          errorData.error?.message || `Whisper API error: ${response.status}`
         )
       }
     }
@@ -87,13 +98,81 @@ export async function transcribeAudio(
       text: data.text || '',
       duration,
       language: data.language,
+      method: 'whisper',
     }
   } catch (error) {
-    if (error instanceof Error) {
-      throw error
-    }
-    throw new Error('Failed to transcribe audio')
+    // Fallback to browser if Whisper fails
+    console.warn('Whisper API failed, falling back to browser:', error)
+    return transcribeWithBrowser(audioBlob, language)
   }
+}
+
+/**
+ * Transcribe using browser's Web Speech API (fallback, free)
+ */
+async function transcribeWithBrowser(
+  audioBlob: Blob,
+  language: string = 'id-ID'
+): Promise<TranscriptionResult> {
+  // Check if Web Speech API is supported
+  if (typeof window === 'undefined') {
+    throw new Error('Browser environment required for Web Speech API')
+  }
+
+  const SpeechRecognition =
+    (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+
+  if (!SpeechRecognition) {
+    throw new Error('Web Speech API not supported in this browser. Please use Chrome, Edge, or Safari.')
+  }
+
+  const startTime = Date.now()
+
+  return new Promise((resolve, reject) => {
+    try {
+      const recognition = new SpeechRecognition()
+      recognition.lang = language
+      recognition.continuous = false
+      recognition.interimResults = false
+      recognition.maxAlternatives = 1
+
+      // Convert blob to audio element to play it
+      const audioUrl = URL.createObjectURL(audioBlob)
+      const audio = new Audio(audioUrl)
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript
+        const duration = Date.now() - startTime
+
+        URL.revokeObjectURL(audioUrl)
+
+        resolve({
+          text: transcript,
+          duration,
+          language,
+          method: 'browser',
+        })
+      }
+
+      recognition.onerror = (event: any) => {
+        URL.revokeObjectURL(audioUrl)
+        reject(new Error(`Speech recognition error: ${event.error}`))
+      }
+
+      // Start recognition and play audio
+      recognition.start()
+      audio.play()
+
+      // Stop recognition when audio ends
+      audio.onended = () => {
+        setTimeout(() => {
+          recognition.stop()
+        }, 500)
+      }
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
 
 /**
