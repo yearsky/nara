@@ -43,34 +43,45 @@ export default function NaraAssistant({
   // Auto greet on mount
   useEffect(() => {
     if (autoGreet) {
-      setTimeout(() => {
+      const greetTimer = setTimeout(() => {
         addMessage({
           type: "info",
           message: getGreetingMessage(),
         });
         setShowBubble(true);
-        setTimeout(() => setShowBubble(false), 5000);
+        const bubbleTimer = setTimeout(() => setShowBubble(false), 5000);
+        return () => clearTimeout(bubbleTimer);
       }, 2000);
+
+      return () => clearTimeout(greetTimer);
     }
-  }, [autoGreet]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoGreet, context]);
 
   // Progress-based encouragement
   useEffect(() => {
+    let timer: NodeJS.Timeout;
+
     if (currentProgress === 50) {
       addMessage({
         type: "encouragement",
         message: "Wah, kamu sudah setengah jalan! Hebat sekali! 🎉 Terus semangat ya!",
       });
       setShowBubble(true);
-      setTimeout(() => setShowBubble(false), 4000);
+      timer = setTimeout(() => setShowBubble(false), 4000);
     } else if (currentProgress === 100) {
       addMessage({
         type: "encouragement",
         message: "Selamat! Kamu berhasil menyelesaikan semuanya! Kamu luar biasa! ⭐",
       });
       setShowBubble(true);
-      setTimeout(() => setShowBubble(false), 5000);
+      timer = setTimeout(() => setShowBubble(false), 5000);
     }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentProgress]);
 
   const getGreetingMessage = () => {
