@@ -60,6 +60,10 @@ export function useNaraChat() {
           return
         }
 
+        // Artificial delay to show typing indicator (1.5 seconds)
+        // This makes the interaction feel more natural
+        await new Promise(resolve => setTimeout(resolve, 1500))
+
         // Add assistant response to chat history
         const assistantMessage: Message = {
           id: `assistant-${Date.now()}`,
@@ -153,6 +157,10 @@ export function useNaraChat() {
           setError('Insufficient credits for this request')
           return
         }
+
+        // Artificial delay to show typing indicator (1.5 seconds)
+        // This makes the interaction feel more natural
+        await new Promise(resolve => setTimeout(resolve, 1500))
 
         // Add assistant response to chat history
         const assistantMessage: Message = {
