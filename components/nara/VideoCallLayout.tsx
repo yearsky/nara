@@ -10,6 +10,7 @@ import VideoPlaceholder from './VideoPlaceholder'
 import CallHeader from './CallHeader'
 import ChatMessagesOverlay from './ChatMessagesOverlay'
 import BottomControlsBar from './BottomControlsBar'
+import NaraTypingIndicator from './NaraTypingIndicator'
 
 interface VideoCallLayoutProps {
   characterName?: string
@@ -157,28 +158,9 @@ export default function VideoCallLayout({
               ))}
             </AnimatePresence>
 
-            {isLoading && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-start"
-              >
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-3">
-                  <p className="text-xs font-bold text-orange-300 mb-1">Nara</p>
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" />
-                    <div
-                      className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.1s' }}
-                    />
-                    <div
-                      className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            )}
+            <AnimatePresence>
+              {isLoading && <NaraTypingIndicator variant="thinking" />}
+            </AnimatePresence>
             <div ref={messagesEndRef} />
           </div>
 

@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import NaraTypingIndicator from './NaraTypingIndicator'
 
 interface Message {
   id: string
@@ -68,28 +69,9 @@ export default function ChatMessagesOverlay({
               </motion.div>
             ))}
           </AnimatePresence>
-          {isLoading && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-orange-500/30 backdrop-blur-md rounded-2xl px-4 py-2 shadow-lg"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-orange-200">Nara:</span>
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" />
-                  <div
-                    className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
-                    style={{ animationDelay: '0.1s' }}
-                  />
-                  <div
-                    className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
-                    style={{ animationDelay: '0.2s' }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
+          <AnimatePresence>
+            {isLoading && <NaraTypingIndicator variant="thinking" mode="mobile" />}
+          </AnimatePresence>
           <div ref={messagesEndRef} />
         </div>
       </div>
