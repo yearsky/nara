@@ -13,6 +13,8 @@ export type OpenRouterModel =
   | 'openai/gpt-4-turbo-preview'
   | 'anthropic/claude-3.5-sonnet'
   | 'openai/gpt-4o'
+  | 'google/gemini-2.0-flash-exp'
+  | 'google/gemini-flash-1.5'
 
 export interface OpenRouterResponse {
   id: string
@@ -51,7 +53,7 @@ export interface StreamChunk {
  */
 export async function callOpenRouterChat(
   messages: Message[],
-  model: OpenRouterModel = 'anthropic/claude-3.5-sonnet',
+  model: OpenRouterModel = 'google/gemini-2.0-flash-exp',
   stream: boolean = false,
   onChunk?: (chunk: string) => void
 ): Promise<{ response: string; tokensUsed: number }> {
@@ -195,6 +197,8 @@ export function calculateCredits(tokensUsed: number, model: OpenRouterModel): nu
     'openai/gpt-4-turbo-preview': 10,
     'anthropic/claude-3.5-sonnet': 15,
     'openai/gpt-4o': 10,
+    'google/gemini-2.0-flash-exp': 0, // Free tier model
+    'google/gemini-flash-1.5': 0.075, // Very cheap
   }
 
   const price = pricePerMillionTokens[model] || 10

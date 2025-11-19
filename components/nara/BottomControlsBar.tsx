@@ -54,7 +54,7 @@ export default function BottomControlsBar({
   useEffect(() => {
     if (!isListening) return
 
-    const transcriptText = fullTranscript.trim()
+    const transcriptText = (transcript + ' ' + interimTranscript).trim()
 
     if (transcriptText) {
       if (!currentUserMessageIdRef.current) {
@@ -73,7 +73,7 @@ export default function BottomControlsBar({
         updateMessage(currentUserMessageIdRef.current, transcriptText)
       }
     }
-  }, [fullTranscript, isListening, addMessage, updateMessage])
+  }, [transcript, interimTranscript, isListening, addMessage, updateMessage])
 
   // Handle text message send
   const handleSend = async () => {

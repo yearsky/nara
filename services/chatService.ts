@@ -3,7 +3,7 @@
  * Orchestrates chat flow with Nara AI
  */
 
-import { callGeminiChat, calculateCredits } from './geminiService'
+import { callOpenRouterChat, calculateCredits, type OpenRouterModel } from './openrouterService'
 import type { Message } from '@/stores/voiceChatStore'
 
 export interface ChatResponse {
@@ -17,12 +17,14 @@ export interface ChatResponse {
  * @param userMessage - User's message text
  * @param chatHistory - Previous chat messages for context
  * @param onChunk - Optional callback for streaming responses
+ * @param model - Optional OpenRouter model to use
  * @returns Chat response with credits used
  */
 export async function sendMessageToNara(
   userMessage: string,
   chatHistory: Message[] = [],
-  onChunk?: (chunk: string) => void
+  onChunk?: (chunk: string) => void,
+  model: OpenRouterModel = 'google/gemini-2.0-flash-exp'
 ): Promise<ChatResponse> {
   if (!userMessage.trim()) {
     throw new Error('Message cannot be empty')
@@ -32,7 +34,7 @@ export async function sendMessageToNara(
   const contextMessages = chatHistory
     .slice(-10) // Keep last 10 messages for context (to avoid token limits)
     .map((msg) => ({
-      role: msg.role as 'user' | 'assistant',
+      role: msg.role as 'user' | 'assistant' | 'system',
       content: msg.content,
     }))
 
@@ -64,13 +66,14 @@ Your goal is to make learning enjoyable and keep users motivated.`,
   try {
     const enableStreaming = !!onChunk
 
-    const { response, tokensUsed } = await callGeminiChat(
+    const { response, tokensUsed } = await callOpenRouterChat(
       messages,
+      model,
       enableStreaming,
       onChunk
     )
 
-    const creditsUsed = calculateCredits(tokensUsed)
+    const creditsUsed = calculateCredits(tokensUsed, model)
 
     return {
       response,
