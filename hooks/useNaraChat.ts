@@ -15,7 +15,7 @@ export function useNaraChat() {
   const [streamingResponse, setStreamingResponse] = useState('')
 
   // Zustand stores
-  const { messages, addMessage, clearMessages } = useVoiceChatStore()
+  const { messages, addMessage, updateMessage, clearMessages } = useVoiceChatStore()
   const { credits, useCredit, hasCredits, isLowCredits } = useCreditStore()
   const { setEmotion, setIsSpeaking } = useNaraEmotionStore()
 
@@ -39,9 +39,21 @@ export function useNaraChat() {
       setError(null)
       setStreamingResponse('')
 
+      // Create placeholder message ID
+      const placeholderMessageId = `assistant-${Date.now()}`
+
       try {
         // Set Nara to thinking state
         setEmotion('thinking')
+
+        // Add placeholder "thinking" message
+        const placeholderMessage: Message = {
+          id: placeholderMessageId,
+          role: 'assistant',
+          content: '...', // Placeholder content
+          timestamp: Date.now(),
+        }
+        addMessage(placeholderMessage)
 
         // Send message to Nara (with streaming support)
         const { response, creditsUsed } = await sendMessageToNara(
@@ -60,14 +72,12 @@ export function useNaraChat() {
           return
         }
 
-        // Add assistant response to chat history
-        const assistantMessage: Message = {
-          id: `assistant-${Date.now()}`,
-          role: 'assistant',
-          content: response,
-          timestamp: Date.now(),
-        }
-        addMessage(assistantMessage)
+        // Artificial delay to show typing indicator (1.5 seconds)
+        // This makes the interaction feel more natural
+        await new Promise(resolve => setTimeout(resolve, 1500))
+
+        // Update placeholder message with actual response
+        updateMessage(placeholderMessageId, response)
 
         // Set Nara to happy state after response
         setEmotion('happy')
@@ -97,6 +107,7 @@ export function useNaraChat() {
       hasCredits,
       useCredit,
       addMessage,
+      updateMessage,
       setEmotion,
       setIsSpeaking,
       isLowCredits,
@@ -124,6 +135,9 @@ export function useNaraChat() {
       setError(null)
       setStreamingResponse('')
 
+      // Create placeholder message ID
+      const placeholderMessageId = `assistant-${Date.now()}`
+
       try {
         // Add user message to chat history
         const userMessage: Message = {
@@ -136,6 +150,15 @@ export function useNaraChat() {
 
         // Set Nara to thinking state
         setEmotion('thinking')
+
+        // Add placeholder "thinking" message
+        const placeholderMessage: Message = {
+          id: placeholderMessageId,
+          role: 'assistant',
+          content: '...', // Placeholder content
+          timestamp: Date.now(),
+        }
+        addMessage(placeholderMessage)
 
         // Send message to Nara (with streaming support)
         const { response, creditsUsed } = await sendMessageToNara(
@@ -154,14 +177,12 @@ export function useNaraChat() {
           return
         }
 
-        // Add assistant response to chat history
-        const assistantMessage: Message = {
-          id: `assistant-${Date.now()}`,
-          role: 'assistant',
-          content: response,
-          timestamp: Date.now(),
-        }
-        addMessage(assistantMessage)
+        // Artificial delay to show typing indicator (1.5 seconds)
+        // This makes the interaction feel more natural
+        await new Promise(resolve => setTimeout(resolve, 1500))
+
+        // Update placeholder message with actual response
+        updateMessage(placeholderMessageId, response)
 
         // Set Nara to happy state after response
         setEmotion('happy')
@@ -191,6 +212,7 @@ export function useNaraChat() {
       hasCredits,
       useCredit,
       addMessage,
+      updateMessage,
       setEmotion,
       setIsSpeaking,
       isLowCredits,
