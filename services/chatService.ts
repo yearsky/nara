@@ -13,22 +13,54 @@ export interface ChatResponse {
 }
 
 /**
+ * Get AI model from environment variable or use default
+ */
+function getAIModel(): OpenRouterModel {
+  const envModel = process.env.NEXT_PUBLIC_AI_MODEL as OpenRouterModel
+  return envModel || 'google/gemini-2.0-flash-exp'
+}
+
+/**
+ * Get system prompt from environment variable or use default
+ */
+function getSystemPrompt(): string {
+  const envPrompt = process.env.NEXT_PUBLIC_SYSTEM_PROMPT
+
+  // Default system prompt if not set
+  const defaultPrompt = `You are Nara, an enthusiastic and supportive AI learning companion. Your personality:
+- Warm, encouraging, and friendly
+- Patient and understanding with learners
+- Use casual, conversational language
+- Keep responses concise (2-3 sentences unless explaining something complex)
+- Show genuine interest in the user's learning journey
+- Use emojis occasionally to express emotion (but not excessively)
+- When user seems stuck, ask guiding questions instead of giving direct answers
+
+Your goal is to make learning enjoyable and keep users motivated.`
+
+  return envPrompt || defaultPrompt
+}
+
+/**
  * Send a message to Nara and get response
  * @param userMessage - User's message text
  * @param chatHistory - Previous chat messages for context
  * @param onChunk - Optional callback for streaming responses
- * @param model - Optional OpenRouter model to use
+ * @param model - Optional OpenRouter model to use (overrides env variable)
  * @returns Chat response with credits used
  */
 export async function sendMessageToNara(
   userMessage: string,
   chatHistory: Message[] = [],
   onChunk?: (chunk: string) => void,
-  model: OpenRouterModel = 'google/gemini-2.0-flash-exp'
+  model?: OpenRouterModel
 ): Promise<ChatResponse> {
   if (!userMessage.trim()) {
     throw new Error('Message cannot be empty')
   }
+
+  // Use provided model or get from env
+  const selectedModel = model || getAIModel()
 
   // Build conversation context from chat history
   const contextMessages = chatHistory
@@ -38,19 +70,10 @@ export async function sendMessageToNara(
       content: msg.content,
     }))
 
-  // Add system prompt for Nara's personality
+  // Get system prompt from env or use default
   const systemPrompt = {
     role: 'system' as const,
-    content: `You are Nara, an enthusiastic and supportive AI learning companion. Your personality:
-- Warm, encouraging, and friendly
-- Patient and understanding with learners
-- Use casual, conversational language
-- Keep responses concise (2-3 sentences unless explaining something complex)
-- Show genuine interest in the user's learning journey
-- Use emojis occasionally to express emotion (but not excessively)
-- When user seems stuck, ask guiding questions instead of giving direct answers
-
-Your goal is to make learning enjoyable and keep users motivated.`,
+    content: getSystemPrompt(),
   }
 
   // Combine system prompt, context, and new message
@@ -68,12 +91,12 @@ Your goal is to make learning enjoyable and keep users motivated.`,
 
     const { response, tokensUsed } = await callOpenRouterChat(
       messages,
-      model,
+      selectedModel,
       enableStreaming,
       onChunk
     )
 
-    const creditsUsed = calculateCredits(tokensUsed, model)
+    const creditsUsed = calculateCredits(tokensUsed, selectedModel)
 
     return {
       response,
