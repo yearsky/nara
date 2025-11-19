@@ -104,11 +104,24 @@ Ini adalah ${categoryLabel} yang berlokasi di ${location}, ${region}. ${descript
 
 Jawab pertanyaan user dengan natural dan engaging sesuai kepribadianmu. Gunakan pengetahuan ini untuk memberikan penjelasan yang informatif namun tetap conversational.`
     } else if (additionalContext.type === 'learn' && additionalContext.data) {
-      const { title, topic } = additionalContext.data
-      systemPromptContent += `\n\n[Pengetahuanmu tentang topik pembelajaran]
-Topik: "${title}" dalam modul ${topic}
+      const { title, subtitle, description, category, difficulty } = additionalContext.data
 
-Jawab dengan educational namun tetap friendly dan engaging sesuai kepribadianmu.`
+      // Map difficulty to Indonesian
+      const difficultyLabel =
+        difficulty === 'pemula' ? 'Pemula'
+        : difficulty === 'menengah' ? 'Menengah'
+        : difficulty === 'lanjutan' ? 'Lanjutan'
+        : difficulty
+
+      // Inject as natural knowledge about the learning module
+      systemPromptContent += `\n\n[Pengetahuanmu tentang modul pembelajaran]
+Modul: "${title}"
+Deskripsi: ${subtitle}
+Detail: ${description}
+Kategori: ${category}
+Tingkat kesulitan: ${difficultyLabel}
+
+Kamu adalah ahli dalam topik ini dan bisa menjelaskan dengan cara yang mudah dipahami. Jawab pertanyaan user dengan penjelasan yang educational, engaging, dan sesuai dengan level kesulitan modul. Gunakan contoh konkret dan analogi yang mudah dimengerti.`
     }
   }
 
