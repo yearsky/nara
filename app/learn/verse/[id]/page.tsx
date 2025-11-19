@@ -75,14 +75,6 @@ function StoryDetailContent() {
     }
   }, [autoPlay, isReading, currentScene, story]);
 
-  if (!story) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50/30 to-pink-50/30 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
-
   // TTS Functions
   const handleToggleTTS = () => {
     if (!ttsSupported || !story || !story.scenes || !story.scenes[currentScene]) return;
@@ -160,6 +152,15 @@ function StoryDetailContent() {
   const handleWordClick = (word: string, meaning: string) => {
     setSelectedWord({ word, meaning });
   };
+
+  // Loading state
+  if (!story) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-purple-50/30 to-pink-50/30 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50/30 to-pink-50/30 pb-32 pt-6">
