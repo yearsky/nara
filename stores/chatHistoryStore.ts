@@ -41,6 +41,7 @@ interface ChatHistoryState {
 
   // Actions
   addMessage: (message: HistoryMessage) => void
+  updateMessage: (id: string, content: string) => void
   disposeMessage: (messageId: string) => void
   disposeOldMessages: (keepLastN: number) => void
   toggleSidebar: () => void
@@ -67,6 +68,17 @@ export const useChatHistoryStore = create<ChatHistoryState>()(
         set((state) => ({
           allMessages: [...state.allMessages, message],
           visibleMessages: [...state.visibleMessages, message],
+        }))
+      },
+
+      updateMessage: (id: string, content: string) => {
+        set((state) => ({
+          allMessages: state.allMessages.map((msg) =>
+            msg.id === id ? { ...msg, content } : msg
+          ),
+          visibleMessages: state.visibleMessages.map((msg) =>
+            msg.id === id ? { ...msg, content } : msg
+          ),
         }))
       },
 
@@ -118,46 +130,62 @@ export const useChatHistoryStore = create<ChatHistoryState>()(
       },
 
       generateConversations: () => {
-        const { allMessages } = get()
+        const { disposedMessages, visibleMessages } = get()
 
-        // Group messages into conversations (simple: every 2 messages = 1 conversation)
+        // Only create conversations from disposed messages
+        // Visible messages are part of current active session, not history yet
+        if (disposedMessages.length === 0) {
+          set({ conversations: [] })
+          return
+        }
+
         const conversations: Conversation[] = []
         let currentConv: HistoryMessage[] = []
 
-        allMessages.forEach((msg, index) => {
-          currentConv.push(msg)
+        // Time gap threshold: 30 minutes (in milliseconds)
+        const TIME_GAP_THRESHOLD = 30 * 60 * 1000
 
-          // Create conversation after assistant response OR every 4 messages
-          if (msg.role === 'assistant' || currentConv.length >= 4) {
+        disposedMessages.forEach((msg, index) => {
+          // Check if we should start a new conversation based on time gap
+          const shouldStartNew = currentConv.length > 0 &&
+            (msg.timestamp - currentConv[currentConv.length - 1].timestamp) > TIME_GAP_THRESHOLD
+
+          if (shouldStartNew) {
+            // Save current conversation
             const firstUserMsg = currentConv.find(m => m.role === 'user')
             const summary = firstUserMsg?.content.slice(0, 50) || 'Percakapan'
 
             conversations.push({
-              id: `conv-${conversations.length}`,
-              summary: summary.length < firstUserMsg?.content.length! ? summary + '...' : summary,
+              id: `conv-${Date.now()}-${conversations.length}`,
+              summary: summary.length < (firstUserMsg?.content.length || 0) ? summary + '...' : summary,
               messages: [...currentConv],
               startTime: currentConv[0].timestamp,
               lastMessageTime: currentConv[currentConv.length - 1].timestamp,
             })
 
-            currentConv = []
+            // Start new conversation
+            currentConv = [msg]
+          } else {
+            // Add to current conversation
+            currentConv.push(msg)
           }
         })
 
-        // Add remaining messages as a conversation
+        // Add remaining messages as final conversation
         if (currentConv.length > 0) {
           const firstUserMsg = currentConv.find(m => m.role === 'user')
           const summary = firstUserMsg?.content.slice(0, 50) || 'Percakapan'
 
           conversations.push({
-            id: `conv-${conversations.length}`,
-            summary: summary.length < firstUserMsg?.content.length! ? summary + '...' : summary,
+            id: `conv-${Date.now()}-${conversations.length}`,
+            summary: summary.length < (firstUserMsg?.content.length || 0) ? summary + '...' : summary,
             messages: [...currentConv],
             startTime: currentConv[0].timestamp,
             lastMessageTime: currentConv[currentConv.length - 1].timestamp,
           })
         }
 
+        console.log('[History] Generated conversations:', conversations.length, 'from', disposedMessages.length, 'disposed messages')
         set({ conversations })
       },
 

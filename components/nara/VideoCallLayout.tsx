@@ -64,13 +64,15 @@ export default function VideoCallLayout({
   const { isSidebarOpen, toggleSidebar, disposedMessages, currentConversationId } =
     useChatHistoryStore()
 
-  // Ref for auto-scrolling chat in desktop mode
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  // Refs for auto-scrolling chat
+  const messagesEndRef = useRef<HTMLDivElement>(null) // Desktop
+  const mobileMessagesEndRef = useRef<HTMLDivElement>(null) // Mobile
 
-  // Auto-scroll to bottom when new messages arrive (desktop mode)
+  // Auto-scroll to bottom when new messages arrive (both desktop and mobile)
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    mobileMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, visibleMessages])
 
   // Start call on mount
   useEffect(() => {
@@ -122,39 +124,48 @@ export default function VideoCallLayout({
         <div className="absolute left-4 bottom-24 md:bottom-28 max-w-xs md:max-w-sm w-full pointer-events-none z-30">
           <div className="space-y-2 max-h-[45vh] overflow-y-auto pointer-events-auto scrollbar-hide">
             <AnimatePresence mode="popLayout">
-              {visibleMessages
-                .filter((message) => message.content !== '...') // Filter out placeholder messages
-                .map((message) => (
+              {visibleMessages.map((message) => {
+                // Check if this is a placeholder message
+                if (message.role === 'assistant' && message.content === '...') {
+                  // Show thinking indicator
+                  return (
+                    <motion.div
+                      key={message.id}
+                      layout
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -30, scale: 0.85 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    >
+                      {streamingResponse ? (
+                        <div className="rounded-2xl px-4 py-2 backdrop-blur-md bg-orange-500/30 text-white shadow-lg">
+                          <div className="flex items-start gap-2">
+                            <span className="text-xs font-bold text-orange-200">Nara:</span>
+                            <p className="text-sm font-medium leading-snug flex-1 break-words">
+                              {streamingResponse}
+                              <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <NaraTypingIndicator variant="thinking" mode="mobile" />
+                      )}
+                    </motion.div>
+                  )
+                }
+
+                // Regular message
+                return (
                   <DisposableMessage
                     key={message.id}
                     message={message}
                     showNaraLabel={true}
                   />
-                ))}
-
-              {/* Streaming Response or Thinking Indicator */}
-              {isLoading && (
-                streamingResponse ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex justify-start"
-                  >
-                    <div className="rounded-2xl px-4 py-2 backdrop-blur-md bg-orange-500/30 text-white shadow-lg">
-                      <div className="flex items-start gap-2">
-                        <span className="text-xs font-bold text-orange-200">Nara:</span>
-                        <p className="text-sm font-medium leading-snug flex-1 break-words">
-                          {streamingResponse}
-                          <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <NaraTypingIndicator variant="thinking" mode="mobile" />
                 )
-              )}
+              })}
             </AnimatePresence>
+            {/* Auto-scroll anchor for mobile */}
+            <div ref={mobileMessagesEndRef} />
           </div>
         </div>
 
