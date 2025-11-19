@@ -52,7 +52,7 @@ export default function VideoCallLayout({
   const { isVisible, showControls } = useAutoHideControls(3000)
 
   // Use new Nara Chat hook for message orchestration
-  const { messages, isLoading, streamingResponse } = useNaraChat()
+  const { messages, isLoading, streamingResponse, handleSendMessage } = useNaraChat()
 
   // Sync messages to history store
   useSyncChatHistory()
@@ -81,6 +81,40 @@ export default function VideoCallLayout({
       endCall()
     }
   }, [startCall, endCall])
+
+  // Check for context from external navigation (e.g., museum, learn modules)
+  useEffect(() => {
+    const checkAndSendContext = async () => {
+      try {
+        const contextData = localStorage.getItem('naraContext')
+        if (contextData) {
+          const context = JSON.parse(contextData)
+
+          // Clear context immediately to prevent re-sending
+          localStorage.removeItem('naraContext')
+
+          // Wait a bit for component to fully mount
+          await new Promise(resolve => setTimeout(resolve, 500))
+
+          // Prepare additional context for system prompt (invisible to user)
+          const additionalContext = context.type && context.data
+            ? { type: context.type, data: context.data }
+            : undefined
+
+          // Auto-send the prompt with context
+          if (context.prompt && handleSendMessage) {
+            await handleSendMessage(context.prompt, additionalContext)
+          }
+        }
+      } catch (error) {
+        console.error('Error processing naraContext:', error)
+        // Clear invalid context
+        localStorage.removeItem('naraContext')
+      }
+    }
+
+    checkAndSendContext()
+  }, [handleSendMessage])
 
   // Handle end call
   const handleEndCall = () => {

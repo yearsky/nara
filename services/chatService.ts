@@ -41,19 +41,26 @@ Your goal is to make learning enjoyable and keep users motivated.`
   return envPrompt || defaultPrompt
 }
 
+export interface AdditionalContext {
+  type: 'museum' | 'learn' | 'general'
+  data?: Record<string, any>
+}
+
 /**
  * Send a message to Nara and get response
  * @param userMessage - User's message text
  * @param chatHistory - Previous chat messages for context
  * @param onChunk - Optional callback for streaming responses
  * @param model - Optional OpenRouter model to use (overrides env variable)
+ * @param additionalContext - Optional context for enhanced responses (e.g., museum info)
  * @returns Chat response with credits used
  */
 export async function sendMessageToNara(
   userMessage: string,
   chatHistory: Message[] = [],
   onChunk?: (chunk: string) => void,
-  model?: OpenRouterModel
+  model?: OpenRouterModel,
+  additionalContext?: AdditionalContext
 ): Promise<ChatResponse> {
   if (!userMessage.trim()) {
     throw new Error('Message cannot be empty')
@@ -70,10 +77,29 @@ export async function sendMessageToNara(
       content: msg.content,
     }))
 
-  // Get system prompt from env or use default
+  // Get base system prompt
+  let systemPromptContent = getSystemPrompt()
+
+  // Enhance system prompt with additional context if provided
+  if (additionalContext) {
+    if (additionalContext.type === 'museum' && additionalContext.data) {
+      const { name, category, location, description, region } = additionalContext.data
+      const categoryLabel =
+        category === 'museum' ? 'museum'
+        : category === 'heritage' ? 'situs warisan budaya'
+        : 'taman budaya'
+
+      systemPromptContent += `\n\nCONTEXT: The user is asking about "${name}", which is a ${categoryLabel} located in ${location}, ${region}. Description: ${description}\n\nProvide a friendly, engaging explanation about this place. Highlight interesting facts and cultural significance. Keep it concise (3-4 sentences) unless the user asks for more details.`
+    } else if (additionalContext.type === 'learn' && additionalContext.data) {
+      const { title, topic } = additionalContext.data
+      systemPromptContent += `\n\nCONTEXT: The user is asking about a learning topic: "${title}" in the ${topic} module. Provide educational, clear explanations that help them understand the concept better.`
+    }
+  }
+
+  // Build system prompt
   const systemPrompt = {
     role: 'system' as const,
-    content: getSystemPrompt(),
+    content: systemPromptContent,
   }
 
   // Combine system prompt, context, and new message

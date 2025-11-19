@@ -1,8 +1,9 @@
 'use client';
 
 import { Museum } from '@/lib/museumData';
-import { X, MapPin, Clock, Phone, ExternalLink, Navigation, Calendar } from 'lucide-react';
+import { X, MapPin, Clock, Phone, ExternalLink, Navigation, Calendar, MessageCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 interface MuseumDetailProps {
@@ -13,6 +14,7 @@ interface MuseumDetailProps {
 
 export default function MuseumDetail({ museum, isOpen, onClose }: MuseumDetailProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const router = useRouter();
 
   // Reset image index when museum changes
   useEffect(() => {
@@ -52,6 +54,28 @@ export default function MuseumDetail({ museum, isOpen, onClose }: MuseumDetailPr
   const handleGetDirections = () => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${museum.coordinates[0]},${museum.coordinates[1]}`;
     window.open(url, '_blank');
+  };
+
+  const handleAskNara = () => {
+    // Create context with museum details for Nara
+    const naraContext = {
+      type: 'museum',
+      id: museum.id,
+      prompt: `Nara, jelaskan ${museum.name} ini dong`,
+      data: {
+        name: museum.name,
+        category: museum.category,
+        location: `${museum.city}, ${museum.province}`,
+        description: museum.description,
+        region: museum.region
+      }
+    };
+
+    // Save context to localStorage for chat to pick up
+    localStorage.setItem('naraContext', JSON.stringify(naraContext));
+
+    // Navigate to chat page
+    router.push('/chat');
   };
 
   return (
@@ -210,13 +234,21 @@ export default function MuseumDetail({ museum, isOpen, onClose }: MuseumDetailPr
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
+              <div className="flex flex-col gap-3 pt-4">
                 <button
                   onClick={handleGetDirections}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-colors shadow-lg hover:shadow-xl"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-colors shadow-lg hover:shadow-xl"
                 >
                   <Navigation className="w-5 h-5" />
                   Petunjuk Arah
+                </button>
+
+                <button
+                  onClick={handleAskNara}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Tanya Nara
                 </button>
               </div>
             </div>
