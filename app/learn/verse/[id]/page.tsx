@@ -20,9 +20,10 @@ import { getStoryById, StoryData } from "@/lib/storiesData";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import GlassFooter from "@/components/learn/GlassFooter";
 import NaraAssistant from "@/components/learn/NaraAssistant";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Image from "next/image";
 
-export default function StoryDetailPage() {
+function StoryDetailContent() {
   const params = useParams();
   const router = useRouter();
   const storyId = parseInt(params.id as string);
@@ -35,6 +36,7 @@ export default function StoryDetailPage() {
   const [selectedWord, setSelectedWord] = useState<{word: string; meaning: string} | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [ttsSupported, setTtsSupported] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
   // Check TTS support
   useEffect(() => {
@@ -42,6 +44,10 @@ export default function StoryDetailPage() {
       setTtsSupported(true);
     }
   }, []);
+
+  const handleImageError = (imageSrc: string) => {
+    setImageErrors(prev => new Set(prev).add(imageSrc));
+  };
 
   useEffect(() => {
     const storyData = getStoryById(storyId);
@@ -81,28 +87,38 @@ export default function StoryDetailPage() {
   const handleToggleTTS = () => {
     if (!ttsSupported || !story || !story.scenes || !story.scenes[currentScene]) return;
 
-    if (isSpeaking) {
-      // Stop speaking
-      window.speechSynthesis.cancel();
+    try {
+      if (isSpeaking) {
+        // Stop speaking
+        if (typeof window !== "undefined" && window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+        }
+        setIsSpeaking(false);
+      } else {
+        // Start speaking
+        const text = story.scenes[currentScene].content;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "id-ID"; // Indonesian language
+        utterance.rate = 0.9; // Slightly slower for kids
+        utterance.pitch = 1.0;
+
+        utterance.onend = () => {
+          setIsSpeaking(false);
+        };
+
+        utterance.onerror = (event) => {
+          console.error("TTS error:", event);
+          setIsSpeaking(false);
+        };
+
+        if (typeof window !== "undefined" && window.speechSynthesis) {
+          window.speechSynthesis.speak(utterance);
+          setIsSpeaking(true);
+        }
+      }
+    } catch (error) {
+      console.error("TTS exception:", error);
       setIsSpeaking(false);
-    } else {
-      // Start speaking
-      const text = story.scenes[currentScene].content;
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "id-ID"; // Indonesian language
-      utterance.rate = 0.9; // Slightly slower for kids
-      utterance.pitch = 1.0;
-
-      utterance.onend = () => {
-        setIsSpeaking(false);
-      };
-
-      utterance.onerror = () => {
-        setIsSpeaking(false);
-      };
-
-      window.speechSynthesis.speak(utterance);
-      setIsSpeaking(true);
     }
   };
 
@@ -166,13 +182,21 @@ export default function StoryDetailPage() {
             className="space-y-6"
           >
             {/* Hero Image */}
-            <div className="relative w-full h-64 md:h-96 rounded-3xl overflow-hidden shadow-2xl">
-              <Image
-                src={story.thumbnail}
-                alt={story.title}
-                fill
-                className="object-cover"
-              />
+            <div className="relative w-full h-64 md:h-96 rounded-3xl overflow-hidden shadow-2xl bg-gray-200">
+              {!imageErrors.has(story.thumbnail) ? (
+                <Image
+                  src={story.thumbnail}
+                  alt={story.title}
+                  fill
+                  className="object-cover"
+                  onError={() => handleImageError(story.thumbnail)}
+                  unoptimized
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <BookOpen className="w-20 h-20 text-gray-400" />
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
               {/* Stats Overlay */}
@@ -224,13 +248,21 @@ export default function StoryDetailPage() {
                     transition={{ delay: idx * 0.1 }}
                     className="flex items-center gap-3 bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-2xl"
                   >
-                    <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-purple-300">
-                      <Image
-                        src={character.image}
-                        alt={character.name}
-                        fill
-                        className="object-cover"
-                      />
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-purple-300 bg-gray-200">
+                      {!imageErrors.has(character.image) ? (
+                        <Image
+                          src={character.image}
+                          alt={character.name}
+                          fill
+                          className="object-cover"
+                          onError={() => handleImageError(character.image)}
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Users className="w-8 h-8 text-gray-400" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-gray-900 truncate">
@@ -328,13 +360,21 @@ export default function StoryDetailPage() {
                 className="bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl border border-white/50"
               >
                 {/* Scene Image */}
-                <div className="relative w-full h-64 md:h-80">
-                  <Image
-                    src={story.scenes[currentScene].image}
-                    alt={story.scenes[currentScene].title}
-                    fill
-                    className="object-cover"
-                  />
+                <div className="relative w-full h-64 md:h-80 bg-gray-200">
+                  {!imageErrors.has(story.scenes[currentScene].image) ? (
+                    <Image
+                      src={story.scenes[currentScene].image}
+                      alt={story.scenes[currentScene].title}
+                      fill
+                      className="object-cover"
+                      onError={() => handleImageError(story.scenes[currentScene].image)}
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <BookOpen className="w-20 h-20 text-gray-400" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
@@ -494,5 +534,13 @@ export default function StoryDetailPage() {
 
       <GlassFooter />
     </div>
+  );
+}
+
+export default function StoryDetailPage() {
+  return (
+    <ErrorBoundary>
+      <StoryDetailContent />
+    </ErrorBoundary>
   );
 }
