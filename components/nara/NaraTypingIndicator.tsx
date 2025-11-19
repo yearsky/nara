@@ -1,25 +1,43 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
 
 interface NaraTypingIndicatorProps {
   variant?: 'thinking' | 'typing'
   mode?: 'desktop' | 'mobile'
 }
 
+// Claude-style thinking phases
+const thinkingPhases = [
+  'Membaca pesan...',
+  'Memahami konteks...',
+  'Memikirkan respons...',
+  'Menyusun jawaban...',
+]
+
 /**
  * Nara Typing Indicator Component
- * Shows an animated bubble when Nara is processing a response
+ * Claude-style thinking animation with cycling text and progress bar
  */
 export default function NaraTypingIndicator({
   variant = 'typing',
   mode = 'desktop'
 }: NaraTypingIndicatorProps) {
-  const text = variant === 'thinking' ? 'Nara sedang berpikir' : 'Nara sedang mengetik'
+  const [phaseIndex, setPhaseIndex] = useState(0)
+
+  // Cycle through thinking phases
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPhaseIndex((prev) => (prev + 1) % thinkingPhases.length)
+    }, 2000) // Change phase every 2 seconds
+
+    return () => clearInterval(interval)
+  }, [])
 
   // Different styling for mobile overlay vs desktop panel
   const bubbleClass = mode === 'mobile'
-    ? 'bg-orange-500/30 backdrop-blur-md rounded-2xl px-4 py-2 shadow-lg'
+    ? 'bg-orange-500/30 backdrop-blur-md rounded-2xl px-4 py-3 shadow-lg'
     : 'bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg'
 
   const labelClass = mode === 'mobile' ? 'text-xs font-bold text-orange-200' : 'text-xs font-bold text-orange-300'
@@ -32,61 +50,58 @@ export default function NaraTypingIndicator({
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className={mode === 'desktop' ? 'flex justify-start' : ''}
     >
-      <motion.div
-        className={bubbleClass}
-        animate={{
-          scale: [1, 1.02, 1],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      >
+      <div className={`relative overflow-hidden ${bubbleClass}`}>
         {/* Nara Label */}
-        <p className={`${labelClass} ${mode === 'desktop' ? 'mb-2' : 'mb-1'}`}>Nara</p>
+        <p className={`${labelClass} ${mode === 'desktop' ? 'mb-2' : 'mb-1.5'}`}>Nara</p>
 
-        {/* Status Text and Dots Container */}
-        <div className="flex items-center gap-2">
-          <span className={mode === 'desktop' ? 'text-sm text-white/80 italic' : 'text-xs text-white/70 italic'}>{text}</span>
-
-          {/* Animated Typing Dots */}
-          <div className="flex gap-1">
-            {[0, 1, 2].map((index) => (
-              <motion.div
-                key={index}
-                className="w-2 h-2 bg-orange-400 rounded-full"
-                animate={{
-                  y: [0, -8, 0],
-                  opacity: [0.4, 1, 0.4],
-                }}
-                transition={{
-                  duration: 0.6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: index * 0.15,
-                }}
-              />
-            ))}
-          </div>
+        {/* Animated Thinking Text */}
+        <div className="relative h-6 overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={phaseIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className={mode === 'desktop' ? 'text-sm text-white/90' : 'text-xs text-white/80'}
+            >
+              {thinkingPhases[phaseIndex]}
+            </motion.p>
+          </AnimatePresence>
         </div>
 
-        {/* Shimmer Effect Overlay */}
+        {/* Progress Bar */}
+        <div className="mt-3 h-1 bg-white/10 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-orange-400 to-orange-500"
+            animate={{
+              x: ['-100%', '100%'],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+            style={{ width: '50%' }}
+          />
+        </div>
+
+        {/* Shimmer Overlay Effect */}
         <motion.div
-          className="absolute inset-0 rounded-2xl"
+          className="absolute inset-0 rounded-2xl pointer-events-none"
           style={{
-            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%)',
           }}
           animate={{
-            x: ['-100%', '100%'],
+            x: ['-100%', '200%'],
           }}
           transition={{
-            duration: 2,
+            duration: 3,
             repeat: Infinity,
-            ease: "linear",
+            ease: 'linear',
           }}
         />
-      </motion.div>
+      </div>
     </motion.div>
   )
 }
