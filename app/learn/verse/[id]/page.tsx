@@ -33,6 +33,15 @@ export default function StoryDetailPage() {
   const [showVocabulary, setShowVocabulary] = useState(false);
   const [autoPlay, setAutoPlay] = useState(false);
   const [selectedWord, setSelectedWord] = useState<{word: string; meaning: string} | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [ttsSupported, setTtsSupported] = useState(false);
+
+  // Check TTS support
+  useEffect(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      setTtsSupported(true);
+    }
+  }, []);
 
   useEffect(() => {
     const storyData = getStoryById(storyId);
@@ -67,6 +76,52 @@ export default function StoryDetailPage() {
       </div>
     );
   }
+
+  // TTS Functions
+  const handleToggleTTS = () => {
+    if (!ttsSupported || !story) return;
+
+    if (isSpeaking) {
+      // Stop speaking
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else {
+      // Start speaking
+      const text = story.scenes[currentScene].content;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "id-ID"; // Indonesian language
+      utterance.rate = 0.9; // Slightly slower for kids
+      utterance.pitch = 1.0;
+
+      utterance.onend = () => {
+        setIsSpeaking(false);
+      };
+
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+      };
+
+      window.speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+    }
+  };
+
+  // Stop TTS when scene changes
+  useEffect(() => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  }, [currentScene]);
+
+  // Cleanup TTS on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   const handleNextScene = () => {
     if (currentScene < story.scenes.length - 1) {
@@ -323,51 +378,50 @@ export default function StoryDetailPage() {
             </AnimatePresence>
 
             {/* Navigation Controls */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-2 md:gap-4">
               <button
                 onClick={handlePrevScene}
                 disabled={currentScene === 0}
-                className="flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-all"
+                className="flex items-center gap-1 md:gap-2 px-3 md:px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-all"
               >
                 <ChevronLeft className="w-5 h-5" />
-                <span className="font-semibold">Sebelumnya</span>
+                <span className="font-semibold hidden sm:inline">Sebelumnya</span>
               </button>
 
               <button
-                onClick={() => setAutoPlay(!autoPlay)}
+                onClick={handleToggleTTS}
+                disabled={!ttsSupported}
                 className={`p-3 rounded-2xl shadow-lg transition-all ${
-                  autoPlay
+                  isSpeaking
                     ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
                     : "bg-white/80 text-gray-700"
-                }`}
+                } ${!ttsSupported ? "opacity-50 cursor-not-allowed" : ""}`}
+                aria-label={isSpeaking ? "Stop membaca" : "Bacakan cerita"}
+                title={!ttsSupported ? "Browser tidak support text-to-speech" : isSpeaking ? "Stop membaca" : "Bacakan cerita"}
               >
-                {autoPlay ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                {isSpeaking ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
               </button>
 
-              <button
-                onClick={handleNextScene}
-                disabled={currentScene === story.scenes.length - 1}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl transition-all"
-              >
-                <span className="font-semibold">Selanjutnya</span>
-                <ChevronRight className="w-5 h-5" />
-              </button>
+              {/* Next button or Quiz button */}
+              {currentScene === story.scenes.length - 1 ? (
+                <button
+                  onClick={() => router.push(`/learn/verse/${storyId}/quiz`)}
+                  className="flex items-center gap-1 md:gap-2 px-3 md:px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all font-semibold"
+                >
+                  <span className="hidden sm:inline">Mulai Quiz</span>
+                  <span className="sm:hidden">Quiz</span>
+                  <Award className="w-5 h-5" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleNextScene}
+                  className="flex items-center gap-1 md:gap-2 px-3 md:px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                >
+                  <span className="font-semibold hidden sm:inline">Selanjutnya</span>
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              )}
             </div>
-
-            {/* Finish Reading Button */}
-            {currentScene === story.scenes.length - 1 && (
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => router.push(`/learn/verse/${storyId}/quiz`)}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2 hover:shadow-xl transition-all"
-              >
-                <Award className="w-5 h-5" />
-                Selesai Membaca - Lanjut ke Quiz
-              </motion.button>
-            )}
           </motion.div>
         )}
       </main>

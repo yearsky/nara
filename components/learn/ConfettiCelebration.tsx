@@ -152,7 +152,7 @@ export function ConfettiCelebration({
         ))}
 
         {/* Celebration Message */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
           <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
@@ -162,7 +162,11 @@ export function ConfettiCelebration({
               stiffness: 200,
               damping: 15,
             }}
-            className="bg-white/95 backdrop-blur-md rounded-3xl px-8 py-6 shadow-2xl border-4 border-yellow-400"
+            onClick={() => {
+              setConfetti([]);
+              if (onComplete) onComplete();
+            }}
+            className="bg-white/95 backdrop-blur-md rounded-3xl px-8 py-6 shadow-2xl border-4 border-yellow-400 cursor-pointer hover:scale-105 transition-transform"
           >
             <motion.div
               animate={{
@@ -176,9 +180,10 @@ export function ConfettiCelebration({
             >
               <div className="text-center">
                 <div className="text-6xl mb-2">🎉</div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
                   {message}
                 </h2>
+                <p className="text-xs text-gray-500 mt-2">Klik untuk menutup</p>
               </div>
             </motion.div>
           </motion.div>
