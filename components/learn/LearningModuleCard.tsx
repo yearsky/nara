@@ -11,8 +11,10 @@ import {
   Grid3x3,
   Clock,
   BookMarked,
+  MessageCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface Module {
   id: string;
@@ -59,6 +61,28 @@ export default function LearningModuleCard({
   index,
 }: LearningModuleCardProps) {
   const Icon = iconMap[module.icon] || BookOpen;
+  const router = useRouter();
+
+  const handleAskNara = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent link navigation
+    e.stopPropagation(); // Stop event bubbling
+
+    const naraContext = {
+      type: "learn" as const,
+      id: module.id,
+      prompt: `Nara, tolong jelaskan tentang ${module.title} ini dong`,
+      data: {
+        title: module.title,
+        subtitle: module.subtitle,
+        description: module.description,
+        category: module.category,
+        difficulty: module.difficulty,
+      },
+    };
+
+    localStorage.setItem("naraContext", JSON.stringify(naraContext));
+    router.push("/chat");
+  };
 
   return (
     <motion.div
@@ -165,20 +189,32 @@ export default function LearningModuleCard({
               </div>
             )}
 
-            {/* CTA */}
-            {module.progress === 0 ? (
-              <button className="w-full bg-gradient-to-r from-brand-primary to-brand-accent text-white py-2.5 rounded-full font-semibold hover:shadow-lg transition-all">
-                Mulai Belajar
+            {/* CTA Buttons */}
+            <div className="space-y-2">
+              {/* Primary CTA */}
+              {module.progress === 0 ? (
+                <button className="w-full bg-gradient-to-r from-brand-primary to-brand-accent text-white py-2.5 rounded-full font-semibold hover:shadow-lg transition-all">
+                  Mulai Belajar
+                </button>
+              ) : module.progress === 100 ? (
+                <button className="w-full bg-green-500 text-white py-2.5 rounded-full font-semibold hover:shadow-lg transition-all">
+                  ✓ Selesai • Ulangi
+                </button>
+              ) : (
+                <button className="w-full bg-gradient-to-r from-brand-primary to-brand-accent text-white py-2.5 rounded-full font-semibold hover:shadow-lg transition-all">
+                  Lanjutkan Belajar
+                </button>
+              )}
+
+              {/* Ask Nara Button */}
+              <button
+                onClick={handleAskNara}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full border-2 border-orange-500 text-orange-600 font-semibold hover:bg-orange-50 transition-all"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Tanya Nara
               </button>
-            ) : module.progress === 100 ? (
-              <button className="w-full bg-green-500 text-white py-2.5 rounded-full font-semibold hover:shadow-lg transition-all">
-                ✓ Selesai • Ulangi
-              </button>
-            ) : (
-              <button className="w-full bg-gradient-to-r from-brand-primary to-brand-accent text-white py-2.5 rounded-full font-semibold hover:shadow-lg transition-all">
-                Lanjutkan Belajar
-              </button>
-            )}
+            </div>
           </div>
         </div>
       </Link>

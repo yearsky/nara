@@ -46,10 +46,14 @@ export default function DashboardPage() {
 
   const handleQuickAccessClick = (action: string) => {
     console.log("Quick access action:", action);
-    // TODO: Handle different actions
+
     switch (action) {
       case "continue":
         // Navigate to last learning session
+        break;
+      case "askNara":
+        // Navigate to chat with general context
+        router.push("/chat");
         break;
       case "daily":
         // Show daily aksara

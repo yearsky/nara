@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { PlayCircle, Calendar, TrendingUp, Trophy, LucideIcon } from "lucide-react";
+import { PlayCircle, Calendar, TrendingUp, Trophy, MessageCircle, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface QuickAccessItem {
   id: string;
   label: string;
   icon: LucideIcon;
-  action: "continue" | "daily" | "popular" | "challenge";
+  action: "continue" | "daily" | "popular" | "challenge" | "askNara";
 }
 
 const quickAccessItems: QuickAccessItem[] = [
@@ -17,6 +17,12 @@ const quickAccessItems: QuickAccessItem[] = [
     label: "Lanjutkan Belajar",
     icon: PlayCircle,
     action: "continue",
+  },
+  {
+    id: "askNara",
+    label: "Tanya Nara",
+    icon: MessageCircle,
+    action: "askNara",
   },
   {
     id: "daily",
