@@ -18,8 +18,8 @@ import MuseumList from '@/components/museum/MuseumList';
 import MuseumFilter from '@/components/museum/MuseumFilter';
 import MuseumDetail from '@/components/museum/MuseumDetail';
 import BottomNav from '@/components/navigation/BottomNav';
-import { MapPin, Map, List, ArrowLeft, Loader2, Search } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { MapPin, Map, List, ArrowLeft, Loader2, Search, SlidersHorizontal, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Dynamic import for MuseumMap to avoid SSR issues with Leaflet
 const MuseumMap = dynamic(() => import('@/components/museum/MuseumMap'), {
@@ -67,6 +67,7 @@ export default function NaraMapPage() {
   const [selectedRegion, setSelectedRegion] = useState<MuseumRegion>('all');
   const [selectedProvince, setSelectedProvince] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Load museum data
   useEffect(() => {
@@ -122,29 +123,24 @@ export default function NaraMapPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-emerald-50 pb-24">
-      {/* Header */}
+      {/* Header - Simple for Mobile */}
       <header className="sticky top-0 z-40 bg-gradient-to-r from-green-600 to-emerald-700 text-white shadow-lg">
-        <div className="max-w-screen-xl mx-auto px-4 py-6">
-          {/* Back Button */}
-          <button
-            onClick={() => router.push('/learn')}
-            className="flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-semibold">Kembali ke Belajar</span>
-          </button>
+        <div className="max-w-screen-xl mx-auto px-4 py-4">
+          {/* Top Row: Back Button, Title, View Toggle */}
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => router.push('/learn')}
+              className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="font-semibold hidden sm:inline">Kembali</span>
+            </button>
 
-          {/* Module Title */}
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
-              <MapPin className="w-8 h-8 text-white" />
+            <div className="flex items-center gap-2">
+              <MapPin className="w-6 h-6" />
+              <h1 className="text-lg md:text-xl font-bold">Nara Map</h1>
             </div>
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">Nara Map</h1>
-              <p className="text-green-100">
-                Jelajahi {museums.length} museum & situs warisan budaya Indonesia
-              </p>
-            </div>
+
             {/* View Mode Toggle */}
             <div className="flex gap-2">
               <button
@@ -156,7 +152,7 @@ export default function NaraMapPage() {
                 }`}
                 aria-label="Tampilan Peta"
               >
-                <Map className="w-5 h-5" />
+                <Map className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
@@ -167,13 +163,13 @@ export default function NaraMapPage() {
                 }`}
                 aria-label="Tampilan Daftar"
               >
-                <List className="w-5 h-5" />
+                <List className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           {/* Search Bar */}
-          <div className="relative mb-4">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-300" />
             <input
               type="text"
@@ -184,8 +180,9 @@ export default function NaraMapPage() {
             />
           </div>
 
-          {/* Category Submenu Tabs */}
-          <div className="mb-4">
+          {/* Desktop Tabs - Hidden on Mobile */}
+          <div className="hidden md:block mt-4 space-y-3">
+            {/* Category Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {categoryTabs.map((tab) => (
                 <button
@@ -202,10 +199,8 @@ export default function NaraMapPage() {
                 </button>
               ))}
             </div>
-          </div>
 
-          {/* Region Submenu Tabs */}
-          <div className="mb-2">
+            {/* Region Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {regionTabs.map((tab) => (
                 <button
@@ -222,48 +217,26 @@ export default function NaraMapPage() {
               ))}
             </div>
           </div>
-
-          {/* Filter Toggle Button */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="text-sm text-green-100 hover:text-white transition-colors"
-          >
-            {showFilters ? '🔼 Sembunyikan Filter' : '🔽 Filter Lanjutan'}
-          </button>
-
-          {/* Advanced Filters */}
-          {showFilters && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-4 bg-white/10 backdrop-blur-sm rounded-xl p-4"
-            >
-              <MuseumFilter
-                searchQuery={searchQuery}
-                selectedCategory={selectedCategory}
-                selectedRegion={selectedRegion}
-                selectedProvince={selectedProvince}
-                provinces={provinces}
-                onSearchChange={setSearchQuery}
-                onCategoryChange={setSelectedCategory}
-                onRegionChange={setSelectedRegion}
-                onProvinceChange={setSelectedProvince}
-                onReset={handleResetFilters}
-              />
-            </motion.div>
-          )}
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
-        {/* Results Count */}
-        <div className="mb-4">
+        {/* Results Count & Filter Button */}
+        <div className="flex items-center justify-between mb-4">
           <p className="text-gray-700">
             Menampilkan <span className="font-bold text-green-700">{filteredMuseums.length}</span>{' '}
             dari {museums.length} lokasi
           </p>
+
+          {/* Filter Button - Mobile Only */}
+          <button
+            onClick={() => setShowMobileFilters(true)}
+            className="md:hidden flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700 transition-all"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span className="text-sm font-semibold">Filter</span>
+          </button>
         </div>
 
         {/* Map View */}
@@ -326,6 +299,102 @@ export default function NaraMapPage() {
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
       />
+
+      {/* Mobile Filter Sheet - Floating Bottom Card */}
+      <AnimatePresence>
+        {showMobileFilters && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileFilters(false)}
+              className="fixed inset-0 bg-black/50 z-50 md:hidden"
+            />
+
+            {/* Filter Card */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 max-h-[80vh] overflow-hidden md:hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 className="text-lg font-bold text-gray-900">Filter</h3>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Filter Content */}
+              <div className="p-4 overflow-y-auto max-h-[calc(80vh-140px)]">
+                {/* Category Section */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Kategori</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {categoryTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setSelectedCategory(tab.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                          selectedCategory === tab.id
+                            ? 'bg-green-600 text-white font-semibold shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <span>{tab.icon}</span>
+                        <span className="text-sm">{tab.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Region Section */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Wilayah</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {regionTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setSelectedRegion(tab.id)}
+                        className={`px-4 py-2 rounded-full transition-all text-sm ${
+                          selectedRegion === tab.id
+                            ? 'bg-green-600 text-white font-semibold shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="p-4 border-t border-gray-200 flex gap-3">
+                <button
+                  onClick={handleResetFilters}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  Reset
+                </button>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="flex-1 px-4 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg"
+                >
+                  Terapkan
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Bottom Navigation */}
       <BottomNav />
