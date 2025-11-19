@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import {
   MapPin,
   BookOpen,
@@ -20,7 +21,7 @@ const features = [
     title: "Nara Map",
     description: "Jelajahi 100+ museum dan situs warisan budaya Indonesia dengan peta interaktif",
     gradient: "from-green-500 to-emerald-600",
-    image: "https://picsum.photos/seed/museum/400/300",
+    image: "https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?w=400&h=300&fit=crop&auto=format&q=80",
     badge: "Populer",
     stats: "100+ Lokasi",
     href: "/learn/map",
@@ -30,7 +31,7 @@ const features = [
     title: "Nara Verse",
     description: "Baca 1000+ cerita rakyat, legenda, dan dongeng dari seluruh Nusantara",
     gradient: "from-purple-500 to-purple-700",
-    image: "https://picsum.photos/seed/stories/400/300",
+    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop&auto=format&q=80",
     badge: "Terbaru",
     stats: "1000+ Cerita",
     href: "/learn/verse",
@@ -40,7 +41,7 @@ const features = [
     title: "Aksara Nusantara",
     description: "Pelajari 8+ aksara tradisional Indonesia dengan cara yang menyenangkan",
     gradient: "from-blue-500 to-blue-700",
-    image: "https://picsum.photos/seed/aksara/400/300",
+    image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=300&fit=crop&auto=format&q=80",
     badge: null,
     stats: "8+ Aksara",
     href: "/learn/aksara",
@@ -50,7 +51,7 @@ const features = [
     title: "Nara Symphony",
     description: "Dengarkan dan pelajari musik tradisional dari berbagai daerah",
     gradient: "from-pink-500 to-rose-600",
-    image: "https://picsum.photos/seed/music/400/300",
+    image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=300&fit=crop&auto=format&q=80",
     badge: null,
     stats: "50+ Lagu",
     href: "/learn/symphony",
@@ -60,7 +61,7 @@ const features = [
     title: "Nara Loka",
     description: "Masak resep tradisional Indonesia dengan panduan step-by-step",
     gradient: "from-amber-500 to-orange-600",
-    image: "https://picsum.photos/seed/food/400/300",
+    image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop&auto=format&q=80",
     badge: "Segera",
     stats: "200+ Resep",
     href: "/learn/loka",
@@ -70,7 +71,7 @@ const features = [
     title: "Nara Pola",
     description: "Eksplorasi motif dan pola tradisional khas Nusantara",
     gradient: "from-teal-500 to-cyan-600",
-    image: "https://picsum.photos/seed/pattern/400/300",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&auto=format&q=80",
     badge: null,
     stats: "150+ Motif",
     href: "/learn/pola",
@@ -166,10 +167,13 @@ export function FeatureShowcase() {
 
               {/* Image */}
               <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-                <img
+                <Image
                   src={feature.image}
                   alt={feature.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover group-hover:scale-110 transition-transform duration-500"
+                  priority={index < 3}
                 />
                 {/* Gradient Overlay */}
                 <div
