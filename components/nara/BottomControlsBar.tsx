@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Mic, MicOff, Video, VideoOff, Square } from 'lucide-react'
 import { useNaraChat } from '@/hooks/useNaraChat'
 import { useLiveTranscription } from '@/hooks/useLiveTranscription'
+import { useVoiceChatStore } from '@/stores/voiceChatStore'
 
 interface BottomControlsBarProps {
   isCameraOn: boolean
@@ -28,9 +29,10 @@ export default function BottomControlsBar({
 }: BottomControlsBarProps) {
   const [input, setInput] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const currentUserMessageIdRef = useRef<string | null>(null)
 
   // Use Nara Chat hook for message orchestration
-  const { handleSendMessage, isLoading, credits, isLowCredits, error } = useNaraChat()
+  const { handleSendMessage, getNaraResponse, isLoading, credits, isLowCredits, error } = useNaraChat()
 
   // Use Live Transcription hook for real-time speech-to-text
   const {
@@ -45,6 +47,34 @@ export default function BottomControlsBar({
     resetTranscript,
   } = useLiveTranscription('id-ID')
 
+  // Access store directly for real-time updates
+  const { addMessage, updateMessage } = useVoiceChatStore()
+
+  // Real-time transcript update: Update user message as they speak
+  useEffect(() => {
+    if (!isListening) return
+
+    const transcriptText = fullTranscript.trim()
+
+    if (transcriptText) {
+      if (!currentUserMessageIdRef.current) {
+        // Create new user message
+        const messageId = `user-${Date.now()}`
+        currentUserMessageIdRef.current = messageId
+
+        addMessage({
+          id: messageId,
+          role: 'user',
+          content: transcriptText,
+          timestamp: Date.now(),
+        })
+      } else {
+        // Update existing user message
+        updateMessage(currentUserMessageIdRef.current, transcriptText)
+      }
+    }
+  }, [fullTranscript, isListening, addMessage, updateMessage])
+
   // Handle text message send
   const handleSend = async () => {
     const content = input.trim()
@@ -54,20 +84,30 @@ export default function BottomControlsBar({
     await handleSendMessage(content)
   }
 
-  // Handle voice/mic toggle - now uses live transcription
+  // Handle voice/mic toggle - now uses live transcription with real-time chat bubbles
   const handleMicClick = async () => {
     if (isListening) {
-      // Stop listening and send transcript
+      // Stop listening
       stopListening()
 
       const finalTranscript = fullTranscript.trim()
+
+      // Reset the current message ref
+      currentUserMessageIdRef.current = null
+
+      // Send to Gemini after delay (800ms) - user message already added in real-time
       if (finalTranscript) {
-        await handleSendMessage(finalTranscript)
+        setTimeout(async () => {
+          await getNaraResponse(finalTranscript)
+          resetTranscript()
+        }, 800)
+      } else {
         resetTranscript()
       }
     } else {
-      // Start listening
+      // Start listening - reset transcript and message ref
       resetTranscript()
+      currentUserMessageIdRef.current = null
       startListening()
     }
   }

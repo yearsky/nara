@@ -20,6 +20,91 @@ export function useNaraChat() {
   const { setEmotion, setIsSpeaking } = useNaraEmotionStore()
 
   /**
+   * Get Nara's response without adding user message (for when user message already exists)
+   */
+  const getNaraResponse = useCallback(
+    async (text: string): Promise<void> => {
+      if (!text.trim()) {
+        setError('Message cannot be empty')
+        return
+      }
+
+      // Check credits
+      if (!hasCredits()) {
+        setError('Insufficient credits. Please add more credits to continue.')
+        return
+      }
+
+      setIsLoading(true)
+      setError(null)
+      setStreamingResponse('')
+
+      try {
+        // Set Nara to thinking state
+        setEmotion('thinking')
+
+        // Send message to Nara (with streaming support)
+        const { response, creditsUsed } = await sendMessageToNara(
+          text,
+          messages,
+          (chunk) => {
+            // Handle streaming chunks
+            setStreamingResponse((prev) => prev + chunk)
+          }
+        )
+
+        // Deduct credits
+        const success = useCredit(creditsUsed)
+        if (!success) {
+          setError('Insufficient credits for this request')
+          return
+        }
+
+        // Add assistant response to chat history
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: response,
+          timestamp: Date.now(),
+        }
+        addMessage(assistantMessage)
+
+        // Set Nara to happy state after response
+        setEmotion('happy')
+        setIsSpeaking(true)
+
+        // Reset speaking state after a delay (simulate speaking time)
+        setTimeout(() => {
+          setIsSpeaking(false)
+          setEmotion('neutral')
+        }, response.length * 50) // Rough estimate: 50ms per character
+
+        // Show low credit warning
+        if (isLowCredits()) {
+          console.warn('Low credits! Only', credits - creditsUsed, 'credits remaining')
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to send message'
+        setError(errorMessage)
+        setEmotion('neutral')
+      } finally {
+        setIsLoading(false)
+        setStreamingResponse('')
+      }
+    },
+    [
+      messages,
+      hasCredits,
+      useCredit,
+      addMessage,
+      setEmotion,
+      setIsSpeaking,
+      isLowCredits,
+      credits,
+    ]
+  )
+
+  /**
    * Handle sending a text message to Nara
    */
   const handleSendMessage = useCallback(
@@ -180,6 +265,7 @@ export function useNaraChat() {
 
     // Actions
     handleSendMessage,
+    getNaraResponse, // Get response without adding user message
     handleVoiceRecord,
     clearChat,
   }
