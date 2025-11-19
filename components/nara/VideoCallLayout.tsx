@@ -6,11 +6,17 @@ import { useCallStore } from '@/stores/callStore'
 import { useCallTimer } from '@/hooks/useCallTimer'
 import { useAutoHideControls } from '@/hooks/useAutoHideControls'
 import { useNaraChat } from '@/hooks/useNaraChat'
+import { useChatHistoryStore } from '@/stores/chatHistoryStore'
+import { useSyncChatHistory } from '@/hooks/useSyncChatHistory'
+import { useMessageDisposal } from '@/hooks/useMessageDisposal'
 import VideoPlaceholder from './VideoPlaceholder'
 import CallHeader from './CallHeader'
 import ChatMessagesOverlay from './ChatMessagesOverlay'
 import BottomControlsBar from './BottomControlsBar'
 import NaraTypingIndicator from './NaraTypingIndicator'
+import EnhancedHeader from './mobile/EnhancedHeader'
+import ChatHistorySidebar from './mobile/ChatHistorySidebar'
+import DisposableMessage from './mobile/DisposableMessage'
 
 interface VideoCallLayoutProps {
   characterName?: string
@@ -46,6 +52,15 @@ export default function VideoCallLayout({
 
   // Use new Nara Chat hook for message orchestration
   const { messages, isLoading, streamingResponse } = useNaraChat()
+
+  // Sync messages to history store
+  useSyncChatHistory()
+
+  // Get visible messages with disposal logic
+  const { visibleMessages } = useMessageDisposal()
+
+  // History sidebar state
+  const { isSidebarOpen, toggleSidebar, disposedMessages } = useChatHistoryStore()
 
   // Ref for auto-scrolling chat in desktop mode
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -87,16 +102,59 @@ export default function VideoCallLayout({
         {/* Video/Character Background - Full Screen */}
         <VideoPlaceholder />
 
-        {/* Top Header Overlay (Name + Timer) */}
-        <CallHeader
-          name={characterName}
-          duration={callDuration}
-          isVisible={isVisible}
+        {/* Enhanced Header with History Toggle */}
+        <EnhancedHeader
+          characterName={characterName}
           onBack={handleEndCall}
+          onToggleSidebar={toggleSidebar}
+          hasUnreadHistory={disposedMessages.length > 0}
+          isVisible={isVisible}
         />
 
-        {/* Chat Messages Overlay - TikTok Style */}
-        <ChatMessagesOverlay messages={messages} isLoading={isLoading} />
+        {/* Disposable Chat Messages - Instagram Stories Style */}
+        <div className="absolute left-4 bottom-24 md:bottom-28 max-w-xs md:max-w-sm w-full pointer-events-none z-30">
+          <div className="space-y-2 max-h-[45vh] overflow-y-auto pointer-events-auto scrollbar-hide">
+            <AnimatePresence mode="popLayout">
+              {visibleMessages.map((message) => (
+                <DisposableMessage
+                  key={message.id}
+                  message={message}
+                  showNaraLabel={true}
+                />
+              ))}
+
+              {/* Streaming Response */}
+              {isLoading && streamingResponse && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex justify-start"
+                >
+                  <div className="rounded-2xl px-4 py-2 backdrop-blur-md bg-orange-500/30 text-white shadow-lg">
+                    <div className="flex items-start gap-2">
+                      <span className="text-xs font-bold text-orange-200">Nara:</span>
+                      <p className="text-sm font-medium leading-snug flex-1 break-words">
+                        {streamingResponse}
+                        <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Typing Indicator */}
+              {isLoading && !streamingResponse && (
+                <NaraTypingIndicator variant="thinking" mode="mobile" />
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Chat History Sidebar */}
+        <ChatHistorySidebar
+          isOpen={isSidebarOpen}
+          onClose={toggleSidebar}
+        />
 
         {/* Bottom Controls Bar - Combined Mic, Camera, and Chat Input */}
         <BottomControlsBar
