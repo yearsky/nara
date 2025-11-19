@@ -122,13 +122,15 @@ export default function VideoCallLayout({
         <div className="absolute left-4 bottom-24 md:bottom-28 max-w-xs md:max-w-sm w-full pointer-events-none z-30">
           <div className="space-y-2 max-h-[45vh] overflow-y-auto pointer-events-auto scrollbar-hide">
             <AnimatePresence mode="popLayout">
-              {visibleMessages.map((message) => (
-                <DisposableMessage
-                  key={message.id}
-                  message={message}
-                  showNaraLabel={true}
-                />
-              ))}
+              {visibleMessages
+                .filter((message) => message.content !== '...') // Filter out placeholder messages
+                .map((message) => (
+                  <DisposableMessage
+                    key={message.id}
+                    message={message}
+                    showNaraLabel={true}
+                  />
+                ))}
 
               {/* Thinking Indicator (like Claude) */}
               {isLoading && (
