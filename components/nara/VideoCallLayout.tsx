@@ -132,7 +132,7 @@ export default function VideoCallLayout({
 
           {/* Chat Messages Area */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               {messages.map((message) => (
                 <motion.div
                   key={message.id}
@@ -142,24 +142,25 @@ export default function VideoCallLayout({
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                      message.role === 'user'
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-white/10 text-white backdrop-blur-sm'
-                    }`}
-                  >
-                    {message.role === 'assistant' && (
-                      <p className="text-xs font-bold text-orange-300 mb-1">Nara</p>
-                    )}
-                    <p className="text-sm leading-relaxed break-words">{message.content}</p>
-                  </div>
+                  {/* Check if this is a placeholder message */}
+                  {message.role === 'assistant' && message.content === '...' ? (
+                    <NaraTypingIndicator variant="thinking" />
+                  ) : (
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                        message.role === 'user'
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-white/10 text-white backdrop-blur-sm'
+                      }`}
+                    >
+                      {message.role === 'assistant' && (
+                        <p className="text-xs font-bold text-orange-300 mb-1">Nara</p>
+                      )}
+                      <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                    </div>
+                  )}
                 </motion.div>
               ))}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {isLoading && <NaraTypingIndicator variant="thinking" />}
             </AnimatePresence>
             <div ref={messagesEndRef} />
           </div>
