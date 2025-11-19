@@ -3,9 +3,11 @@
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Sparkles, Heart, BookOpen } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function HeadlineBlock() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const handleCTA = () => {
     router.push('/chat');
@@ -35,13 +37,13 @@ export function HeadlineBlock() {
               backgroundClip: 'text',
             }}
           >
-            Nara.ai
+            {t('home.title')}
           </span>
           <span className="text-gray-900 block text-4xl md:text-5xl lg:text-5xl">
-            Your Cultural
+            {t('home.subtitle1')}
           </span>
           <span className="text-gray-900 block text-4xl md:text-5xl lg:text-5xl">
-            AI Companion
+            {t('home.subtitle2')}
           </span>
         </motion.h1>
 
@@ -52,8 +54,7 @@ export function HeadlineBlock() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          Jelajahi kekayaan budaya Indonesia dengan AI companion yang interaktif
-          dan personal
+          {t('home.description')}
         </motion.p>
       </div>
 
@@ -72,7 +73,7 @@ export function HeadlineBlock() {
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.98 }}
         >
-          <span className="relative z-10 text-white">Try Nara.ai</span>
+          <span className="relative z-10 text-white">{t('home.cta')}</span>
           <motion.div
             className="relative z-10"
             initial={{ x: 0 }}
@@ -100,14 +101,14 @@ export function HeadlineBlock() {
         transition={{ delay: 0.8, duration: 0.6 }}
       >
         {[
-          { icon: Sparkles, label: 'AI Powered', color: 'from-amber-500 to-orange-500' },
-          { icon: Heart, label: 'Cultural Rich', color: 'from-rose-500 to-pink-500' },
-          { icon: BookOpen, label: 'Interactive Learning', color: 'from-blue-500 to-cyan-500' },
+          { icon: Sparkles, key: 'feature.ai', color: 'from-amber-500 to-orange-500' },
+          { icon: Heart, key: 'feature.cultural', color: 'from-rose-500 to-pink-500' },
+          { icon: BookOpen, key: 'feature.learning', color: 'from-blue-500 to-cyan-500' },
         ].map((feature, index) => {
           const Icon = feature.icon;
           return (
             <motion.div
-              key={feature.label}
+              key={feature.key}
               className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -117,7 +118,7 @@ export function HeadlineBlock() {
               <div className={`p-1.5 rounded-full bg-gradient-to-br ${feature.color}`}>
                 <Icon className="w-3 h-3 text-white" />
               </div>
-              <span className="text-sm font-semibold text-gray-700">{feature.label}</span>
+              <span className="text-sm font-semibold text-gray-700">{t(feature.key)}</span>
             </motion.div>
           );
         })}
@@ -141,7 +142,7 @@ export function HeadlineBlock() {
           ))}
         </div>
         <span className="font-medium">
-          Dipercaya oleh <span className="font-bold text-[#FF7A5C]">10,000+</span> pengguna
+          {t('feature.trusted')} <span className="font-bold text-[#FF7A5C]">10,000+</span> {t('feature.users')}
         </span>
       </motion.div>
     </motion.div>

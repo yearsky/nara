@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, ChevronRight, type LucideIcon } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface NavLink {
-  label: string;
+  key: string;
   href: string;
   icon: LucideIcon;
 }
@@ -20,6 +21,7 @@ interface MobileMenuProps {
 
 export function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   // Close on Escape key
   useEffect(() => {
@@ -129,7 +131,7 @@ export function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
                                 isActive ? 'text-white' : 'text-gray-900'
                               }`}
                             >
-                              {link.label}
+                              {t(link.key)}
                             </span>
                           </div>
                           <ChevronRight
@@ -158,8 +160,8 @@ export function MobileMenu({ isOpen, onClose, navLinks }: MobileMenuProps) {
                       <User className="w-5 h-5 text-[#FF7A5C]" />
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900 text-sm">Dashboard</p>
-                      <p className="text-xs text-gray-600">View your progress</p>
+                      <p className="font-bold text-gray-900 text-sm">{t('dashboard.title')}</p>
+                      <p className="text-xs text-gray-600">{t('dashboard.subtitle')}</p>
                     </div>
                   </div>
                   <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#FF7A5C] transition-colors" />

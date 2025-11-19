@@ -2,17 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Users, TrendingUp, Star, MessageCircle, Heart, Sparkles } from 'lucide-react';
-
-const stats = [
-  { icon: Users, label: 'Active Users', value: '10K+', color: 'from-blue-500 to-cyan-500' },
-  {
-    icon: MessageCircle,
-    label: 'Daily Conversations',
-    value: '50K+',
-    color: 'from-purple-500 to-pink-500',
-  },
-  { icon: Star, label: 'Satisfaction Rate', value: '95%', color: 'from-amber-500 to-orange-500' },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const avatarColors = [
   'from-rose-400 to-pink-500',
@@ -23,6 +13,18 @@ const avatarColors = [
 ];
 
 export function SocialProofCard() {
+  const { t } = useLanguage();
+
+  const stats = [
+    { icon: Users, key: 'stats.activeUsers', value: '10K+', color: 'from-blue-500 to-cyan-500' },
+    {
+      icon: MessageCircle,
+      key: 'stats.conversations',
+      value: '50K+',
+      color: 'from-purple-500 to-pink-500',
+    },
+    { icon: Star, key: 'stats.satisfaction', value: '95%', color: 'from-amber-500 to-orange-500' },
+  ];
   return (
     <motion.div
       className="flex flex-col justify-center space-y-6"
@@ -98,7 +100,7 @@ export function SocialProofCard() {
             <span className="text-sm font-semibold text-gray-700">5.0</span>
           </div>
           <p className="text-sm text-gray-600 font-medium">
-            Rated excellent by our community
+            {t('stats.rated')}
           </p>
         </motion.div>
       </motion.div>
@@ -109,7 +111,7 @@ export function SocialProofCard() {
           const Icon = stat.icon;
           return (
             <motion.div
-              key={stat.label}
+              key={stat.key}
               className="bg-white/60 backdrop-blur-md rounded-2xl p-4 shadow-md border border-gray-200/50 hover:bg-white/80 transition-all group"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -134,7 +136,7 @@ export function SocialProofCard() {
                   <p className="text-2xl font-bold text-gray-900 group-hover:text-[#FF7A5C] transition-colors">
                     {stat.value}
                   </p>
-                  <p className="text-xs text-gray-600 font-medium">{stat.label}</p>
+                  <p className="text-xs text-gray-600 font-medium">{t(stat.key)}</p>
                 </div>
 
                 {/* Sparkle decoration on hover */}
@@ -162,8 +164,7 @@ export function SocialProofCard() {
         <div className="flex items-start gap-2 mb-3">
           <Heart className="w-5 h-5 fill-white/90 text-white/90 flex-shrink-0 mt-1" />
           <p className="text-sm font-medium leading-relaxed italic">
-            "Nara membantu aku belajar budaya Indonesia dengan cara yang menyenangkan dan
-            interaktif!"
+            {t('testimonial.quote')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -171,8 +172,8 @@ export function SocialProofCard() {
             <span className="font-bold text-sm">A</span>
           </div>
           <div>
-            <p className="font-bold text-sm">Andi Pratama</p>
-            <p className="text-xs text-white/80">Student, Jakarta</p>
+            <p className="font-bold text-sm">{t('testimonial.name')}</p>
+            <p className="text-xs text-white/80">{t('testimonial.location')}</p>
           </div>
         </div>
       </motion.div>
@@ -197,7 +198,7 @@ export function SocialProofCard() {
           }}
         />
         <span className="text-xs font-semibold text-green-700">
-          <span className="font-bold">234</span> people are learning right now
+          <span className="font-bold">234</span> {t('stats.learning')}
         </span>
       </motion.div>
     </motion.div>

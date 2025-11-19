@@ -4,10 +4,12 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Sparkles, MessageCircle, ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function PhoneMockupLive() {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
+  const { t } = useLanguage();
 
   const handlePhoneClick = () => {
     router.push('/chat');
@@ -135,7 +137,7 @@ export function PhoneMockupLive() {
                 >
                   <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm max-w-[80%]">
                     <p className="text-sm text-gray-800">
-                      Halo! Aku Nara, AI companion-mu 👋
+                      {t('chat.greeting')}
                     </p>
                   </div>
                 </motion.div>
@@ -148,7 +150,7 @@ export function PhoneMockupLive() {
                 >
                   <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm max-w-[80%]">
                     <p className="text-sm text-gray-800">
-                      Mau belajar budaya Indonesia yang mana hari ini?
+                      {t('chat.question')}
                     </p>
                   </div>
                 </motion.div>
@@ -184,7 +186,7 @@ export function PhoneMockupLive() {
               {/* Input Bar */}
               <div className="mt-4 flex items-center gap-2 bg-white rounded-full px-4 py-3 shadow-md">
                 <MessageCircle className="w-5 h-5 text-gray-400" />
-                <div className="flex-1 text-sm text-gray-400">Type a message...</div>
+                <div className="flex-1 text-sm text-gray-400">{t('chat.placeholder')}</div>
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#C2410C] to-[#FF7A5C] flex items-center justify-center">
                   <ArrowUpRight className="w-4 h-4 text-white" />
                 </div>
