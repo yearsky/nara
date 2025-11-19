@@ -17,7 +17,9 @@ export type OpenRouterModel =
   | 'anthropic/claude-3.5-sonnet'
   | 'openai/gpt-4o'
   | 'google/gemini-2.0-flash-exp'
+  | 'google/gemini-2.0-flash-exp:free'
   | 'google/gemini-flash-1.5'
+  | string // Allow any OpenRouter model
 
 /**
  * Create OpenRouter client instance
@@ -114,16 +116,19 @@ export function estimateTokens(text: string): number {
  */
 export function calculateCredits(tokensUsed: number, model: OpenRouterModel): number {
   // Rough pricing (adjust based on actual OpenRouter pricing)
-  const pricePerMillionTokens: Record<OpenRouterModel, number> = {
+  const pricePerMillionTokens: Record<string, number> = {
     'anthropic/claude-sonnet-4-20250514': 15, // $15 per million tokens (estimate)
     'openai/gpt-4-turbo-preview': 10,
     'anthropic/claude-3.5-sonnet': 15,
     'openai/gpt-4o': 10,
     'google/gemini-2.0-flash-exp': 0, // Free tier model
+    'google/gemini-2.0-flash-exp:free': 0, // Free tier model with explicit :free suffix
     'google/gemini-flash-1.5': 0.075, // Very cheap
   }
 
-  const price = pricePerMillionTokens[model] || 10
+  // Handle :free suffix models
+  const modelKey = model.includes(':free') ? model : model
+  const price = pricePerMillionTokens[modelKey] || pricePerMillionTokens[model.replace(':free', '')] || 10
   const costInDollars = (tokensUsed / 1_000_000) * price
 
   // Convert to credits (1 credit = $0.10)
