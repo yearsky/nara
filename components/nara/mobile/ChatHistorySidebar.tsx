@@ -1,9 +1,9 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Search, Trash2 } from 'lucide-react'
-import { useChatHistoryStore, type HistoryMessage } from '@/stores/chatHistoryStore'
-import { useState, memo, useMemo } from 'react'
+import { X, Search, Trash2, MessageCircle } from 'lucide-react'
+import { useChatHistoryStore, type Conversation } from '@/stores/chatHistoryStore'
+import { useState, memo, useMemo, useEffect } from 'react'
 
 interface ChatHistorySidebarProps {
   isOpen: boolean
@@ -18,12 +18,30 @@ export default function ChatHistorySidebar({
   isOpen,
   onClose,
 }: ChatHistorySidebarProps) {
-  const { searchQuery, setSearchQuery, getMessagesByDate, clearHistory, allMessages } =
-    useChatHistoryStore()
+  const {
+    searchQuery,
+    setSearchQuery,
+    clearHistory,
+    conversations,
+    generateConversations,
+    getConversationSummaries,
+    setCurrentConversation,
+    allMessages,
+  } = useChatHistoryStore()
   const [showClearConfirm, setShowClearConfirm] = useState(false)
 
-  // Memoize expensive computation of grouping messages by date
-  const messagesByDate = useMemo(() => getMessagesByDate(), [allMessages, searchQuery])
+  // Generate conversations when messages change
+  useEffect(() => {
+    if (allMessages.length > 0) {
+      generateConversations()
+    }
+  }, [allMessages.length, generateConversations])
+
+  // Get filtered conversations
+  const filteredConversations = useMemo(
+    () => getConversationSummaries(),
+    [conversations, searchQuery, getConversationSummaries]
+  )
 
   const handleClearHistory = () => {
     clearHistory()
@@ -60,7 +78,7 @@ export default function ChatHistorySidebar({
           <div>
             <h2 className="text-white font-bold text-lg">Riwayat Chat</h2>
             <p className="text-white/60 text-xs">
-              {allMessages.length} pesan total
+              {conversations.length} percakapan
             </p>
           </div>
           <motion.button
@@ -87,27 +105,23 @@ export default function ChatHistorySidebar({
           </div>
         </div>
 
-        {/* Messages List - Optimized for smooth scrolling */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6" style={{ willChange: 'scroll-position', contain: 'layout style paint' }}>
-          {Object.keys(messagesByDate).length === 0 ? (
+        {/* Conversation List - Optimized for smooth scrolling */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3" style={{ willChange: 'scroll-position', contain: 'layout style paint' }}>
+          {filteredConversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-white/40 py-12">
-              <p className="text-sm">Tidak ada pesan</p>
+              <MessageCircle className="w-12 h-12 mb-3 opacity-40" />
+              <p className="text-sm">Tidak ada percakapan</p>
             </div>
           ) : (
-            Object.entries(messagesByDate).map(([date, messages]) => (
-              <div key={date} className="space-y-2">
-                {/* Date Header */}
-                <div className="sticky top-0 bg-gradient-to-r from-orange-500/20 to-pink-500/20 backdrop-blur-sm px-3 py-1 rounded-full inline-block">
-                  <p className="text-white/80 text-xs font-semibold">{date}</p>
-                </div>
-
-                {/* Messages */}
-                <div className="space-y-2">
-                  {messages.map((message) => (
-                    <HistoryMessageItem key={message.id} message={message} />
-                  ))}
-                </div>
-              </div>
+            filteredConversations.map((conversation) => (
+              <ConversationSummaryItem
+                key={conversation.id}
+                conversation={conversation}
+                onClick={() => {
+                  setCurrentConversation(conversation.id)
+                  onClose()
+                }}
+              />
             ))
           )}
         </div>
@@ -154,41 +168,65 @@ export default function ChatHistorySidebar({
 }
 
 /**
- * Individual History Message Component
- * Memoized to prevent unnecessary re-renders for performance
+ * Conversation Summary Item Component
+ * Shows summary with click to view full conversation
  */
-const HistoryMessageItem = memo(function HistoryMessageItem({ message }: { message: HistoryMessage }) {
+const ConversationSummaryItem = memo(function ConversationSummaryItem({
+  conversation,
+  onClick,
+}: {
+  conversation: Conversation
+  onClick: () => void
+}) {
   const time = useMemo(
     () =>
-      new Date(message.timestamp).toLocaleTimeString('id-ID', {
+      new Date(conversation.lastMessageTime).toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit',
       }),
-    [message.timestamp]
+    [conversation.lastMessageTime]
   )
 
+  const date = useMemo(() => {
+    const msgDate = new Date(conversation.lastMessageTime)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+    msgDate.setHours(0, 0, 0, 0)
+
+    if (msgDate.getTime() === today.getTime()) return 'Hari ini'
+    if (msgDate.getTime() === yesterday.getTime()) return 'Kemarin'
+    return msgDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+  }, [conversation.lastMessageTime])
+
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.2 }}
-      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+    <motion.button
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className="w-full text-left px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 transition-colors"
     >
-      <div
-        className={`max-w-[80%] rounded-2xl px-3 py-2 ${
-          message.role === 'user'
-            ? 'bg-orange-500/30 border border-orange-500/40'
-            : 'bg-white/10 border border-white/20'
-        } ${message.isDisposed ? 'opacity-60' : 'opacity-100'}`}
-      >
-        {message.role === 'assistant' && (
-          <p className="text-orange-300 text-[10px] font-bold mb-0.5">Nara</p>
-        )}
-        <p className="text-white text-xs leading-relaxed break-words">
-          {message.content}
-        </p>
-        <p className="text-white/40 text-[10px] mt-1">{time}</p>
+      <div className="flex items-start gap-3">
+        {/* Icon */}
+        <div className="flex-shrink-0 mt-0.5">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+            <MessageCircle className="w-5 h-5 text-white" />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-medium text-sm leading-snug mb-1 truncate">
+            {conversation.summary}
+          </p>
+          <p className="text-white/50 text-xs">
+            {conversation.messages.length} pesan • {date} • {time}
+          </p>
+        </div>
       </div>
-    </motion.div>
+    </motion.button>
   )
 })

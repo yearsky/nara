@@ -17,6 +17,7 @@ import NaraTypingIndicator from './NaraTypingIndicator'
 import EnhancedHeader from './mobile/EnhancedHeader'
 import ChatHistorySidebar from './mobile/ChatHistorySidebar'
 import DisposableMessage from './mobile/DisposableMessage'
+import ChatBoxView from './mobile/ChatBoxView'
 
 interface VideoCallLayoutProps {
   characterName?: string
@@ -60,7 +61,8 @@ export default function VideoCallLayout({
   const { visibleMessages } = useMessageDisposal()
 
   // History sidebar state
-  const { isSidebarOpen, toggleSidebar, disposedMessages } = useChatHistoryStore()
+  const { isSidebarOpen, toggleSidebar, disposedMessages, currentConversationId } =
+    useChatHistoryStore()
 
   // Ref for auto-scrolling chat in desktop mode
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -89,6 +91,11 @@ export default function VideoCallLayout({
   // Handle screen tap to show controls
   const handleScreenTap = () => {
     showControls()
+  }
+
+  // Show ChatBoxView when viewing conversation history
+  if (currentConversationId) {
+    return <ChatBoxView onBack={() => {}} />
   }
 
   return (

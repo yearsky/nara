@@ -9,6 +9,14 @@ export interface HistoryMessage {
   isDisposed?: boolean
 }
 
+export interface Conversation {
+  id: string
+  summary: string // Generated summary or first user message
+  messages: HistoryMessage[]
+  startTime: number
+  lastMessageTime: number
+}
+
 interface ChatHistoryState {
   // All messages including disposed ones
   allMessages: HistoryMessage[]
@@ -18,6 +26,12 @@ interface ChatHistoryState {
 
   // Disposed messages (for history sidebar)
   disposedMessages: HistoryMessage[]
+
+  // Grouped conversations with summaries
+  conversations: Conversation[]
+
+  // Current conversation being viewed in chat box
+  currentConversationId: string | null
 
   // Sidebar state
   isSidebarOpen: boolean
@@ -32,7 +46,10 @@ interface ChatHistoryState {
   toggleSidebar: () => void
   setSearchQuery: (query: string) => void
   clearHistory: () => void
+  setCurrentConversation: (conversationId: string | null) => void
   getMessagesByDate: () => { [key: string]: HistoryMessage[] }
+  getConversationSummaries: () => Conversation[]
+  generateConversations: () => void
 }
 
 export const useChatHistoryStore = create<ChatHistoryState>()(
@@ -41,6 +58,8 @@ export const useChatHistoryStore = create<ChatHistoryState>()(
       allMessages: [],
       visibleMessages: [],
       disposedMessages: [],
+      conversations: [],
+      currentConversationId: null,
       isSidebarOpen: false,
       searchQuery: '',
 
@@ -89,7 +108,68 @@ export const useChatHistoryStore = create<ChatHistoryState>()(
           allMessages: [],
           visibleMessages: [],
           disposedMessages: [],
+          conversations: [],
+          currentConversationId: null,
         })
+      },
+
+      setCurrentConversation: (conversationId: string | null) => {
+        set({ currentConversationId: conversationId })
+      },
+
+      generateConversations: () => {
+        const { allMessages } = get()
+
+        // Group messages into conversations (simple: every 2 messages = 1 conversation)
+        const conversations: Conversation[] = []
+        let currentConv: HistoryMessage[] = []
+
+        allMessages.forEach((msg, index) => {
+          currentConv.push(msg)
+
+          // Create conversation after assistant response OR every 4 messages
+          if (msg.role === 'assistant' || currentConv.length >= 4) {
+            const firstUserMsg = currentConv.find(m => m.role === 'user')
+            const summary = firstUserMsg?.content.slice(0, 50) || 'Percakapan'
+
+            conversations.push({
+              id: `conv-${conversations.length}`,
+              summary: summary.length < firstUserMsg?.content.length! ? summary + '...' : summary,
+              messages: [...currentConv],
+              startTime: currentConv[0].timestamp,
+              lastMessageTime: currentConv[currentConv.length - 1].timestamp,
+            })
+
+            currentConv = []
+          }
+        })
+
+        // Add remaining messages as a conversation
+        if (currentConv.length > 0) {
+          const firstUserMsg = currentConv.find(m => m.role === 'user')
+          const summary = firstUserMsg?.content.slice(0, 50) || 'Percakapan'
+
+          conversations.push({
+            id: `conv-${conversations.length}`,
+            summary: summary.length < firstUserMsg?.content.length! ? summary + '...' : summary,
+            messages: [...currentConv],
+            startTime: currentConv[0].timestamp,
+            lastMessageTime: currentConv[currentConv.length - 1].timestamp,
+          })
+        }
+
+        set({ conversations })
+      },
+
+      getConversationSummaries: () => {
+        const { conversations, searchQuery } = get()
+
+        if (!searchQuery) return conversations
+
+        // Filter by search query
+        return conversations.filter(conv =>
+          conv.summary.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       },
 
       getMessagesByDate: () => {

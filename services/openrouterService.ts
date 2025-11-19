@@ -53,7 +53,39 @@ export async function callOpenRouterChat(
   try {
     const client = getOpenRouterClient()
 
-    // Handle non-streaming response (simpler approach)
+    // Handle streaming response
+    if (stream && onChunk) {
+      const completion = await client.chat.send({
+        model,
+        messages: messages.map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+        stream: true,
+        temperature: 0.7,
+        maxTokens: 1000,
+      })
+
+      let fullResponse = ''
+
+      // Process stream chunks
+      for await (const chunk of completion) {
+        const delta = chunk.choices[0]?.delta?.content
+        if (delta) {
+          fullResponse += delta
+          onChunk(delta) // Send chunk to callback
+        }
+      }
+
+      const tokensUsed = estimateTokens(fullResponse)
+
+      return {
+        response: fullResponse,
+        tokensUsed,
+      }
+    }
+
+    // Handle non-streaming response (fallback)
     const completion = await client.chat.send({
       model,
       messages: messages.map((msg) => ({
