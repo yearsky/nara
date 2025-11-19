@@ -26,16 +26,14 @@ export default function ChatHistorySidebar({
     generateConversations,
     getConversationSummaries,
     setCurrentConversation,
-    allMessages,
+    disposedMessages,
   } = useChatHistoryStore()
   const [showClearConfirm, setShowClearConfirm] = useState(false)
 
-  // Generate conversations when messages change
+  // Generate conversations when disposed messages change
   useEffect(() => {
-    if (allMessages.length > 0) {
-      generateConversations()
-    }
-  }, [allMessages.length, generateConversations])
+    generateConversations()
+  }, [disposedMessages.length, generateConversations])
 
   // Get filtered conversations
   const filteredConversations = useMemo(
@@ -127,7 +125,7 @@ export default function ChatHistorySidebar({
         </div>
 
         {/* Footer: Clear History */}
-        {allMessages.length > 0 && (
+        {disposedMessages.length > 0 && (
           <div className="px-4 py-3 border-t border-white/10">
             {!showClearConfirm ? (
               <motion.button

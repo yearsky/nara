@@ -64,13 +64,15 @@ export default function VideoCallLayout({
   const { isSidebarOpen, toggleSidebar, disposedMessages, currentConversationId } =
     useChatHistoryStore()
 
-  // Ref for auto-scrolling chat in desktop mode
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  // Refs for auto-scrolling chat
+  const messagesEndRef = useRef<HTMLDivElement>(null) // Desktop
+  const mobileMessagesEndRef = useRef<HTMLDivElement>(null) // Mobile
 
-  // Auto-scroll to bottom when new messages arrive (desktop mode)
+  // Auto-scroll to bottom when new messages arrive (both desktop and mobile)
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    mobileMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, visibleMessages])
 
   // Start call on mount
   useEffect(() => {
@@ -162,6 +164,8 @@ export default function VideoCallLayout({
                 )
               })}
             </AnimatePresence>
+            {/* Auto-scroll anchor for mobile */}
+            <div ref={mobileMessagesEndRef} />
           </div>
         </div>
 
