@@ -12,6 +12,7 @@ interface BottomControlsBarProps {
   isMicOn: boolean
   onCameraToggle: () => void
   onMicToggle: () => void
+  isDesktopMode?: boolean
 }
 
 /**
@@ -26,6 +27,7 @@ export default function BottomControlsBar({
   isMicOn,
   onCameraToggle,
   onMicToggle,
+  isDesktopMode = false,
 }: BottomControlsBarProps) {
   const [input, setInput] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -123,8 +125,8 @@ export default function BottomControlsBar({
     <>
       {/* Bottom Controls Container - 3 Floating Sections */}
       <div
-        className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 z-50 pointer-events-auto"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        className={isDesktopMode ? "relative w-full z-50 pointer-events-auto" : "absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 z-50 pointer-events-auto"}
+        style={isDesktopMode ? {} : { paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
         <div className="flex items-center gap-3 md:gap-4 max-w-4xl mx-auto">
           {/* Voice/Mic Control - 1/3 (Live Transcription) */}
