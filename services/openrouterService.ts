@@ -1,7 +1,10 @@
 /**
  * OpenRouter Service
  * Handles communication with OpenRouter API for LLM chat completions
+ * Using official @openrouter/sdk
  */
+
+import { OpenRouter } from '@openrouter/sdk'
 
 export interface Message {
   role: 'user' | 'assistant' | 'system'
@@ -16,40 +19,28 @@ export type OpenRouterModel =
   | 'google/gemini-2.0-flash-exp'
   | 'google/gemini-flash-1.5'
 
-export interface OpenRouterResponse {
-  id: string
-  choices: Array<{
-    message: {
-      role: string
-      content: string
-    }
-    finish_reason: string
-  }>
-  usage: {
-    prompt_tokens: number
-    completion_tokens: number
-    total_tokens: number
-  }
-}
+/**
+ * Create OpenRouter client instance
+ */
+function getOpenRouterClient(): OpenRouter {
+  const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_KEY
 
-export interface StreamChunk {
-  id: string
-  choices: Array<{
-    delta: {
-      role?: string
-      content?: string
-    }
-    finish_reason: string | null
-  }>
+  if (!apiKey || apiKey === 'sk-or-v1-xxxxxx') {
+    throw new Error('OpenRouter API key not configured. Please set NEXT_PUBLIC_OPENROUTER_KEY in .env.local')
+  }
+
+  return new OpenRouter({
+    apiKey,
+  })
 }
 
 /**
- * Call OpenRouter Chat API with messages
+ * Call OpenRouter Chat API with messages using official SDK
  * @param messages - Array of chat messages
  * @param model - LLM model to use
  * @param stream - Enable streaming responses
  * @param onChunk - Callback for streaming chunks
- * @returns Response text
+ * @returns Response text and token usage
  */
 export async function callOpenRouterChat(
   messages: Message[],
@@ -57,56 +48,36 @@ export async function callOpenRouterChat(
   stream: boolean = false,
   onChunk?: (chunk: string) => void
 ): Promise<{ response: string; tokensUsed: number }> {
-  const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_KEY
-
-  if (!apiKey || apiKey === 'sk-or-v1-xxxxxx') {
-    throw new Error('OpenRouter API key not configured. Please set NEXT_PUBLIC_OPENROUTER_KEY in .env.local')
-  }
-
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-        'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : '',
-        'X-Title': 'Nara.ai Voice Chat',
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        stream,
-        temperature: 0.7,
-        max_tokens: 1000,
-      }),
+    const client = getOpenRouterClient()
+
+    // Handle non-streaming response (simpler approach)
+    const completion = await client.chat.send({
+      model,
+      messages: messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+      stream: false,
+      temperature: 0.7,
+      maxTokens: 1000,
     })
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
+    const messageContent = completion.choices[0]?.message?.content
 
-      // Handle specific error cases
-      if (response.status === 401) {
-        throw new Error('Invalid OpenRouter API key')
-      } else if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please try again later.')
-      } else if (response.status === 402) {
-        throw new Error('Insufficient credits in OpenRouter account')
-      } else {
-        throw new Error(
-          errorData.error?.message || `OpenRouter API error: ${response.status}`
-        )
-      }
+    // Handle content - it can be string or array of content items
+    let responseText = ''
+    if (typeof messageContent === 'string') {
+      responseText = messageContent
+    } else if (Array.isArray(messageContent)) {
+      // Extract text from content items
+      responseText = messageContent
+        .filter((item: any) => item.type === 'text')
+        .map((item: any) => item.text)
+        .join('')
     }
 
-    // Handle streaming response
-    if (stream && response.body) {
-      return handleStreamingResponse(response.body, onChunk)
-    }
-
-    // Handle non-streaming response
-    const data: OpenRouterResponse = await response.json()
-    const responseText = data.choices[0]?.message?.content || ''
-    const tokensUsed = data.usage?.total_tokens || 0
+    const tokensUsed = completion.usage?.totalTokens || estimateTokens(responseText)
 
     return {
       response: responseText,
@@ -114,6 +85,14 @@ export async function callOpenRouterChat(
     }
   } catch (error) {
     if (error instanceof Error) {
+      // Better error handling
+      if (error.message.includes('401')) {
+        throw new Error('Invalid OpenRouter API key')
+      } else if (error.message.includes('429')) {
+        throw new Error('Rate limit exceeded. Please try again later.')
+      } else if (error.message.includes('402')) {
+        throw new Error('Insufficient credits in OpenRouter account')
+      }
       throw error
     }
     throw new Error('Failed to call OpenRouter API')
@@ -121,65 +100,8 @@ export async function callOpenRouterChat(
 }
 
 /**
- * Handle streaming response from OpenRouter
- */
-async function handleStreamingResponse(
-  body: ReadableStream<Uint8Array>,
-  onChunk?: (chunk: string) => void
-): Promise<{ response: string; tokensUsed: number }> {
-  const reader = body.getReader()
-  const decoder = new TextDecoder()
-  let fullResponse = ''
-  let tokensUsed = 0
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read()
-
-      if (done) break
-
-      const chunk = decoder.decode(value)
-      const lines = chunk.split('\n').filter((line) => line.trim() !== '')
-
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6)
-
-          if (data === '[DONE]') {
-            continue
-          }
-
-          try {
-            const parsed: StreamChunk = JSON.parse(data)
-            const content = parsed.choices[0]?.delta?.content
-
-            if (content) {
-              fullResponse += content
-              onChunk?.(content)
-            }
-          } catch (e) {
-            // Skip malformed JSON
-            console.warn('Failed to parse streaming chunk:', e)
-          }
-        }
-      }
-    }
-
-    // Estimate tokens (rough estimation: ~4 chars per token)
-    tokensUsed = estimateTokens(fullResponse)
-
-    return {
-      response: fullResponse,
-      tokensUsed,
-    }
-  } finally {
-    reader.releaseLock()
-  }
-}
-
-/**
  * Estimate token count from text
- * Rough estimation: ~4 characters per token for English
+ * Rough estimation: ~4 characters per token for English/Indonesian
  * More accurate for production: use tiktoken library
  */
 export function estimateTokens(text: string): number {
