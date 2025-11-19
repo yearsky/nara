@@ -2,8 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import VideoCallLayout from "@/components/nara/VideoCallLayout";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Dynamically import VideoCallLayout with SSR disabled (requires browser APIs)
+const VideoCallLayout = dynamic(() => import("@/components/nara/VideoCallLayout"), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 bg-black flex items-center justify-center">
+      <div className="text-white">Loading...</div>
+    </div>
+  ),
+});
 
 /**
  * Dedicated Full-Screen Video Call Page
