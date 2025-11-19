@@ -38,7 +38,7 @@ const COLORS = [
 
 const ICONS = ["star", "heart", "sparkle", "trophy", "zap"] as const;
 
-export default function ConfettiCelebration({
+export function ConfettiCelebration({
   show,
   onComplete,
   duration = 4000,
@@ -302,3 +302,6 @@ export function AchievementUnlocked({
     />
   );
 }
+
+// Also export as default for backward compatibility
+export default ConfettiCelebration;
