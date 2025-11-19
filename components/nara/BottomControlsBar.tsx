@@ -39,6 +39,14 @@ export default function BottomControlsBar({
   // Use Nara Chat hook for message orchestration
   const { handleSendMessage, getNaraResponse, isLoading, credits, isLowCredits, error, messages } = useNaraChat()
 
+  // Auto-hide TopicChips if there are existing messages (from localStorage)
+  useEffect(() => {
+    if (messages.length > 0) {
+      setHasInteracted(true)
+      setShowTopicChips(false)
+    }
+  }, []) // Run only on mount
+
   // Use Live Transcription hook for real-time speech-to-text
   const {
     isListening,
@@ -138,15 +146,6 @@ export default function BottomControlsBar({
       handleSend()
     }
   }
-
-  // Debug logging
-  console.log('🔍 BottomControlsBar render:', {
-    showTopicChips,
-    isDesktopMode,
-    shouldShowChips: showTopicChips && !isDesktopMode,
-    hasInteracted,
-    messagesLength: messages.length
-  })
 
   return (
     <>

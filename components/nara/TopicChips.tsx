@@ -66,12 +66,7 @@ const TOPICS: Topic[] = [
  * Quick access buttons for popular cultural topics
  */
 export default function TopicChips({ onTopicSelect, isVisible = true }: TopicChipsProps) {
-  if (!isVisible) {
-    console.log('🚫 TopicChips: Hidden (isVisible=false)')
-    return null;
-  }
-
-  console.log('✅ TopicChips: Rendering with', TOPICS.length, 'topics')
+  if (!isVisible) return null;
 
   return (
     <motion.div
