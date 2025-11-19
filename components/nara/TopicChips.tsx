@@ -66,14 +66,19 @@ const TOPICS: Topic[] = [
  * Quick access buttons for popular cultural topics
  */
 export default function TopicChips({ onTopicSelect, isVisible = true }: TopicChipsProps) {
-  if (!isVisible) return null;
+  if (!isVisible) {
+    console.log('🚫 TopicChips: Hidden (isVisible=false)')
+    return null;
+  }
+
+  console.log('✅ TopicChips: Rendering with', TOPICS.length, 'topics')
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      className="w-full"
+      className="w-full bg-transparent"
     >
       <div className="mb-2 px-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">

@@ -139,12 +139,23 @@ export default function BottomControlsBar({
     }
   }
 
+  // Debug logging
+  console.log('🔍 BottomControlsBar render:', {
+    showTopicChips,
+    isDesktopMode,
+    shouldShowChips: showTopicChips && !isDesktopMode,
+    hasInteracted,
+    messagesLength: messages.length
+  })
+
   return (
     <>
-      {/* Topic Chips - Show before first message */}
+      {/* Topic Chips - Show before first message - HIGHER Z-INDEX */}
       {showTopicChips && !isDesktopMode && (
-        <div className="absolute bottom-24 left-0 right-0 z-40">
-          <TopicChips onTopicSelect={handleTopicSelect} />
+        <div className="absolute bottom-20 left-0 right-0 z-[60] pointer-events-none">
+          <div className="pointer-events-auto">
+            <TopicChips onTopicSelect={handleTopicSelect} />
+          </div>
         </div>
       )}
 

@@ -72,9 +72,9 @@ export function useNaraChat() {
           return
         }
 
-        // Artificial delay to show typing indicator (1.5 seconds)
-        // This makes the interaction feel more natural
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        // Quick delay to show typing indicator (300ms for snappy response)
+        // Streaming UI already shows real-time response
+        await new Promise(resolve => setTimeout(resolve, 300))
 
         // Update placeholder message with actual response
         updateMessage(placeholderMessageId, response)
@@ -177,9 +177,9 @@ export function useNaraChat() {
           return
         }
 
-        // Artificial delay to show typing indicator (1.5 seconds)
-        // This makes the interaction feel more natural
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        // Quick delay to show typing indicator (300ms for snappy response)
+        // Streaming UI already shows real-time response
+        await new Promise(resolve => setTimeout(resolve, 300))
 
         // Update placeholder message with actual response
         updateMessage(placeholderMessageId, response)
