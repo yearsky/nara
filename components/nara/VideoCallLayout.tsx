@@ -7,8 +7,10 @@ import { useCallTimer } from '@/hooks/useCallTimer'
 import { useAutoHideControls } from '@/hooks/useAutoHideControls'
 import { useNaraChat } from '@/hooks/useNaraChat'
 import { useChatHistoryStore } from '@/stores/chatHistoryStore'
+import { useVoiceChatStore } from '@/stores/voiceChatStore'
 import { useSyncChatHistory } from '@/hooks/useSyncChatHistory'
 import { useMessageDisposal } from '@/hooks/useMessageDisposal'
+import { formatMessage } from '@/lib/formatMessage'
 import VideoPlaceholder from './VideoPlaceholder'
 import CallHeader from './CallHeader'
 import ChatMessagesOverlay from './ChatMessagesOverlay'
@@ -52,7 +54,7 @@ export default function VideoCallLayout({
   const { isVisible, showControls } = useAutoHideControls(3000)
 
   // Use new Nara Chat hook for message orchestration
-  const { messages, isLoading, streamingResponse } = useNaraChat()
+  const { messages, isLoading, streamingResponse, handleSendMessage } = useNaraChat()
 
   // Sync messages to history store
   useSyncChatHistory()
@@ -82,8 +84,70 @@ export default function VideoCallLayout({
     }
   }, [startCall, endCall])
 
+  // Check for context from external navigation (e.g., museum, learn modules)
+  useEffect(() => {
+    const checkAndSendContext = async () => {
+      try {
+        const contextData = localStorage.getItem('naraContext')
+        if (contextData) {
+          const context = JSON.parse(contextData)
+
+          // Clear context immediately to prevent re-sending
+          localStorage.removeItem('naraContext')
+
+          // Archive current session before starting new one
+          // 1. Dispose all visible messages (move to disposed/history)
+          const { visibleMessages, disposeMessage, generateConversations } = useChatHistoryStore.getState()
+          if (visibleMessages.length > 0) {
+            console.log('[Session] Archiving current session:', visibleMessages.length, 'messages')
+            visibleMessages.forEach(msg => disposeMessage(msg.id))
+
+            // Generate conversations from newly disposed messages
+            generateConversations()
+          }
+
+          // 2. Clear active voice chat messages (start fresh)
+          const { clearMessages } = useVoiceChatStore.getState()
+          clearMessages()
+
+          // Wait a bit for stores to update and component to stabilize
+          await new Promise(resolve => setTimeout(resolve, 500))
+
+          // Prepare additional context for system prompt (invisible to user)
+          const additionalContext = context.type && context.data
+            ? { type: context.type, data: context.data }
+            : undefined
+
+          // Auto-send the prompt with context
+          if (context.prompt && handleSendMessage) {
+            console.log('[Session] Starting new session with context:', context.type)
+            await handleSendMessage(context.prompt, additionalContext)
+          }
+        }
+      } catch (error) {
+        console.error('Error processing naraContext:', error)
+        // Clear invalid context
+        localStorage.removeItem('naraContext')
+      }
+    }
+
+    checkAndSendContext()
+  }, [handleSendMessage])
+
   // Handle end call
   const handleEndCall = () => {
+    // Archive current session when user leaves chat
+    const { visibleMessages, disposeMessage, generateConversations } = useChatHistoryStore.getState()
+    if (visibleMessages.length > 0) {
+      console.log('[Session] User left chat, archiving session:', visibleMessages.length, 'messages')
+      visibleMessages.forEach(msg => disposeMessage(msg.id))
+      generateConversations()
+    }
+
+    // Clear active messages
+    const { clearMessages } = useVoiceChatStore.getState()
+    clearMessages()
+
     endCall()
     if (onEndCall) {
       onEndCall()
@@ -142,7 +206,7 @@ export default function VideoCallLayout({
                           <div className="flex items-start gap-2">
                             <span className="text-xs font-bold text-orange-200">Nara:</span>
                             <p className="text-sm font-medium leading-snug flex-1 break-words">
-                              {streamingResponse}
+                              {formatMessage(streamingResponse)}
                               <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
                             </p>
                           </div>
@@ -226,7 +290,7 @@ export default function VideoCallLayout({
                       <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-white/10 text-white backdrop-blur-sm">
                         <p className="text-xs font-bold text-orange-300 mb-1">Nara</p>
                         <p className="text-sm leading-relaxed break-words">
-                          {streamingResponse}
+                          {formatMessage(streamingResponse)}
                           <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
                         </p>
                       </div>
@@ -244,7 +308,7 @@ export default function VideoCallLayout({
                       {message.role === 'assistant' && (
                         <p className="text-xs font-bold text-orange-300 mb-1">Nara</p>
                       )}
-                      <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                      <p className="text-sm leading-relaxed break-words">{formatMessage(message.content)}</p>
                     </div>
                   )}
                 </motion.div>

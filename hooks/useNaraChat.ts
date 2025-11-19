@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useVoiceChatStore, type Message } from '@/stores/voiceChatStore'
 import { useCreditStore } from '@/stores/creditStore'
 import { useNaraEmotionStore } from '@/stores/naraEmotionStore'
-import { sendMessageToNara } from '@/services/chatService'
+import { sendMessageToNara, type AdditionalContext } from '@/services/chatService'
 import { transcribeAudio } from '@/services/transcriptionService'
 
 /**
@@ -115,7 +115,7 @@ export function useNaraChat() {
    * Handle sending a text message to Nara
    */
   const handleSendMessage = useCallback(
-    async (text: string): Promise<void> => {
+    async (text: string, additionalContext?: AdditionalContext): Promise<void> => {
       if (!text.trim()) {
         setError('Message cannot be empty')
         return
@@ -159,7 +159,10 @@ export function useNaraChat() {
         // Send message to Nara (without streaming for now)
         const { response, creditsUsed } = await sendMessageToNara(
           text,
-          messages
+          messages,
+          undefined, // onChunk
+          undefined, // model
+          additionalContext // pass additional context
         )
 
         // Deduct credits
