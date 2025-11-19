@@ -11,10 +11,11 @@ import {
   TrendingUp,
   Clock,
   ArrowLeft,
+  BookOpen,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import BottomNav from "@/components/navigation/BottomNav";
+import GlassFooter from "@/components/learn/GlassFooter";
 import { useUserStore } from "@/stores/userStore";
 import LearningModuleCard from "@/components/learn/LearningModuleCard";
 import ContinueLearningCard from "@/components/learn/ContinueLearningCard";
@@ -209,83 +210,109 @@ export default function LearnPage() {
     (selectedProgress !== "semua" ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-amber-50 pb-24">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="max-w-screen-xl mx-auto px-4 py-4">
-          {/* Top Row - Back button and Title */}
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="flex items-center gap-2 text-gray-600 hover:text-brand-primary transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-semibold">Dashboard</span>
-            </button>
+    <div className="min-h-screen bg-gradient-to-b from-orange-50/30 to-amber-50/30 pb-32 pt-6">
+      {/* Header - Sticky Glass Morphism */}
+      <header className="sticky top-4 z-40 px-4 md:px-6">
+        <div className="max-w-5xl mx-auto">
+          {/* Glass morphism container */}
+          <div className="backdrop-blur-xl bg-white/70 rounded-3xl shadow-xl border border-white/30 overflow-hidden">
+            <div className="p-4 md:p-5">
+              {/* Top Row - Back button and Title */}
+              <div className="flex items-center justify-between mb-3">
+                <button
+                  onClick={() => router.push("/dashboard")}
+                  className="flex items-center gap-2 text-stone-600 hover:text-stone-900 transition-colors group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all">
+                    <ArrowLeft className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium text-sm hidden sm:inline">
+                    Dashboard
+                  </span>
+                </button>
 
-            <h1 className="text-2xl md:text-3xl font-heading font-bold text-brand-primary">
-              Belajar
-            </h1>
+                {/* Icon with gradient */}
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg bg-gradient-to-br from-orange-500 to-amber-600">
+                  <BookOpen className="w-6 h-6 text-white" />
+                </div>
+              </div>
 
-            <div className="w-20" /> {/* Spacer for centering */}
-          </div>
+              {/* Title Section */}
+              <div className="text-center mb-3">
+                <h1 className="text-2xl md:text-3xl font-bold text-stone-900 mb-1">
+                  Belajar
+                </h1>
+                <p className="text-sm md:text-base text-stone-600">
+                  Jelajahi modul pembelajaran budaya Indonesia
+                </p>
+              </div>
 
-          {/* Search and Filter Row */}
-          <div className="flex gap-3">
-            {/* Search Bar */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari modul pembelajaran..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-300 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all"
-              />
+              {/* Search and Filter Row */}
+              <div className="flex gap-2">
+                {/* Search Bar */}
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Cari modul pembelajaran..."
+                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/50 text-stone-900 placeholder:text-stone-400 focus:bg-white/90 focus:outline-none focus:ring-2 focus:ring-orange-400/30 transition-all"
+                  />
+                </div>
+
+                {/* Filter Button */}
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={cn(
+                    "relative flex items-center gap-2 px-4 py-2.5 rounded-2xl font-semibold transition-all",
+                    showFilters
+                      ? "bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg"
+                      : "bg-white/70 backdrop-blur-sm border border-white/50 text-stone-700 hover:bg-white/90"
+                  )}
+                >
+                  <Filter className="w-4 h-4" />
+                  <span className="hidden sm:inline text-sm">Filter</span>
+                  {activeFiltersCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-red-500 to-orange-500 text-white text-xs rounded-full flex items-center justify-center shadow-md font-bold">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* Filter Button */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={cn(
-                "relative flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold transition-all",
-                showFilters
-                  ? "bg-brand-primary text-white"
-                  : "bg-white border border-gray-300 text-gray-700 hover:border-brand-primary"
+            {/* Filter Panel */}
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="border-t border-white/30 overflow-hidden"
+                >
+                  <FilterPanel
+                    categories={categories}
+                    difficulties={difficulties}
+                    progressOptions={progressOptions}
+                    selectedCategory={selectedCategory}
+                    selectedDifficulty={selectedDifficulty}
+                    selectedProgress={selectedProgress}
+                    onCategoryChange={setSelectedCategory}
+                    onDifficultyChange={setSelectedDifficulty}
+                    onProgressChange={setSelectedProgress}
+                    onReset={() => {
+                      setSelectedCategory("semua");
+                      setSelectedDifficulty("semua");
+                      setSelectedProgress("semua");
+                    }}
+                  />
+                </motion.div>
               )}
-            >
-              <Filter className="w-5 h-5" />
-              <span className="hidden sm:inline">Filter</span>
-              {activeFiltersCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </button>
+            </AnimatePresence>
           </div>
         </div>
-
-        {/* Filter Panel */}
-        <AnimatePresence>
-          {showFilters && (
-            <FilterPanel
-              categories={categories}
-              difficulties={difficulties}
-              progressOptions={progressOptions}
-              selectedCategory={selectedCategory}
-              selectedDifficulty={selectedDifficulty}
-              selectedProgress={selectedProgress}
-              onCategoryChange={setSelectedCategory}
-              onDifficultyChange={setSelectedDifficulty}
-              onProgressChange={setSelectedProgress}
-              onReset={() => {
-                setSelectedCategory("semua");
-                setSelectedDifficulty("semua");
-                setSelectedProgress("semua");
-              }}
-            />
-          )}
-        </AnimatePresence>
       </header>
 
       {/* Main Content */}
@@ -415,8 +442,8 @@ export default function LearnPage() {
         </div>
       </main>
 
-      {/* Fixed Bottom Navigation */}
-      <BottomNav />
+      {/* Glass Footer */}
+      <GlassFooter />
     </div>
   );
 }
