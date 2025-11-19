@@ -4,15 +4,16 @@ import { useChatHistoryStore, type HistoryMessage } from '@/stores/chatHistorySt
 
 /**
  * Hook to sync messages from voiceChatStore to chatHistoryStore
- * Ensures both stores stay in sync
+ * Ensures both stores stay in sync (including message updates)
  */
 export function useSyncChatHistory() {
   const { messages: voiceMessages } = useVoiceChatStore()
-  const { addMessage: addToHistory, allMessages } = useChatHistoryStore()
+  const { addMessage: addToHistory, updateMessage: updateInHistory, allMessages } = useChatHistoryStore()
   const lastSyncedCountRef = useRef(0)
+  const messageContentsRef = useRef<Map<string, string>>(new Map())
 
   useEffect(() => {
-    // Only add new messages that haven't been synced yet
+    // Sync new messages
     if (voiceMessages.length > lastSyncedCountRef.current) {
       const newMessages = voiceMessages.slice(lastSyncedCountRef.current)
 
@@ -28,10 +29,22 @@ export function useSyncChatHistory() {
             isDisposed: false,
           }
           addToHistory(historyMessage)
+          messageContentsRef.current.set(msg.id, msg.content)
         }
       })
 
       lastSyncedCountRef.current = voiceMessages.length
     }
-  }, [voiceMessages, addToHistory, allMessages])
+
+    // Sync message content updates
+    voiceMessages.forEach((msg) => {
+      const lastContent = messageContentsRef.current.get(msg.id)
+
+      // If content has changed, update it in history store
+      if (lastContent !== undefined && lastContent !== msg.content) {
+        updateInHistory(msg.id, msg.content)
+        messageContentsRef.current.set(msg.id, msg.content)
+      }
+    })
+  }, [voiceMessages, addToHistory, updateInHistory, allMessages])
 }

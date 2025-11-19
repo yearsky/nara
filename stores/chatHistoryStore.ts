@@ -41,6 +41,7 @@ interface ChatHistoryState {
 
   // Actions
   addMessage: (message: HistoryMessage) => void
+  updateMessage: (id: string, content: string) => void
   disposeMessage: (messageId: string) => void
   disposeOldMessages: (keepLastN: number) => void
   toggleSidebar: () => void
@@ -67,6 +68,17 @@ export const useChatHistoryStore = create<ChatHistoryState>()(
         set((state) => ({
           allMessages: [...state.allMessages, message],
           visibleMessages: [...state.visibleMessages, message],
+        }))
+      },
+
+      updateMessage: (id: string, content: string) => {
+        set((state) => ({
+          allMessages: state.allMessages.map((msg) =>
+            msg.id === id ? { ...msg, content } : msg
+          ),
+          visibleMessages: state.visibleMessages.map((msg) =>
+            msg.id === id ? { ...msg, content } : msg
+          ),
         }))
       },
 
