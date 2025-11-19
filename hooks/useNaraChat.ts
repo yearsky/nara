@@ -55,14 +55,10 @@ export function useNaraChat() {
         }
         addMessage(placeholderMessage)
 
-        // Send message to Nara (with streaming support)
+        // Send message to Nara (without streaming for now)
         const { response, creditsUsed } = await sendMessageToNara(
           text,
-          messages,
-          (chunk) => {
-            // Handle streaming chunks
-            setStreamingResponse((prev) => prev + chunk)
-          }
+          messages
         )
 
         // Deduct credits
@@ -160,14 +156,10 @@ export function useNaraChat() {
         }
         addMessage(placeholderMessage)
 
-        // Send message to Nara (with streaming support)
+        // Send message to Nara (without streaming for now)
         const { response, creditsUsed } = await sendMessageToNara(
           text,
-          messages,
-          (chunk) => {
-            // Handle streaming chunks
-            setStreamingResponse((prev) => prev + chunk)
-          }
+          messages
         )
 
         // Deduct credits

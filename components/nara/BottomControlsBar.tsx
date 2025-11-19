@@ -6,6 +6,7 @@ import { Send, Mic, MicOff, Video, VideoOff, Square } from 'lucide-react'
 import { useNaraChat } from '@/hooks/useNaraChat'
 import { useLiveTranscription } from '@/hooks/useLiveTranscription'
 import { useVoiceChatStore } from '@/stores/voiceChatStore'
+import TopicChips from './TopicChips'
 
 interface BottomControlsBarProps {
   isCameraOn: boolean
@@ -30,11 +31,21 @@ export default function BottomControlsBar({
   isDesktopMode = false,
 }: BottomControlsBarProps) {
   const [input, setInput] = useState('')
+  const [showTopicChips, setShowTopicChips] = useState(true)
+  const [hasInteracted, setHasInteracted] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const currentUserMessageIdRef = useRef<string | null>(null)
 
   // Use Nara Chat hook for message orchestration
-  const { handleSendMessage, getNaraResponse, isLoading, credits, isLowCredits, error } = useNaraChat()
+  const { handleSendMessage, getNaraResponse, isLoading, credits, isLowCredits, error, messages } = useNaraChat()
+
+  // Auto-hide TopicChips if there are existing messages (from localStorage)
+  useEffect(() => {
+    if (messages.length > 0) {
+      setHasInteracted(true)
+      setShowTopicChips(false)
+    }
+  }, []) // Run only on mount
 
   // Use Live Transcription hook for real-time speech-to-text
   const {
@@ -83,7 +94,18 @@ export default function BottomControlsBar({
     if (!content || isLoading) return
 
     setInput('')
+    if (!hasInteracted) {
+      setHasInteracted(true)
+      setShowTopicChips(false) // Hide topic chips after first interaction
+    }
     await handleSendMessage(content)
+  }
+
+  // Handle topic chip selection
+  const handleTopicSelect = async (prompt: string) => {
+    setHasInteracted(true)
+    setShowTopicChips(false)
+    await handleSendMessage(prompt)
   }
 
   // Handle voice/mic toggle - now uses live transcription with real-time chat bubbles
@@ -99,6 +121,10 @@ export default function BottomControlsBar({
 
       // Send to Gemini after delay (800ms) - user message already added in real-time
       if (finalTranscript) {
+        if (!hasInteracted) {
+          setHasInteracted(true)
+          setShowTopicChips(false) // Hide topic chips after first voice interaction
+        }
         setTimeout(async () => {
           await getNaraResponse(finalTranscript)
           resetTranscript()
@@ -123,6 +149,15 @@ export default function BottomControlsBar({
 
   return (
     <>
+      {/* Topic Chips - Show before first message - HIGHER Z-INDEX */}
+      {showTopicChips && !isDesktopMode && (
+        <div className="absolute bottom-20 left-0 right-0 z-[60] pointer-events-none">
+          <div className="pointer-events-auto">
+            <TopicChips onTopicSelect={handleTopicSelect} />
+          </div>
+        </div>
+      )}
+
       {/* Bottom Controls Container - 3 Floating Sections */}
       <div
         className={isDesktopMode ? "relative w-full z-50 pointer-events-auto" : "absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 z-50 pointer-events-auto"}

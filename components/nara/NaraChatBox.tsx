@@ -38,6 +38,7 @@ export const NaraChatBox = ({
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { setEmotion } = useNaraEmotionStore();
   const { credits, useCredit, hasCredits, isLowCredits } = useCreditStore();
@@ -70,6 +71,7 @@ export const NaraChatBox = ({
     setInput("");
     setIsLoading(true);
     setEmotion("thinking");
+    setErrorMessage(null); // Clear previous errors
 
     try {
       const response = await fetch("/api/nara/chat", {
@@ -121,6 +123,7 @@ export const NaraChatBox = ({
     } catch (error) {
       console.error("Chat error:", error);
       setEmotion("neutral");
+      setErrorMessage("Maaf, terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }
@@ -157,8 +160,8 @@ export const NaraChatBox = ({
     } catch (error) {
       console.error('Transcription error:', error);
       setEmotion("neutral");
-      // Show error message to user
-      alert('Gagal mengkonversi suara ke teks. Silakan coba lagi.');
+      // Show inline error message instead of alert
+      setErrorMessage('Gagal mengkonversi suara ke teks. Silakan coba lagi.');
     } finally {
       setIsTranscribing(false);
     }
@@ -214,6 +217,34 @@ export const NaraChatBox = ({
         )}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Error Message Display */}
+      <AnimatePresence>
+        {errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-xs font-bold">!</span>
+              </div>
+              <p className="text-sm text-red-700">{errorMessage}</p>
+            </div>
+            <button
+              onClick={() => setErrorMessage(null)}
+              className="text-red-500 hover:text-red-700 transition-colors"
+              aria-label="Close error"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Voice recorder section */}
       {showVoiceRecorder ? (

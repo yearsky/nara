@@ -123,7 +123,7 @@ export function calculateCredits(tokensUsed: number, model: OpenRouterModel): nu
     'openai/gpt-4o': 10,
     'google/gemini-2.0-flash-exp': 0, // Free tier model
     'google/gemini-2.0-flash-exp:free': 0, // Free tier model with explicit :free suffix
-    'google/gemini-flash-1.5': 0.075, // Very cheap
+    'google/gemini-flash-1.5': 0.075, // Very cheap,
   }
 
   // Handle :free suffix models
