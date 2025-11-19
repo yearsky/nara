@@ -163,6 +163,11 @@ export class AudioRecorder {
    * Check if browser supports audio recording
    */
   static isSupported(): boolean {
+    // Check if running in browser environment
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false;
+    }
+
     return !!(
       navigator.mediaDevices &&
       typeof navigator.mediaDevices.getUserMedia === 'function' &&
@@ -174,6 +179,11 @@ export class AudioRecorder {
    * Check if microphone permission is granted
    */
   static async checkPermission(): Promise<PermissionState> {
+    // Check if running in browser environment
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return 'prompt';
+    }
+
     try {
       const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
       return result.state;
