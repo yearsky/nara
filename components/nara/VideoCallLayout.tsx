@@ -1,22 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useCallStore } from '@/stores/callStore'
 import { useCallTimer } from '@/hooks/useCallTimer'
 import { useAutoHideControls } from '@/hooks/useAutoHideControls'
+import { useNaraChat } from '@/hooks/useNaraChat'
 import VideoPlaceholder from './VideoPlaceholder'
 import CallHeader from './CallHeader'
 import ChatMessagesOverlay from './ChatMessagesOverlay'
 import BottomControlsBar from './BottomControlsBar'
-
-interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  audioUrl?: string
-  timestamp: number
-}
 
 interface VideoCallLayoutProps {
   characterName?: string
@@ -49,8 +42,9 @@ export default function VideoCallLayout({
 
   const { formatted: callDuration } = useCallTimer(isCallActive)
   const { isVisible, showControls } = useAutoHideControls(3000)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+
+  // Use new Nara Chat hook for message orchestration
+  const { messages, isLoading } = useNaraChat()
 
   // Start call on mount
   useEffect(() => {
@@ -99,10 +93,6 @@ export default function VideoCallLayout({
         isMicOn={isMicOn}
         onCameraToggle={toggleCamera}
         onMicToggle={toggleMic}
-        messages={messages}
-        setMessages={setMessages}
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
       />
     </div>
   )
