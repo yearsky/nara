@@ -36,7 +36,16 @@ function getSystemPrompt(): string {
 - Use emojis occasionally to express emotion (but not excessively)
 - When user seems stuck, ask guiding questions instead of giving direct answers
 
-Your goal is to make learning enjoyable and keep users motivated.`
+Your goal is to make learning enjoyable and keep users motivated.
+
+FORMATTING GUIDELINES:
+- Use **bold text** untuk highlight poin penting atau nama tempat
+- Gunakan paragraf baru (line break) untuk memisahkan topik atau poin berbeda
+- Format response agar mudah dibaca dan engaging
+- Contoh format yang baik:
+  **Museum Nasional** adalah salah satu museum terbesar di Indonesia!
+
+  Di sini kamu bisa menemukan koleksi artefak dari berbagai periode sejarah. Koleksi terkenalnya termasuk Prasasti Yupa dan Arca Prajnaparamita.`
 
   return envPrompt || defaultPrompt
 }
@@ -89,10 +98,17 @@ export async function sendMessageToNara(
         : category === 'heritage' ? 'situs warisan budaya'
         : 'taman budaya'
 
-      systemPromptContent += `\n\nCONTEXT: The user is asking about "${name}", which is a ${categoryLabel} located in ${location}, ${region}. Description: ${description}\n\nProvide a friendly, engaging explanation about this place. Highlight interesting facts and cultural significance. Keep it concise (3-4 sentences) unless the user asks for more details.`
+      // Inject as natural knowledge, not as instruction
+      systemPromptContent += `\n\n[Pengetahuanmu tentang ${name}]
+Ini adalah ${categoryLabel} yang berlokasi di ${location}, ${region}. ${description}
+
+Jawab pertanyaan user dengan natural dan engaging sesuai kepribadianmu. Gunakan pengetahuan ini untuk memberikan penjelasan yang informatif namun tetap conversational.`
     } else if (additionalContext.type === 'learn' && additionalContext.data) {
       const { title, topic } = additionalContext.data
-      systemPromptContent += `\n\nCONTEXT: The user is asking about a learning topic: "${title}" in the ${topic} module. Provide educational, clear explanations that help them understand the concept better.`
+      systemPromptContent += `\n\n[Pengetahuanmu tentang topik pembelajaran]
+Topik: "${title}" dalam modul ${topic}
+
+Jawab dengan educational namun tetap friendly dan engaging sesuai kepribadianmu.`
     }
   }
 

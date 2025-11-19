@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
 import { useChatHistoryStore, type Conversation } from '@/stores/chatHistoryStore'
 import { useMemo } from 'react'
+import { formatMessage } from '@/lib/formatMessage'
 
 interface ChatBoxViewProps {
   onBack: () => void
@@ -116,7 +117,7 @@ export default function ChatBoxView({ onBack }: ChatBoxViewProps) {
                   <p className="text-orange-300 text-xs font-bold mb-1">Nara</p>
                 )}
                 <p className="text-white text-sm leading-relaxed break-words">
-                  {message.content}
+                  {formatMessage(message.content)}
                 </p>
                 <p className="text-white/40 text-xs mt-1">{time}</p>
               </div>

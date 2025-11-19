@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { type HistoryMessage } from '@/stores/chatHistoryStore'
 import { DISPOSAL_CONFIG } from '@/config/disposalConfig'
+import { formatMessage } from '@/lib/formatMessage'
 
 interface DisposableMessageProps {
   message: HistoryMessage
@@ -49,7 +50,7 @@ export default function DisposableMessage({
             <span className="text-xs font-bold text-orange-200">Nara:</span>
           )}
           <p className="text-sm font-medium leading-snug flex-1 break-words">
-            {message.content}
+            {formatMessage(message.content)}
           </p>
         </div>
       </div>

@@ -9,6 +9,7 @@ import { useNaraChat } from '@/hooks/useNaraChat'
 import { useChatHistoryStore } from '@/stores/chatHistoryStore'
 import { useSyncChatHistory } from '@/hooks/useSyncChatHistory'
 import { useMessageDisposal } from '@/hooks/useMessageDisposal'
+import { formatMessage } from '@/lib/formatMessage'
 import VideoPlaceholder from './VideoPlaceholder'
 import CallHeader from './CallHeader'
 import ChatMessagesOverlay from './ChatMessagesOverlay'
@@ -176,7 +177,7 @@ export default function VideoCallLayout({
                           <div className="flex items-start gap-2">
                             <span className="text-xs font-bold text-orange-200">Nara:</span>
                             <p className="text-sm font-medium leading-snug flex-1 break-words">
-                              {streamingResponse}
+                              {formatMessage(streamingResponse)}
                               <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
                             </p>
                           </div>
@@ -260,7 +261,7 @@ export default function VideoCallLayout({
                       <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-white/10 text-white backdrop-blur-sm">
                         <p className="text-xs font-bold text-orange-300 mb-1">Nara</p>
                         <p className="text-sm leading-relaxed break-words">
-                          {streamingResponse}
+                          {formatMessage(streamingResponse)}
                           <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
                         </p>
                       </div>
@@ -278,7 +279,7 @@ export default function VideoCallLayout({
                       {message.role === 'assistant' && (
                         <p className="text-xs font-bold text-orange-300 mb-1">Nara</p>
                       )}
-                      <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                      <p className="text-sm leading-relaxed break-words">{formatMessage(message.content)}</p>
                     </div>
                   )}
                 </motion.div>
