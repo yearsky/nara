@@ -55,11 +55,10 @@ export function useNaraChat() {
         }
         addMessage(placeholderMessage)
 
-        // Send message to Nara (WITHOUT streaming for thinking indicator)
+        // Send message to Nara (without streaming for now)
         const { response, creditsUsed } = await sendMessageToNara(
           text,
           messages
-          // No streaming callback = shows thinking indicator
         )
 
         // Deduct credits
@@ -69,8 +68,9 @@ export function useNaraChat() {
           return
         }
 
-        // Delay to show thinking indicator (simulate thinking like Claude)
-        await new Promise(resolve => setTimeout(resolve, 800))
+        // Artificial delay to show typing indicator (1.5 seconds)
+        // This makes the interaction feel more natural
+        await new Promise(resolve => setTimeout(resolve, 1500))
 
         // Update placeholder message with actual response
         updateMessage(placeholderMessageId, response)
@@ -156,11 +156,10 @@ export function useNaraChat() {
         }
         addMessage(placeholderMessage)
 
-        // Send message to Nara (WITHOUT streaming for thinking indicator)
+        // Send message to Nara (without streaming for now)
         const { response, creditsUsed } = await sendMessageToNara(
           text,
           messages
-          // No streaming callback = shows thinking indicator
         )
 
         // Deduct credits
@@ -170,8 +169,9 @@ export function useNaraChat() {
           return
         }
 
-        // Delay to show thinking indicator (simulate thinking like Claude)
-        await new Promise(resolve => setTimeout(resolve, 800))
+        // Artificial delay to show typing indicator (1.5 seconds)
+        // This makes the interaction feel more natural
+        await new Promise(resolve => setTimeout(resolve, 1500))
 
         // Update placeholder message with actual response
         updateMessage(placeholderMessageId, response)

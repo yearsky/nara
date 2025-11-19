@@ -53,39 +53,7 @@ export async function callOpenRouterChat(
   try {
     const client = getOpenRouterClient()
 
-    // Handle streaming response
-    if (stream && onChunk) {
-      const completion = await client.chat.send({
-        model,
-        messages: messages.map((msg) => ({
-          role: msg.role,
-          content: msg.content,
-        })),
-        stream: true,
-        temperature: 0.7,
-        maxTokens: 1000,
-      })
-
-      let fullResponse = ''
-
-      // Process stream chunks
-      for await (const chunk of completion) {
-        const delta = chunk.choices[0]?.delta?.content
-        if (delta) {
-          fullResponse += delta
-          onChunk(delta) // Send chunk to callback
-        }
-      }
-
-      const tokensUsed = estimateTokens(fullResponse)
-
-      return {
-        response: fullResponse,
-        tokensUsed,
-      }
-    }
-
-    // Handle non-streaming response (fallback)
+    // Handle non-streaming response (simpler approach)
     const completion = await client.chat.send({
       model,
       messages: messages.map((msg) => ({
@@ -155,7 +123,7 @@ export function calculateCredits(tokensUsed: number, model: OpenRouterModel): nu
     'openai/gpt-4o': 10,
     'google/gemini-2.0-flash-exp': 0, // Free tier model
     'google/gemini-2.0-flash-exp:free': 0, // Free tier model with explicit :free suffix
-    'google/gemini-flash-1.5': 0.075, // Very cheap
+    'google/gemini-flash-1.5': 0.075, // Very cheap,
   }
 
   // Handle :free suffix models
