@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import {
   MapPin,
   BookOpen,
@@ -22,6 +23,7 @@ const features = [
     image: "https://picsum.photos/seed/museum/400/300",
     badge: "Populer",
     stats: "100+ Lokasi",
+    href: "/learn/map",
   },
   {
     icon: BookOpen,
@@ -31,6 +33,7 @@ const features = [
     image: "https://picsum.photos/seed/stories/400/300",
     badge: "Terbaru",
     stats: "1000+ Cerita",
+    href: "/learn/verse",
   },
   {
     icon: PenTool,
@@ -40,6 +43,7 @@ const features = [
     image: "https://picsum.photos/seed/aksara/400/300",
     badge: null,
     stats: "8+ Aksara",
+    href: "/learn/aksara",
   },
   {
     icon: Music,
@@ -49,6 +53,7 @@ const features = [
     image: "https://picsum.photos/seed/music/400/300",
     badge: null,
     stats: "50+ Lagu",
+    href: "/learn/symphony",
   },
   {
     icon: ChefHat,
@@ -58,6 +63,7 @@ const features = [
     image: "https://picsum.photos/seed/food/400/300",
     badge: "Segera",
     stats: "200+ Resep",
+    href: "/learn/loka",
   },
   {
     icon: Grid3x3,
@@ -67,6 +73,7 @@ const features = [
     image: "https://picsum.photos/seed/pattern/400/300",
     badge: null,
     stats: "150+ Motif",
+    href: "/learn/pola",
   },
 ];
 
@@ -128,13 +135,17 @@ export function FeatureShowcase() {
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
         >
           {features.map((feature, index) => (
-            <motion.div
+            <Link
               key={feature.title}
-              variants={item}
-              whileHover={{ y: -8 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 border border-gray-100"
+              href={feature.href}
+              className="block"
             >
+              <motion.div
+                variants={item}
+                whileHover={{ y: -8 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="group relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 border border-gray-100 cursor-pointer"
+              >
               {/* Badge */}
               {feature.badge && (
                 <div className="absolute top-4 right-4 z-20">
@@ -205,7 +216,8 @@ export function FeatureShowcase() {
                 className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-br ${feature.gradient} blur-2xl -z-10`}
                 style={{ transform: "translate(0, 100%)" }}
               />
-            </motion.div>
+              </motion.div>
+            </Link>
           ))}
         </motion.div>
 

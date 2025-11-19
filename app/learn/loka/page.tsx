@@ -10,66 +10,77 @@ import {
   Flame,
   BookmarkPlus,
   Search,
+  SlidersHorizontal,
+  X,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import BottomNav from "@/components/navigation/BottomNav";
 import Image from "next/image";
+
+type RecipeType = 'Makanan Utama' | 'Kudapan' | 'Minuman';
+type Difficulty = 'Mudah' | 'Sedang' | 'Sulit' | 'Semua';
+type Region = 'Semua' | 'Jawa' | 'Sumatera' | 'Bali & Nusa Tenggara' | 'Papua';
 
 const recipes = [
   {
     id: 1,
     name: "Rendang",
-    region: "Sumatera Barat",
+    region: "Sumatera",
     difficulty: "Sulit",
     cookTime: "4 jam",
     servings: 6,
     thumbnail: "https://picsum.photos/seed/rendang/400/300",
     likes: 1580,
     isPopular: true,
+    type: 'Makanan Utama' as RecipeType,
   },
   {
     id: 2,
     name: "Gudeg Jogja",
-    region: "Yogyakarta",
+    region: "Jawa",
     difficulty: "Sedang",
     cookTime: "3 jam",
     servings: 4,
     thumbnail: "https://picsum.photos/seed/gudeg/400/300",
     likes: 1240,
     isPopular: true,
+    type: 'Makanan Utama' as RecipeType,
   },
   {
     id: 3,
     name: "Soto Betawi",
-    region: "Jakarta",
+    region: "Jawa",
     difficulty: "Sedang",
     cookTime: "2 jam",
     servings: 5,
     thumbnail: "https://picsum.photos/seed/soto/400/300",
     likes: 980,
     isPopular: false,
+    type: 'Makanan Utama' as RecipeType,
   },
   {
     id: 4,
     name: "Pempek Palembang",
-    region: "Sumatera Selatan",
+    region: "Sumatera",
     difficulty: "Sedang",
     cookTime: "1.5 jam",
     servings: 4,
     thumbnail: "https://picsum.photos/seed/pempek/400/300",
     likes: 876,
     isPopular: false,
+    type: 'Kudapan' as RecipeType,
   },
   {
     id: 5,
     name: "Ayam Betutu",
-    region: "Bali",
+    region: "Bali & Nusa Tenggara",
     difficulty: "Sulit",
     cookTime: "5 jam",
     servings: 6,
     thumbnail: "https://picsum.photos/seed/betutu/400/300",
     likes: 756,
     isPopular: false,
+    type: 'Makanan Utama' as RecipeType,
   },
   {
     id: 6,
@@ -81,6 +92,7 @@ const recipes = [
     thumbnail: "https://picsum.photos/seed/papeda/400/300",
     likes: 642,
     isPopular: false,
+    type: 'Makanan Utama' as RecipeType,
   },
 ];
 
@@ -90,42 +102,69 @@ const difficultyColors = {
   Sulit: "bg-red-100 text-red-700",
 };
 
+const typeTabs = [
+  { id: 'Semua', label: 'Semua', icon: '🍽️' },
+  { id: 'Makanan Utama', label: 'Makanan Utama', icon: '🍛' },
+  { id: 'Kudapan', label: 'Kudapan', icon: '🥟' },
+  { id: 'Minuman', label: 'Minuman', icon: '🧋' },
+];
+
+const difficultyTabs = [
+  { id: 'Semua', label: 'Semua Level' },
+  { id: 'Mudah', label: 'Mudah' },
+  { id: 'Sedang', label: 'Sedang' },
+  { id: 'Sulit', label: 'Sulit' },
+];
+
+const regionTabs = [
+  { id: 'Semua', label: 'Semua Daerah' },
+  { id: 'Jawa', label: 'Jawa' },
+  { id: 'Sumatera', label: 'Sumatera' },
+  { id: 'Bali & Nusa Tenggara', label: 'Bali & Nusa Tenggara' },
+  { id: 'Papua', label: 'Papua' },
+];
+
 export default function LokaPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedType, setSelectedType] = useState('Semua');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('Semua');
+  const [selectedRegion, setSelectedRegion] = useState<Region>('Semua');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const filteredRecipes = recipes.filter((recipe) =>
-    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRecipes = recipes.filter((recipe) => {
+    const matchesSearch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = selectedType === 'Semua' || recipe.type === selectedType;
+    const matchesDifficulty = selectedDifficulty === 'Semua' || recipe.difficulty === selectedDifficulty;
+    const matchesRegion = selectedRegion === 'Semua' || recipe.region === selectedRegion;
+
+    return matchesSearch && matchesType && matchesDifficulty && matchesRegion;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-yellow-50 pb-24">
-      {/* Header */}
+      {/* Header - Simple for Mobile */}
       <header className="sticky top-0 z-40 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg">
-        <div className="max-w-screen-xl mx-auto px-4 py-6">
-          <button
-            onClick={() => router.push("/learn")}
-            className="flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-semibold">Kembali ke Belajar</span>
-          </button>
+        <div className="max-w-screen-xl mx-auto px-4 py-4">
+          {/* Top Row */}
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => router.push("/learn")}
+              className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="font-semibold hidden sm:inline">Kembali</span>
+            </button>
 
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
-              <ChefHat className="w-8 h-8 text-white" />
+            <div className="flex items-center gap-2">
+              <ChefHat className="w-6 h-6" />
+              <h1 className="text-lg md:text-xl font-bold">Nara Loka</h1>
+              <span className="bg-amber-800 px-2 py-1 rounded-full text-xs font-semibold">
+                🔒
+              </span>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-2xl md:text-3xl font-bold">Nara Loka</h1>
-                <span className="bg-amber-800 px-2 py-1 rounded-full text-xs font-semibold">
-                  🔒 Terkunci
-                </span>
-              </div>
-              <p className="text-orange-100">
-                Masak dan cicipi resep tradisional Indonesia
-              </p>
-            </div>
+
+            <div className="w-20"></div>
           </div>
 
           {/* Search Bar */}
@@ -139,11 +178,83 @@ export default function LokaPage() {
               className="w-full pl-10 pr-4 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-orange-200 focus:bg-white/30 focus:outline-none transition-all"
             />
           </div>
+
+          {/* Desktop Tabs - Hidden on Mobile */}
+          <div className="hidden md:block mt-4 space-y-3">
+            {/* Type Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {typeTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedType(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all flex-shrink-0 ${
+                    selectedType === tab.id
+                      ? 'bg-white text-orange-700 font-semibold shadow-md'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span className="text-sm">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Difficulty Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {difficultyTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedDifficulty(tab.id as Difficulty)}
+                  className={`px-4 py-2 rounded-full whitespace-nowrap transition-all flex-shrink-0 text-sm ${
+                    selectedDifficulty === tab.id
+                      ? 'bg-white text-orange-700 font-semibold shadow-md'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Region Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {regionTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedRegion(tab.id as Region)}
+                  className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all flex-shrink-0 text-sm ${
+                    selectedRegion === tab.id
+                      ? 'bg-white text-orange-700 font-semibold shadow-md'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
+        {/* Results Count & Filter Button */}
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-gray-700">
+            Menampilkan <span className="font-bold text-orange-700">{filteredRecipes.length}</span>{' '}
+            dari {recipes.length} resep
+          </p>
+
+          {/* Filter Button - Mobile Only */}
+          <button
+            onClick={() => setShowMobileFilters(true)}
+            className="md:hidden flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-full shadow-lg hover:bg-orange-700 transition-all"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span className="text-sm font-semibold">Filter</span>
+          </button>
+        </div>
+
         {/* Lock Notice */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -261,6 +372,126 @@ export default function LokaPage() {
           </div>
         </div>
       </main>
+
+      {/* Mobile Filter Sheet - Floating Bottom Card */}
+      <AnimatePresence>
+        {showMobileFilters && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileFilters(false)}
+              className="fixed inset-0 bg-black/50 z-50 md:hidden"
+            />
+
+            {/* Filter Card */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 max-h-[80vh] overflow-hidden md:hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 className="text-lg font-bold text-gray-900">Filter</h3>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Filter Content */}
+              <div className="p-4 overflow-y-auto max-h-[calc(80vh-140px)]">
+                {/* Type Section */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Jenis Makanan</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {typeTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setSelectedType(tab.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                          selectedType === tab.id
+                            ? 'bg-orange-600 text-white font-semibold shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <span>{tab.icon}</span>
+                        <span className="text-sm">{tab.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Difficulty Section */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Tingkat Kesulitan</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {difficultyTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setSelectedDifficulty(tab.id as Difficulty)}
+                        className={`px-4 py-2 rounded-full transition-all text-sm ${
+                          selectedDifficulty === tab.id
+                            ? 'bg-orange-600 text-white font-semibold shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Region Section */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Daerah</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {regionTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setSelectedRegion(tab.id as Region)}
+                        className={`px-4 py-2 rounded-full transition-all text-sm ${
+                          selectedRegion === tab.id
+                            ? 'bg-orange-600 text-white font-semibold shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="p-4 border-t border-gray-200 flex gap-3">
+                <button
+                  onClick={() => {
+                    setSelectedType('Semua');
+                    setSelectedDifficulty('Semua');
+                    setSelectedRegion('Semua');
+                  }}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  Reset
+                </button>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="flex-1 px-4 py-3 bg-orange-600 text-white rounded-xl font-semibold hover:bg-orange-700 transition-colors shadow-lg"
+                >
+                  Terapkan
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <BottomNav />
     </div>

@@ -8,10 +8,11 @@ import {
   Heart,
   Eye,
   Clock,
-  Filter,
   Search,
+  SlidersHorizontal,
+  X,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import BottomNav from "@/components/navigation/BottomNav";
 import Image from "next/image";
 
@@ -84,10 +85,28 @@ const stories = [
   },
 ];
 
+const categoryTabs = [
+  { id: 'semua', label: 'Semua', icon: '📚' },
+  { id: 'Legenda', label: 'Legenda', icon: '🏛️' },
+  { id: 'Dongeng', label: 'Dongeng', icon: '🧚' },
+  { id: 'Mitologi', label: 'Mitologi', icon: '⚡' },
+];
+
+const regionTabs = [
+  { id: 'semua', label: 'Semua Daerah' },
+  { id: 'Jawa Barat', label: 'Jawa Barat' },
+  { id: 'Jawa Tengah', label: 'Jawa Tengah' },
+  { id: 'Jawa Timur', label: 'Jawa Timur' },
+  { id: 'Sumatera Barat', label: 'Sumatera Barat' },
+  { id: 'Bali', label: 'Bali' },
+];
+
 export default function VersePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("semua");
+  const [selectedRegion, setSelectedRegion] = useState("semua");
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const filteredStories = stories.filter((story) => {
     const matchesSearch = story.title
@@ -95,42 +114,32 @@ export default function VersePage() {
       .includes(searchQuery.toLowerCase());
     const matchesCategory =
       selectedCategory === "semua" || story.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesRegion =
+      selectedRegion === "semua" || story.region === selectedRegion;
+    return matchesSearch && matchesCategory && matchesRegion;
   });
-
-  const categories = [
-    "semua",
-    ...Array.from(new Set(stories.map((s) => s.category))),
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 pb-24">
-      {/* Header */}
+      {/* Header - Simple for Mobile */}
       <header className="sticky top-0 z-40 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg">
-        <div className="max-w-screen-xl mx-auto px-4 py-6">
-          <button
-            onClick={() => router.push("/learn")}
-            className="flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-semibold">Kembali ke Belajar</span>
-          </button>
+        <div className="max-w-screen-xl mx-auto px-4 py-4">
+          {/* Top Row */}
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => router.push("/learn")}
+              className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="font-semibold hidden sm:inline">Kembali</span>
+            </button>
 
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
-              <BookOpen className="w-8 h-8 text-white" />
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-6 h-6" />
+              <h1 className="text-lg md:text-xl font-bold">Nara Verse</h1>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-2xl md:text-3xl font-bold">Nara Verse</h1>
-                <span className="bg-white/20 px-2 py-1 rounded-full text-xs font-semibold">
-                  1000+ Cerita
-                </span>
-              </div>
-              <p className="text-purple-100">
-                Cerita rakyat, dongeng, dan sastra klasik nusantara
-              </p>
-            </div>
+
+            <div className="w-20"></div>
           </div>
 
           {/* Search Bar */}
@@ -144,37 +153,65 @@ export default function VersePage() {
               className="w-full pl-10 pr-4 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-purple-200 focus:bg-white/30 focus:outline-none transition-all"
             />
           </div>
+
+          {/* Desktop Tabs - Hidden on Mobile */}
+          <div className="hidden md:block mt-4 space-y-3">
+            {/* Category Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {categoryTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedCategory(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all flex-shrink-0 ${
+                    selectedCategory === tab.id
+                      ? 'bg-white text-purple-700 font-semibold shadow-md'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span className="text-sm">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Region Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {regionTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedRegion(tab.id)}
+                  className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all flex-shrink-0 text-sm ${
+                    selectedRegion === tab.id
+                      ? 'bg-white text-purple-700 font-semibold shadow-md'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
-        {/* Category Filter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <Filter className="w-5 h-5 text-gray-600" />
-            <span className="font-semibold text-gray-900">Kategori</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  selectedCategory === category
-                    ? "bg-purple-600 text-white shadow-md"
-                    : "bg-white text-gray-700 hover:bg-gray-50 shadow-sm"
-                }`}
-              >
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </button>
-            ))}
-          </div>
-        </motion.div>
+        {/* Results Count & Filter Button */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-gray-700">
+            Menampilkan <span className="font-bold text-purple-700">{filteredStories.length}</span>{' '}
+            dari {stories.length} cerita
+          </p>
+
+          {/* Filter Button - Mobile Only */}
+          <button
+            onClick={() => setShowMobileFilters(true)}
+            className="md:hidden flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 transition-all"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span className="text-sm font-semibold">Filter</span>
+          </button>
+        </div>
 
         {/* Stories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -243,6 +280,105 @@ export default function VersePage() {
           </div>
         )}
       </main>
+
+      {/* Mobile Filter Sheet - Floating Bottom Card */}
+      <AnimatePresence>
+        {showMobileFilters && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileFilters(false)}
+              className="fixed inset-0 bg-black/50 z-50 md:hidden"
+            />
+
+            {/* Filter Card */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 max-h-[80vh] overflow-hidden md:hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 className="text-lg font-bold text-gray-900">Filter</h3>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Filter Content */}
+              <div className="p-4 overflow-y-auto max-h-[calc(80vh-140px)]">
+                {/* Category Section */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Kategori</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {categoryTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setSelectedCategory(tab.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                          selectedCategory === tab.id
+                            ? 'bg-purple-600 text-white font-semibold shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <span>{tab.icon}</span>
+                        <span className="text-sm">{tab.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Region Section */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Daerah</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {regionTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setSelectedRegion(tab.id)}
+                        className={`px-4 py-2 rounded-full transition-all text-sm ${
+                          selectedRegion === tab.id
+                            ? 'bg-purple-600 text-white font-semibold shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="p-4 border-t border-gray-200 flex gap-3">
+                <button
+                  onClick={() => {
+                    setSelectedCategory('semua');
+                    setSelectedRegion('semua');
+                  }}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  Reset
+                </button>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors shadow-lg"
+                >
+                  Terapkan
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <BottomNav />
     </div>
