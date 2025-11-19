@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   Grid3x3,
   Download,
   Heart,
@@ -12,7 +11,8 @@ import {
   Search,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import BottomNav from "@/components/navigation/BottomNav";
+import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
+import GlassFooter from "@/components/learn/GlassFooter";
 import Image from "next/image";
 
 const patterns = [
@@ -110,45 +110,27 @@ export default function PolaPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50 to-cyan-50 pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-teal-50/30 to-cyan-50/30 pb-32 pt-6">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-lg">
-        <div className="max-w-screen-xl mx-auto px-4 py-6">
-          <button
-            onClick={() => router.push("/learn")}
-            className="flex items-center gap-2 text-white/90 hover:text-white transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-semibold">Kembali ke Belajar</span>
-          </button>
-
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
-              <Grid3x3 className="w-8 h-8 text-white" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                Nara Pola
-              </h1>
-              <p className="text-teal-100">
-                Jelajahi batik, tenun, dan motif tradisional nusantara
-              </p>
-            </div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-300" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari motif..."
-              className="w-full pl-10 pr-4 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-teal-200 focus:bg-white/30 focus:outline-none transition-all"
-            />
-          </div>
+      <SubmoduleHeader
+        title="Nara Pola"
+        subtitle="Jelajahi batik, tenun, dan motif tradisional nusantara"
+        icon={Grid3x3}
+        gradientFrom="#14B8A6"
+        gradientTo="#06B6D4"
+      >
+        {/* Search Bar */}
+        <div className="relative mt-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cari motif..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/50 text-stone-900 placeholder:text-stone-400 focus:bg-white/90 focus:outline-none focus:ring-2 focus:ring-teal-400/30 transition-all"
+          />
         </div>
-      </header>
+      </SubmoduleHeader>
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
@@ -299,7 +281,8 @@ export default function PolaPage() {
         </motion.div>
       </main>
 
-      <BottomNav />
+      {/* Glass Footer */}
+      <GlassFooter />
     </div>
   );
 }

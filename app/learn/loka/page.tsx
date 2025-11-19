@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   ChefHat,
   Clock,
   Users,
@@ -14,7 +13,8 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import BottomNav from "@/components/navigation/BottomNav";
+import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
+import GlassFooter from "@/components/learn/GlassFooter";
 import Image from "next/image";
 
 type RecipeType = 'Makanan Utama' | 'Kudapan' | 'Minuman';
@@ -142,99 +142,28 @@ export default function LokaPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-yellow-50 pb-24">
-      {/* Header - Simple for Mobile */}
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg">
-        <div className="max-w-screen-xl mx-auto px-4 py-4">
-          {/* Top Row */}
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => router.push("/learn")}
-              className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-semibold hidden sm:inline">Kembali</span>
-            </button>
+    <div className="min-h-screen bg-gradient-to-b from-orange-50/30 to-yellow-50/30 pb-32 pt-6">
+      {/* Header */}
+      <SubmoduleHeader
+        title="Nara Loka 🔒"
+        subtitle="Kuliner & resep nusantara"
+        icon={ChefHat}
+        gradientFrom="#F59E0B"
+        gradientTo="#D97706"
+      >
+        {/* Search Bar */}
+        <div className="relative mt-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cari resep..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white/70 backdrop-blur-sm border border-white/50 text-stone-900 placeholder:text-stone-400 focus:bg-white/90 focus:outline-none focus:ring-2 focus:ring-orange-400/30 transition-all"
+          />
 
-            <div className="flex items-center gap-2">
-              <ChefHat className="w-6 h-6" />
-              <h1 className="text-lg md:text-xl font-bold">Nara Loka</h1>
-              <span className="bg-amber-800 px-2 py-1 rounded-full text-xs font-semibold">
-                🔒
-              </span>
-            </div>
-
-            <div className="w-20"></div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-300" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari resep..."
-              className="w-full pl-10 pr-4 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-orange-200 focus:bg-white/30 focus:outline-none transition-all"
-            />
-          </div>
-
-          {/* Desktop Tabs - Hidden on Mobile */}
-          <div className="hidden md:block mt-4 space-y-3">
-            {/* Type Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {typeTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSelectedType(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all flex-shrink-0 ${
-                    selectedType === tab.id
-                      ? 'bg-white text-orange-700 font-semibold shadow-md'
-                      : 'bg-white/20 text-white hover:bg-white/30'
-                  }`}
-                >
-                  <span>{tab.icon}</span>
-                  <span className="text-sm">{tab.label}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Difficulty Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {difficultyTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSelectedDifficulty(tab.id as Difficulty)}
-                  className={`px-4 py-2 rounded-full whitespace-nowrap transition-all flex-shrink-0 text-sm ${
-                    selectedDifficulty === tab.id
-                      ? 'bg-white text-orange-700 font-semibold shadow-md'
-                      : 'bg-white/20 text-white hover:bg-white/30'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Region Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {regionTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSelectedRegion(tab.id as Region)}
-                  className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all flex-shrink-0 text-sm ${
-                    selectedRegion === tab.id
-                      ? 'bg-white text-orange-700 font-semibold shadow-md'
-                      : 'bg-white/20 text-white hover:bg-white/30'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
-      </header>
+      </SubmoduleHeader>
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
@@ -493,7 +422,8 @@ export default function LokaPage() {
         )}
       </AnimatePresence>
 
-      <BottomNav />
+      {/* Glass Footer */}
+      <GlassFooter />
     </div>
   );
 }
