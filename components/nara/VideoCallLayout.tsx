@@ -7,6 +7,7 @@ import { useCallTimer } from '@/hooks/useCallTimer'
 import { useAutoHideControls } from '@/hooks/useAutoHideControls'
 import { useNaraChat } from '@/hooks/useNaraChat'
 import { useChatHistoryStore } from '@/stores/chatHistoryStore'
+import { useVoiceChatStore } from '@/stores/voiceChatStore'
 import { useSyncChatHistory } from '@/hooks/useSyncChatHistory'
 import { useMessageDisposal } from '@/hooks/useMessageDisposal'
 import { formatMessage } from '@/lib/formatMessage'
@@ -94,7 +95,22 @@ export default function VideoCallLayout({
           // Clear context immediately to prevent re-sending
           localStorage.removeItem('naraContext')
 
-          // Wait a bit for component to fully mount
+          // Archive current session before starting new one
+          // 1. Dispose all visible messages (move to disposed/history)
+          const { visibleMessages, disposeMessage, generateConversations } = useChatHistoryStore.getState()
+          if (visibleMessages.length > 0) {
+            console.log('[Session] Archiving current session:', visibleMessages.length, 'messages')
+            visibleMessages.forEach(msg => disposeMessage(msg.id))
+
+            // Generate conversations from newly disposed messages
+            generateConversations()
+          }
+
+          // 2. Clear active voice chat messages (start fresh)
+          const { clearMessages } = useVoiceChatStore.getState()
+          clearMessages()
+
+          // Wait a bit for stores to update and component to stabilize
           await new Promise(resolve => setTimeout(resolve, 500))
 
           // Prepare additional context for system prompt (invisible to user)
@@ -104,6 +120,7 @@ export default function VideoCallLayout({
 
           // Auto-send the prompt with context
           if (context.prompt && handleSendMessage) {
+            console.log('[Session] Starting new session with context:', context.type)
             await handleSendMessage(context.prompt, additionalContext)
           }
         }
@@ -119,6 +136,18 @@ export default function VideoCallLayout({
 
   // Handle end call
   const handleEndCall = () => {
+    // Archive current session when user leaves chat
+    const { visibleMessages, disposeMessage, generateConversations } = useChatHistoryStore.getState()
+    if (visibleMessages.length > 0) {
+      console.log('[Session] User left chat, archiving session:', visibleMessages.length, 'messages')
+      visibleMessages.forEach(msg => disposeMessage(msg.id))
+      generateConversations()
+    }
+
+    // Clear active messages
+    const { clearMessages } = useVoiceChatStore.getState()
+    clearMessages()
+
     endCall()
     if (onEndCall) {
       onEndCall()
