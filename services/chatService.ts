@@ -3,7 +3,7 @@
  * Orchestrates chat flow with Nara AI
  */
 
-import { callOpenRouterChat, calculateCredits, type OpenRouterModel } from './openrouterService'
+import { callGeminiChat, calculateCredits } from './geminiService'
 import type { Message } from '@/stores/voiceChatStore'
 
 export interface ChatResponse {
@@ -62,17 +62,15 @@ Your goal is to make learning enjoyable and keep users motivated.`,
   ]
 
   try {
-    const model: OpenRouterModel = 'anthropic/claude-3.5-sonnet'
     const enableStreaming = !!onChunk
 
-    const { response, tokensUsed } = await callOpenRouterChat(
+    const { response, tokensUsed } = await callGeminiChat(
       messages,
-      model,
       enableStreaming,
       onChunk
     )
 
-    const creditsUsed = calculateCredits(tokensUsed, model)
+    const creditsUsed = calculateCredits(tokensUsed)
 
     return {
       response,
