@@ -15,61 +15,70 @@ import { motion } from "framer-motion";
 import BottomNav from "@/components/navigation/BottomNav";
 import Image from "next/image";
 
+type RecipeType = 'Makanan Utama' | 'Kudapan' | 'Minuman';
+type Difficulty = 'Mudah' | 'Sedang' | 'Sulit' | 'Semua';
+type Region = 'Semua' | 'Jawa' | 'Sumatera' | 'Bali & Nusa Tenggara' | 'Papua';
+
 const recipes = [
   {
     id: 1,
     name: "Rendang",
-    region: "Sumatera Barat",
+    region: "Sumatera",
     difficulty: "Sulit",
     cookTime: "4 jam",
     servings: 6,
     thumbnail: "https://picsum.photos/seed/rendang/400/300",
     likes: 1580,
     isPopular: true,
+    type: 'Makanan Utama' as RecipeType,
   },
   {
     id: 2,
     name: "Gudeg Jogja",
-    region: "Yogyakarta",
+    region: "Jawa",
     difficulty: "Sedang",
     cookTime: "3 jam",
     servings: 4,
     thumbnail: "https://picsum.photos/seed/gudeg/400/300",
     likes: 1240,
     isPopular: true,
+    type: 'Makanan Utama' as RecipeType,
   },
   {
     id: 3,
     name: "Soto Betawi",
-    region: "Jakarta",
+    region: "Jawa",
     difficulty: "Sedang",
     cookTime: "2 jam",
     servings: 5,
     thumbnail: "https://picsum.photos/seed/soto/400/300",
     likes: 980,
     isPopular: false,
+    type: 'Makanan Utama' as RecipeType,
   },
   {
     id: 4,
     name: "Pempek Palembang",
-    region: "Sumatera Selatan",
+    region: "Sumatera",
     difficulty: "Sedang",
     cookTime: "1.5 jam",
     servings: 4,
     thumbnail: "https://picsum.photos/seed/pempek/400/300",
     likes: 876,
     isPopular: false,
+    type: 'Kudapan' as RecipeType,
   },
   {
     id: 5,
     name: "Ayam Betutu",
-    region: "Bali",
+    region: "Bali & Nusa Tenggara",
     difficulty: "Sulit",
     cookTime: "5 jam",
     servings: 6,
     thumbnail: "https://picsum.photos/seed/betutu/400/300",
     likes: 756,
     isPopular: false,
+    type: 'Makanan Utama' as RecipeType,
   },
   {
     id: 6,
@@ -81,6 +90,7 @@ const recipes = [
     thumbnail: "https://picsum.photos/seed/papeda/400/300",
     likes: 642,
     isPopular: false,
+    type: 'Makanan Utama' as RecipeType,
   },
 ];
 
@@ -90,13 +100,43 @@ const difficultyColors = {
   Sulit: "bg-red-100 text-red-700",
 };
 
+const typeTabs = [
+  { id: 'Semua', label: 'Semua', icon: '🍽️' },
+  { id: 'Makanan Utama', label: 'Makanan Utama', icon: '🍛' },
+  { id: 'Kudapan', label: 'Kudapan', icon: '🥟' },
+  { id: 'Minuman', label: 'Minuman', icon: '🧋' },
+];
+
+const difficultyTabs = [
+  { id: 'Semua', label: 'Semua Level' },
+  { id: 'Mudah', label: 'Mudah' },
+  { id: 'Sedang', label: 'Sedang' },
+  { id: 'Sulit', label: 'Sulit' },
+];
+
+const regionTabs = [
+  { id: 'Semua', label: 'Semua Daerah' },
+  { id: 'Jawa', label: 'Jawa' },
+  { id: 'Sumatera', label: 'Sumatera' },
+  { id: 'Bali & Nusa Tenggara', label: 'Bali & Nusa Tenggara' },
+  { id: 'Papua', label: 'Papua' },
+];
+
 export default function LokaPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedType, setSelectedType] = useState('Semua');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('Semua');
+  const [selectedRegion, setSelectedRegion] = useState<Region>('Semua');
 
-  const filteredRecipes = recipes.filter((recipe) =>
-    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRecipes = recipes.filter((recipe) => {
+    const matchesSearch = recipe.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = selectedType === 'Semua' || recipe.type === selectedType;
+    const matchesDifficulty = selectedDifficulty === 'Semua' || recipe.difficulty === selectedDifficulty;
+    const matchesRegion = selectedRegion === 'Semua' || recipe.region === selectedRegion;
+
+    return matchesSearch && matchesType && matchesDifficulty && matchesRegion;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-yellow-50 pb-24">
@@ -129,7 +169,7 @@ export default function LokaPage() {
           </div>
 
           {/* Search Bar */}
-          <div className="relative">
+          <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-300" />
             <input
               type="text"
@@ -139,11 +179,77 @@ export default function LokaPage() {
               className="w-full pl-10 pr-4 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-orange-200 focus:bg-white/30 focus:outline-none transition-all"
             />
           </div>
+
+          {/* Type Submenu Tabs */}
+          <div className="mb-3">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {typeTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedType(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all flex-shrink-0 ${
+                    selectedType === tab.id
+                      ? 'bg-white text-orange-700 font-semibold shadow-md'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span className="text-sm">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Difficulty Submenu Tabs */}
+          <div className="mb-3">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {difficultyTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedDifficulty(tab.id as Difficulty)}
+                  className={`px-4 py-2 rounded-full whitespace-nowrap transition-all flex-shrink-0 text-sm ${
+                    selectedDifficulty === tab.id
+                      ? 'bg-white text-orange-700 font-semibold shadow-md'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Region Submenu Tabs */}
+          <div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {regionTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedRegion(tab.id as Region)}
+                  className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all flex-shrink-0 text-sm ${
+                    selectedRegion === tab.id
+                      ? 'bg-white text-orange-700 font-semibold shadow-md'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
+        {/* Results Count */}
+        <div className="mb-4">
+          <p className="text-gray-700">
+            Menampilkan <span className="font-bold text-orange-700">{filteredRecipes.length}</span>{' '}
+            dari {recipes.length} resep
+          </p>
+        </div>
+
         {/* Lock Notice */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

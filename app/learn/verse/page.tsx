@@ -8,7 +8,6 @@ import {
   Heart,
   Eye,
   Clock,
-  Filter,
   Search,
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -84,10 +83,27 @@ const stories = [
   },
 ];
 
+const categoryTabs = [
+  { id: 'semua', label: 'Semua', icon: '📚' },
+  { id: 'Legenda', label: 'Legenda', icon: '🏛️' },
+  { id: 'Dongeng', label: 'Dongeng', icon: '🧚' },
+  { id: 'Mitologi', label: 'Mitologi', icon: '⚡' },
+];
+
+const regionTabs = [
+  { id: 'semua', label: 'Semua Daerah' },
+  { id: 'Jawa Barat', label: 'Jawa Barat' },
+  { id: 'Jawa Tengah', label: 'Jawa Tengah' },
+  { id: 'Jawa Timur', label: 'Jawa Timur' },
+  { id: 'Sumatera Barat', label: 'Sumatera Barat' },
+  { id: 'Bali', label: 'Bali' },
+];
+
 export default function VersePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("semua");
+  const [selectedRegion, setSelectedRegion] = useState("semua");
 
   const filteredStories = stories.filter((story) => {
     const matchesSearch = story.title
@@ -95,13 +111,10 @@ export default function VersePage() {
       .includes(searchQuery.toLowerCase());
     const matchesCategory =
       selectedCategory === "semua" || story.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesRegion =
+      selectedRegion === "semua" || story.region === selectedRegion;
+    return matchesSearch && matchesCategory && matchesRegion;
   });
-
-  const categories = [
-    "semua",
-    ...Array.from(new Set(stories.map((s) => s.category))),
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 pb-24">
@@ -134,7 +147,7 @@ export default function VersePage() {
           </div>
 
           {/* Search Bar */}
-          <div className="relative">
+          <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-300" />
             <input
               type="text"
@@ -144,37 +157,57 @@ export default function VersePage() {
               className="w-full pl-10 pr-4 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-purple-200 focus:bg-white/30 focus:outline-none transition-all"
             />
           </div>
+
+          {/* Category Submenu Tabs */}
+          <div className="mb-3">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {categoryTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedCategory(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all flex-shrink-0 ${
+                    selectedCategory === tab.id
+                      ? 'bg-white text-purple-700 font-semibold shadow-md'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span className="text-sm">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Region Submenu Tabs */}
+          <div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {regionTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedRegion(tab.id)}
+                  className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all flex-shrink-0 text-sm ${
+                    selectedRegion === tab.id
+                      ? 'bg-white text-purple-700 font-semibold shadow-md'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
-        {/* Category Filter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <Filter className="w-5 h-5 text-gray-600" />
-            <span className="font-semibold text-gray-900">Kategori</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  selectedCategory === category
-                    ? "bg-purple-600 text-white shadow-md"
-                    : "bg-white text-gray-700 hover:bg-gray-50 shadow-sm"
-                }`}
-              >
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </button>
-            ))}
-          </div>
-        </motion.div>
+        {/* Results Count */}
+        <div className="mb-6">
+          <p className="text-gray-700">
+            Menampilkan <span className="font-bold text-purple-700">{filteredStories.length}</span>{' '}
+            dari {stories.length} cerita
+          </p>
+        </div>
 
         {/* Stories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
