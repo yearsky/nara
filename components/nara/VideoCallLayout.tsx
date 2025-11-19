@@ -52,7 +52,7 @@ export default function VideoCallLayout({
   const { isVisible, showControls } = useAutoHideControls(3000)
 
   // Use new Nara Chat hook for message orchestration
-  const { messages, isLoading, streamingResponse } = useNaraChat()
+  const { messages, isLoading } = useNaraChat()
 
   // Sync messages to history store
   useSyncChatHistory()
@@ -130,27 +130,8 @@ export default function VideoCallLayout({
                 />
               ))}
 
-              {/* Streaming Response */}
-              {isLoading && streamingResponse && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex justify-start"
-                >
-                  <div className="rounded-2xl px-4 py-2 backdrop-blur-md bg-orange-500/30 text-white shadow-lg">
-                    <div className="flex items-start gap-2">
-                      <span className="text-xs font-bold text-orange-200">Nara:</span>
-                      <p className="text-sm font-medium leading-snug flex-1 break-words">
-                        {streamingResponse}
-                        <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Typing Indicator */}
-              {isLoading && !streamingResponse && (
+              {/* Thinking Indicator (like Claude) */}
+              {isLoading && (
                 <NaraTypingIndicator variant="thinking" mode="mobile" />
               )}
             </AnimatePresence>
@@ -209,18 +190,8 @@ export default function VideoCallLayout({
                 >
                   {/* Check if this is a placeholder message */}
                   {message.role === 'assistant' && message.content === '...' ? (
-                    // Show streaming response if available, otherwise show typing indicator
-                    streamingResponse ? (
-                      <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-white/10 text-white backdrop-blur-sm">
-                        <p className="text-xs font-bold text-orange-300 mb-1">Nara</p>
-                        <p className="text-sm leading-relaxed break-words">
-                          {streamingResponse}
-                          <span className="inline-block w-1 h-4 bg-orange-300 ml-1 animate-pulse" />
-                        </p>
-                      </div>
-                    ) : (
-                      <NaraTypingIndicator variant="thinking" />
-                    )
+                    // Show thinking indicator (like Claude)
+                    <NaraTypingIndicator variant="thinking" />
                   ) : (
                     <div
                       className={`max-w-[80%] rounded-2xl px-4 py-3 ${

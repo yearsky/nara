@@ -55,14 +55,11 @@ export function useNaraChat() {
         }
         addMessage(placeholderMessage)
 
-        // Send message to Nara (with streaming support)
+        // Send message to Nara (WITHOUT streaming for thinking indicator)
         const { response, creditsUsed } = await sendMessageToNara(
           text,
-          messages,
-          (chunk) => {
-            // Handle streaming chunks
-            setStreamingResponse((prev) => prev + chunk)
-          }
+          messages
+          // No streaming callback = shows thinking indicator
         )
 
         // Deduct credits
@@ -72,9 +69,8 @@ export function useNaraChat() {
           return
         }
 
-        // Quick delay to show typing indicator (300ms for snappy response)
-        // Streaming UI already shows real-time response
-        await new Promise(resolve => setTimeout(resolve, 300))
+        // Delay to show thinking indicator (simulate thinking like Claude)
+        await new Promise(resolve => setTimeout(resolve, 800))
 
         // Update placeholder message with actual response
         updateMessage(placeholderMessageId, response)
@@ -160,14 +156,11 @@ export function useNaraChat() {
         }
         addMessage(placeholderMessage)
 
-        // Send message to Nara (with streaming support)
+        // Send message to Nara (WITHOUT streaming for thinking indicator)
         const { response, creditsUsed } = await sendMessageToNara(
           text,
-          messages,
-          (chunk) => {
-            // Handle streaming chunks
-            setStreamingResponse((prev) => prev + chunk)
-          }
+          messages
+          // No streaming callback = shows thinking indicator
         )
 
         // Deduct credits
@@ -177,9 +170,8 @@ export function useNaraChat() {
           return
         }
 
-        // Quick delay to show typing indicator (300ms for snappy response)
-        // Streaming UI already shows real-time response
-        await new Promise(resolve => setTimeout(resolve, 300))
+        // Delay to show thinking indicator (simulate thinking like Claude)
+        await new Promise(resolve => setTimeout(resolve, 800))
 
         // Update placeholder message with actual response
         updateMessage(placeholderMessageId, response)
