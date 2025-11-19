@@ -8,7 +8,7 @@ import { useChatHistoryStore, type HistoryMessage } from '@/stores/chatHistorySt
  */
 export function useSyncChatHistory() {
   const { messages: voiceMessages } = useVoiceChatStore()
-  const { addMessage: addToHistory, updateMessage: updateInHistory, allMessages } = useChatHistoryStore()
+  const { addMessage: addToHistory, updateMessage: updateInHistory, visibleMessages } = useChatHistoryStore()
   const lastSyncedCountRef = useRef(0)
   const messageContentsRef = useRef<Map<string, string>>(new Map())
 
@@ -19,7 +19,7 @@ export function useSyncChatHistory() {
 
       newMessages.forEach((msg) => {
         // Check if message already exists in history (by ID)
-        const exists = allMessages.some((m) => m.id === msg.id)
+        const exists = visibleMessages.some((m) => m.id === msg.id)
         if (!exists) {
           const historyMessage: HistoryMessage = {
             id: msg.id,
@@ -28,6 +28,7 @@ export function useSyncChatHistory() {
             timestamp: msg.timestamp,
             isDisposed: false,
           }
+          console.log('[Sync] Adding new message to history:', { id: msg.id, role: msg.role, content: msg.content.substring(0, 20) })
           addToHistory(historyMessage)
           messageContentsRef.current.set(msg.id, msg.content)
         }
@@ -42,9 +43,10 @@ export function useSyncChatHistory() {
 
       // If content has changed, update it in history store
       if (lastContent !== undefined && lastContent !== msg.content) {
+        console.log('[Sync] Updating message content:', { id: msg.id, from: lastContent.substring(0, 20), to: msg.content.substring(0, 20) })
         updateInHistory(msg.id, msg.content)
         messageContentsRef.current.set(msg.id, msg.content)
       }
     })
-  }, [voiceMessages, addToHistory, updateInHistory, allMessages])
+  }, [voiceMessages, addToHistory, updateInHistory, visibleMessages])
 }
