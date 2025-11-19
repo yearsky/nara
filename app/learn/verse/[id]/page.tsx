@@ -79,7 +79,7 @@ export default function StoryDetailPage() {
 
   // TTS Functions
   const handleToggleTTS = () => {
-    if (!ttsSupported || !story) return;
+    if (!ttsSupported || !story || !story.scenes || !story.scenes[currentScene]) return;
 
     if (isSpeaking) {
       // Stop speaking
@@ -108,10 +108,11 @@ export default function StoryDetailPage() {
 
   // Stop TTS when scene changes
   useEffect(() => {
-    if (isSpeaking) {
+    if (isSpeaking && typeof window !== "undefined" && window.speechSynthesis) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentScene]);
 
   // Cleanup TTS on unmount
@@ -124,13 +125,13 @@ export default function StoryDetailPage() {
   }, []);
 
   const handleNextScene = () => {
-    if (currentScene < story.scenes.length - 1) {
+    if (story && story.scenes && currentScene < story.scenes.length - 1) {
       setCurrentScene(currentScene + 1);
     }
   };
 
   const handlePrevScene = () => {
-    if (currentScene > 0) {
+    if (story && story.scenes && currentScene > 0) {
       setCurrentScene(currentScene - 1);
     }
   };
@@ -287,7 +288,7 @@ export default function StoryDetailPage() {
               Mulai Membaca Cerita
             </motion.button>
           </motion.div>
-        ) : (
+        ) : story.scenes && story.scenes.length > 0 && story.scenes[currentScene] ? (
           /* Reading Mode */
           <motion.div
             initial={{ opacity: 0 }}
@@ -423,6 +424,17 @@ export default function StoryDetailPage() {
               )}
             </div>
           </motion.div>
+        ) : (
+          /* Error state - Scene not found */
+          <div className="text-center py-12">
+            <p className="text-gray-600 mb-4">Scene tidak ditemukan</p>
+            <button
+              onClick={() => setIsReading(false)}
+              className="px-6 py-3 bg-purple-600 text-white rounded-2xl hover:bg-purple-700 transition-colors"
+            >
+              Kembali ke Overview
+            </button>
+          </div>
         )}
       </main>
 
