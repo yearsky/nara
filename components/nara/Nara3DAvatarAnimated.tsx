@@ -3,20 +3,52 @@
 import { useRef, useEffect } from "react";
 import * as React from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF, PerspectiveCamera, Environment } from "@react-three/drei";
+import { useGLTF, useFBX, useAnimations, PerspectiveCamera, Environment } from "@react-three/drei";
 import { useNaraEmotionStore } from "@/stores/naraEmotionStore";
 import * as THREE from "three";
 
-interface Nara3DAvatarEnhancedProps {
+interface Nara3DAvatarAnimatedProps {
   fullScreen?: boolean;
 }
 
-export function Nara3DAvatarEnhanced({ fullScreen = false }: Nara3DAvatarEnhancedProps) {
+/**
+ * Advanced 3D Avatar with RPM Animation Support
+ * Features:
+ * - Emotion-based animations
+ * - Speaking animations (Talking Variations from RPM)
+ * - Idle animations with variations
+ * - Mouse tracking
+ * - Responsive camera & positioning
+ */
+export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimatedProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const { scene } = useGLTF("/models/nara/nara-rpm.glb");
+  const { scene, animations: modelAnimations } = useGLTF("/models/nara/nara-rpm.glb");
 
   // Get emotion state from Zustand store
   const { emotion, isSpeaking } = useNaraEmotionStore();
+
+  // Load RPM animations (optional - fallback to procedural if not available)
+  // You can download these from: https://github.com/readyplayerme/animation-library
+  const talkingAnim1 = useFBX("/animations/F_Talking_Variations_001.fbx");
+  const talkingAnim2 = useFBX("/animations/F_Talking_Variations_002.fbx");
+
+  // Combine model animations with external animations
+  const animations = React.useMemo(() => {
+    const combinedAnims = [...(modelAnimations || [])];
+
+    // Add talking animations if loaded
+    if (talkingAnim1.animations.length > 0) {
+      combinedAnims.push(...talkingAnim1.animations);
+    }
+    if (talkingAnim2.animations.length > 0) {
+      combinedAnims.push(...talkingAnim2.animations);
+    }
+
+    return combinedAnims;
+  }, [modelAnimations, talkingAnim1, talkingAnim2]);
+
+  // Setup animation mixer
+  const { actions, mixer } = useAnimations(animations, groupRef);
 
   // Animation parameters based on emotion
   const animationParams = useRef({
@@ -24,6 +56,18 @@ export function Nara3DAvatarEnhanced({ fullScreen = false }: Nara3DAvatarEnhance
     floatIntensity: 0.03,
     floatSpeed: 0.8,
   });
+
+  // Responsive detection
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Update animation based on emotion
   useEffect(() => {
@@ -65,14 +109,44 @@ export function Nara3DAvatarEnhanced({ fullScreen = false }: Nara3DAvatarEnhance
     }
   }, [emotion]);
 
-  // Idle animation with emotion-based variations
+  // Play animations based on state
+  useEffect(() => {
+    if (!actions) return;
+
+    // Stop all current animations
+    Object.values(actions).forEach((action) => action?.stop());
+
+    if (isSpeaking) {
+      // Try to play RPM talking animation first
+      const talkingAction = actions["F_Talking_Variations_001"] || actions["mixamo.com"];
+
+      if (talkingAction) {
+        talkingAction.reset().fadeIn(0.3).play();
+        talkingAction.setLoop(THREE.LoopRepeat, Infinity);
+      }
+    } else {
+      // Play idle or emotion-specific animation
+      const idleAction = actions["idle"] || actions["Idle"] || actions[Object.keys(actions)[0]];
+
+      if (idleAction) {
+        idleAction.reset().fadeIn(0.3).play();
+        idleAction.setLoop(THREE.LoopRepeat, Infinity);
+      }
+    }
+
+    return () => {
+      Object.values(actions).forEach((action) => action?.fadeOut(0.3));
+    };
+  }, [isSpeaking, emotion, actions]);
+
+  // Procedural idle animation (works even without animation files)
   useFrame((state) => {
     if (groupRef.current) {
       const { rotationIntensity, floatIntensity, floatSpeed } = animationParams.current;
 
       // Breathing/floating animation - intensity varies by emotion
       const breathingSpeed = isSpeaking ? floatSpeed * 1.5 : floatSpeed;
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * breathingSpeed) * floatIntensity;
+      groupRef.current.position.y += Math.sin(state.clock.elapsedTime * breathingSpeed) * floatIntensity * 0.001;
 
       // Mouse follow - more reactive when speaking
       const { pointer } = state;
@@ -89,25 +163,13 @@ export function Nara3DAvatarEnhanced({ fullScreen = false }: Nara3DAvatarEnhance
         followSpeed
       );
 
-      // Speaking animation - subtle head bob
-      if (isSpeaking) {
+      // Speaking animation - subtle head bob (procedural fallback)
+      if (isSpeaking && !actions["F_Talking_Variations_001"]) {
         const speakingBob = Math.sin(state.clock.elapsedTime * 4) * 0.01;
         groupRef.current.position.y += speakingBob;
       }
     }
   });
-
-  // Responsive camera settings based on view mode and screen size
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // Camera settings: mobile needs lower camera and more zoom out
   const cameraSettings = fullScreen
