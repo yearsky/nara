@@ -157,7 +157,13 @@ export default function BottomControlsBar({
 
   // Handle voice/mic toggle - now uses live transcription with real-time chat bubbles
   // Auto-send akan triggered setelah 5 detik silence
-  const handleMicClick = async () => {
+  const handleMicClick = async (e: React.MouseEvent | React.TouchEvent) => {
+    // Prevent event bubbling to parent containers (fixes mobile auto-cancel bug)
+    e.stopPropagation()
+    e.preventDefault()
+
+    console.log('[BottomControlsBar] Mic button clicked, isListening:', isListening)
+
     if (isListening) {
       // Manual stop listening (user clicks stop button)
       console.log('[BottomControlsBar] User manually stopped listening')
@@ -210,18 +216,22 @@ export default function BottomControlsBar({
       <div
         className={isDesktopMode ? "relative w-full z-50 pointer-events-auto" : "absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 z-50 pointer-events-auto"}
         style={isDesktopMode ? {} : { paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 md:gap-4 max-w-4xl mx-auto">
           {/* Voice/Mic Control - 1/3 (Live Transcription) */}
           <motion.button
             onClick={handleMicClick}
+            onTouchEnd={handleMicClick}
             disabled={isLoading || !isSupported || micPermissionStatus === 'denied'}
-            className={`flex-1 h-14 md:h-16 rounded-full flex items-center justify-center gap-2 transition-all duration-200 backdrop-blur-xl shadow-lg relative overflow-hidden ${
+            className={`flex-1 h-14 md:h-16 rounded-full flex items-center justify-center gap-2 transition-all duration-200 backdrop-blur-xl shadow-lg relative overflow-hidden pointer-events-auto ${
               isListening
-                ? 'bg-red-500/90 hover:bg-red-600/90'
+                ? 'bg-red-500/90 hover:bg-red-600/90 active:bg-red-700/90'
                 : micPermissionStatus === 'denied'
                 ? 'bg-gray-500/50'
-                : 'bg-white/30 hover:bg-white/40'
+                : 'bg-white/30 hover:bg-white/40 active:bg-white/50'
             } ${isLoading || !isSupported || micPermissionStatus === 'denied' ? 'opacity-50 cursor-not-allowed' : ''}`}
             whileHover={{ scale: isLoading || !isSupported || micPermissionStatus === 'denied' ? 1 : 1.05 }}
             whileTap={{ scale: isLoading || !isSupported || micPermissionStatus === 'denied' ? 1 : 0.95 }}
@@ -303,42 +313,45 @@ export default function BottomControlsBar({
         </div>
 
         {/* Live Transcript Display (Google Meet style) with Auto-send indicator */}
-        <AnimatePresence>
-          {isListening && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="mt-3 max-w-4xl mx-auto space-y-2"
-            >
-              {/* Transcript display */}
-              {(transcript || interimTranscript) && (
-                <div className="bg-black/60 backdrop-blur-md rounded-2xl px-4 py-3 border border-white/10">
-                  <p className="text-sm text-white leading-relaxed">
-                    {/* Final transcript (confirmed) */}
-                    {transcript && <span className="text-white">{transcript}</span>}
-                    {/* Interim transcript (being spoken, lighter color) */}
-                    {interimTranscript && (
-                      <span className="text-white/60 italic"> {interimTranscript}</span>
-                    )}
-                  </p>
-                </div>
-              )}
+        {/* Only show on DESKTOP mode - on mobile, transcript appears directly in chat bubbles */}
+        {isDesktopMode && (
+          <AnimatePresence>
+            {isListening && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="mt-3 max-w-4xl mx-auto space-y-2"
+              >
+                {/* Transcript display */}
+                {(transcript || interimTranscript) && (
+                  <div className="bg-black/60 backdrop-blur-md rounded-2xl px-4 py-3 border border-white/10">
+                    <p className="text-sm text-white leading-relaxed">
+                      {/* Final transcript (confirmed) */}
+                      {transcript && <span className="text-white">{transcript}</span>}
+                      {/* Interim transcript (being spoken, lighter color) */}
+                      {interimTranscript && (
+                        <span className="text-white/60 italic"> {interimTranscript}</span>
+                      )}
+                    </p>
+                  </div>
+                )}
 
-              {/* Auto-send hint */}
-              <div className="flex items-center justify-center gap-2">
-                <motion.div
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                  className="w-2 h-2 rounded-full bg-red-400"
-                />
-                <span className="text-xs text-white/70">
-                  Otomatis kirim setelah 5 detik diam atau klik Stop
-                </span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                {/* Auto-send hint */}
+                <div className="flex items-center justify-center gap-2">
+                  <motion.div
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    className="w-2 h-2 rounded-full bg-red-400"
+                  />
+                  <span className="text-xs text-white/70">
+                    Otomatis kirim setelah 5 detik diam atau klik Stop
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
 
         {/* Credit indicator & Error messages */}
         {(isLowCredits || error || transcriptError) && (
