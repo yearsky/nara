@@ -22,6 +22,8 @@ export function useLiveTranscription(
   const recognitionRef = useRef<any>(null)
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null)
   const lastSpeechTimeRef = useRef<number>(0)
+  const isManualStopRef = useRef<boolean>(false)
+  const shouldBeListeningRef = useRef<boolean>(false)
 
   // Clear silence timer helper
   const clearSilenceTimer = useCallback(() => {
@@ -44,9 +46,11 @@ export function useLiveTranscription(
         onAutoSend(fullTranscript)
       }
 
-      // Stop listening after auto-send
+      // Stop listening after auto-send (mark as manual stop to prevent restart)
       if (recognitionRef.current) {
         try {
+          isManualStopRef.current = true
+          shouldBeListeningRef.current = false
           recognitionRef.current.stop()
         } catch (err) {
           console.error('[useLiveTranscription] Error stopping recognition:', err)
@@ -120,35 +124,73 @@ export function useLiveTranscription(
 
         clearSilenceTimer()
 
-        // Handle specific errors
+        // Handle specific errors - DON'T auto-stop for no-speech on mobile
         if (event.error === 'no-speech') {
-          console.warn('[useLiveTranscription] No speech detected')
-          setError('Tidak mendeteksi suara. Coba lagi.')
+          console.warn('[useLiveTranscription] No speech detected - will keep trying')
+          // Don't set error or stop listening - just log it
+          // Mobile browsers are sensitive and may trigger this falsely
+          return
         } else if (event.error === 'audio-capture') {
           console.error('[useLiveTranscription] Microphone not accessible')
           setError('Mikrofon tidak ditemukan atau tidak diizinkan.')
+          setIsListening(false)
         } else if (event.error === 'not-allowed') {
           console.error('[useLiveTranscription] Microphone permission denied')
           setError('Izin mikrofon ditolak. Mohon izinkan akses mikrofon.')
+          setIsListening(false)
         } else if (event.error === 'aborted') {
           console.log('[useLiveTranscription] Recognition aborted by user')
           // Don't show error for aborted (user stopped)
           setError(null)
+          setIsListening(false)
         } else if (event.error === 'network') {
           console.error('[useLiveTranscription] Network error')
           setError('Kesalahan jaringan. Periksa koneksi internet.')
+          setIsListening(false)
         } else {
           console.error('[useLiveTranscription] Unknown error:', event.error)
           setError(`Error: ${event.error}`)
+          setIsListening(false)
         }
-
-        setIsListening(false)
       }
 
       recognitionRef.current.onend = () => {
         console.log('[useLiveTranscription] Recognition ended')
-        setIsListening(false)
+        console.log('  - isManualStop:', isManualStopRef.current)
+        console.log('  - shouldBeListening:', shouldBeListeningRef.current)
+
         clearSilenceTimer()
+
+        // If this was a manual stop, update state and exit
+        if (isManualStopRef.current) {
+          console.log('[useLiveTranscription] Manual stop detected, updating state')
+          setIsListening(false)
+          isManualStopRef.current = false
+          shouldBeListeningRef.current = false
+          return
+        }
+
+        // If recognition ended unexpectedly but we should still be listening, try to restart
+        if (shouldBeListeningRef.current) {
+          console.log('[useLiveTranscription] Unexpected end, attempting to restart...')
+
+          // Wait a bit before restarting to avoid rapid restart loops
+          setTimeout(() => {
+            if (shouldBeListeningRef.current && recognitionRef.current) {
+              try {
+                console.log('[useLiveTranscription] Restarting recognition...')
+                recognitionRef.current.start()
+              } catch (err) {
+                console.error('[useLiveTranscription] Failed to restart:', err)
+                setIsListening(false)
+                shouldBeListeningRef.current = false
+              }
+            }
+          }, 200)
+        } else {
+          // Normal end, update state
+          setIsListening(false)
+        }
       }
 
       recognitionRef.current.onspeechstart = () => {
@@ -193,6 +235,10 @@ export function useLiveTranscription(
       setError(null)
       lastSpeechTimeRef.current = Date.now()
 
+      // Mark that we want to be listening (for auto-restart on unexpected end)
+      shouldBeListeningRef.current = true
+      isManualStopRef.current = false
+
       recognitionRef.current.start()
       // Note: setIsListening(true) akan dipanggil di onstart handler
     } catch (err: any) {
@@ -202,8 +248,10 @@ export function useLiveTranscription(
       if (err.message && err.message.includes('already started')) {
         console.log('[useLiveTranscription] Recognition already running')
         setIsListening(true)
+        shouldBeListeningRef.current = true
       } else {
         setError('Gagal memulai speech recognition')
+        shouldBeListeningRef.current = false
       }
     }
   }, [isSupported])
@@ -215,13 +263,19 @@ export function useLiveTranscription(
     if (!recognitionRef.current) return
 
     try {
-      console.log('[useLiveTranscription] Stopping recognition...')
+      console.log('[useLiveTranscription] Stopping recognition (manual)...')
+
+      // Mark this as a manual stop (don't auto-restart)
+      isManualStopRef.current = true
+      shouldBeListeningRef.current = false
+
       clearSilenceTimer()
       recognitionRef.current.stop()
       // Note: setIsListening(false) akan dipanggil di onend handler
     } catch (err) {
       console.error('[useLiveTranscription] Failed to stop recognition:', err)
       setIsListening(false)
+      shouldBeListeningRef.current = false
     }
   }, [clearSilenceTimer])
 

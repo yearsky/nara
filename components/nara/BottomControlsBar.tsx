@@ -40,20 +40,41 @@ export default function BottomControlsBar({
   // Use Nara Chat hook for message orchestration
   const { handleSendMessage, getNaraResponse, isLoading, credits, isLowCredits, error, messages } = useNaraChat()
 
-  // Check microphone permission on mount
+  // Check microphone permission on mount and auto-start on grant
   useEffect(() => {
+    let previousPermission: 'granted' | 'denied' | 'prompt' | 'checking' = 'checking'
+
     const checkMicPermission = async () => {
       try {
         if (navigator.permissions) {
           const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
-          setMicPermissionStatus(result.state as 'granted' | 'denied' | 'prompt')
+          const currentState = result.state as 'granted' | 'denied' | 'prompt'
 
-          console.log('[BottomControlsBar] Microphone permission:', result.state)
+          console.log('[BottomControlsBar] Microphone permission:', currentState)
+          setMicPermissionStatus(currentState)
+          previousPermission = currentState
 
           // Listen for permission changes
           result.onchange = () => {
-            setMicPermissionStatus(result.state as 'granted' | 'denied' | 'prompt')
-            console.log('[BottomControlsBar] Microphone permission changed:', result.state)
+            const newState = result.state as 'granted' | 'denied' | 'prompt'
+            console.log('[BottomControlsBar] Microphone permission changed:', previousPermission, '→', newState)
+
+            setMicPermissionStatus(newState)
+
+            // AUTO-START: If permission just changed from 'prompt' to 'granted', auto-start listening
+            if (previousPermission === 'prompt' && newState === 'granted') {
+              console.log('[BottomControlsBar] Permission granted! Auto-starting mic...')
+              setTimeout(() => {
+                if (isSupported && !isListening) {
+                  console.log('[BottomControlsBar] Triggering auto-start listening')
+                  resetTranscript()
+                  currentUserMessageIdRef.current = null
+                  startListening()
+                }
+              }, 300) // Small delay to ensure everything is ready
+            }
+
+            previousPermission = newState
           }
         } else {
           // Fallback: assume prompt if Permissions API not available
@@ -66,7 +87,7 @@ export default function BottomControlsBar({
     }
 
     checkMicPermission()
-  }, [])
+  }, [isSupported, isListening, startListening, resetTranscript])
 
   // Auto-hide TopicChips if there are existing messages (from localStorage)
   useEffect(() => {
@@ -110,17 +131,24 @@ export default function BottomControlsBar({
   // Access store directly for real-time updates
   const { addMessage, updateMessage } = useVoiceChatStore()
 
-  // Real-time transcript update: Update user message as they speak
+  // Real-time transcript update: Update user message as they speak (FOR MOBILE - appears in bubble)
   useEffect(() => {
-    if (!isListening) return
+    // Only update bubble on mobile mode (not desktop)
+    if (!isListening || isDesktopMode) {
+      return
+    }
 
     const transcriptText = (transcript + ' ' + interimTranscript).trim()
+
+    console.log('[BottomControlsBar] Updating bubble transcript:', transcriptText)
 
     if (transcriptText) {
       if (!currentUserMessageIdRef.current) {
         // Create new user message
-        const messageId = `user-${Date.now()}`
+        const messageId = `user-voice-${Date.now()}`
         currentUserMessageIdRef.current = messageId
+
+        console.log('[BottomControlsBar] Creating new bubble message:', messageId)
 
         addMessage({
           id: messageId,
@@ -130,10 +158,11 @@ export default function BottomControlsBar({
         })
       } else {
         // Update existing user message
+        console.log('[BottomControlsBar] Updating existing bubble:', currentUserMessageIdRef.current)
         updateMessage(currentUserMessageIdRef.current, transcriptText)
       }
     }
-  }, [transcript, interimTranscript, isListening, addMessage, updateMessage])
+  }, [transcript, interimTranscript, isListening, isDesktopMode, addMessage, updateMessage])
 
   // Handle text message send
   const handleSend = async () => {
