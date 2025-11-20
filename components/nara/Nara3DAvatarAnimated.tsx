@@ -374,29 +374,51 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
         />
       </mesh>
 
-      {/* BACK WALL - Main wall with depth */}
-      <mesh position={[0, 1.5, -5]} receiveShadow castShadow>
-        <planeGeometry args={[15, 12]} />
+      {/* BACK WALL - Main wall with gradient effect */}
+      {/* Upper wall - lighter yellow */}
+      <mesh position={[0, 3.5, -5]} receiveShadow castShadow>
+        <planeGeometry args={[15, 5]} />
         <meshStandardMaterial
-          color="#f5f5dc"
+          color="#fef9c3"
           roughness={0.95}
           metalness={0.02}
         />
       </mesh>
 
-      {/* Wall wainscoting (panel bawah dinding) */}
-      <mesh position={[0, -0.3, -4.95]}>
-        <planeGeometry args={[15, 2.4]} />
+      {/* Middle wall - medium yellow */}
+      <mesh position={[0, 0.5, -4.98]}>
+        <planeGeometry args={[15, 4]} />
         <meshStandardMaterial
-          color="#f0e68c"
+          color="#fde68a"
+          roughness={0.92}
+          metalness={0.03}
+        />
+      </mesh>
+
+      {/* Wall wainscoting (panel bawah dinding) - darker yellow */}
+      <mesh position={[0, -0.8, -4.95]}>
+        <planeGeometry args={[15, 2.8]} />
+        <meshStandardMaterial
+          color="#fcd34d"
           roughness={0.85}
         />
       </mesh>
 
+      {/* Wall vertical panel lines - matching floor style */}
+      {Array.from({ length: 10 }).map((_, i) => (
+        <mesh
+          key={`wall-line-${i}`}
+          position={[-6.5 + i * 1.4, 1.5, -4.92]}
+        >
+          <boxGeometry args={[0.06, 12, 0.02]} />
+          <meshStandardMaterial color="#d97706" opacity={0.25} transparent />
+        </mesh>
+      ))}
+
       {/* Wall chair rail (pembatas panel) */}
       <mesh position={[0, 0.9, -4.9]}>
         <boxGeometry args={[15, 0.08, 0.12]} />
-        <meshStandardMaterial color="#daa520" />
+        <meshStandardMaterial color="#d97706" />
       </mesh>
 
       {/* CORNER WALLS - Left and Right for depth */}
@@ -404,7 +426,7 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       <mesh position={[-7.5, 1.5, -0.5]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[9, 12]} />
         <meshStandardMaterial
-          color="#f0e68c"
+          color="#fde68a"
           roughness={0.95}
           metalness={0.02}
         />
@@ -414,7 +436,7 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       <mesh position={[7.5, 1.5, -0.5]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[9, 12]} />
         <meshStandardMaterial
-          color="#f0e68c"
+          color="#fde68a"
           roughness={0.95}
           metalness={0.02}
         />
@@ -443,7 +465,7 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 5.5, -0.5]} receiveShadow>
         <planeGeometry args={[15, 12]} />
         <meshStandardMaterial
-          color="#fffaf0"
+          color="#fef3c7"
           roughness={0.98}
           side={2}
         />
@@ -453,26 +475,26 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       {/* Back wall crown */}
       <mesh position={[0, 5.3, -4.85]}>
         <boxGeometry args={[15, 0.2, 0.2]} />
-        <meshStandardMaterial color="#f0e68c" />
+        <meshStandardMaterial color="#fbbf24" />
       </mesh>
 
       {/* Left wall crown */}
       <mesh position={[-7.4, 5.3, -0.5]} rotation={[0, Math.PI / 2, 0]}>
         <boxGeometry args={[9, 0.2, 0.2]} />
-        <meshStandardMaterial color="#f0e68c" />
+        <meshStandardMaterial color="#fbbf24" />
       </mesh>
 
       {/* Right wall crown */}
       <mesh position={[7.4, 5.3, -0.5]} rotation={[0, -Math.PI / 2, 0]}>
         <boxGeometry args={[9, 0.2, 0.2]} />
-        <meshStandardMaterial color="#f0e68c" />
+        <meshStandardMaterial color="#fbbf24" />
       </mesh>
 
       {/* DECORATIVE ELEMENTS */}
       {/* Wall decorative stripe/accent */}
       <mesh position={[0, 3, -4.92]}>
         <boxGeometry args={[10, 0.08, 0.06]} />
-        <meshStandardMaterial color="#daa520" metalness={0.3} />
+        <meshStandardMaterial color="#f59e0b" metalness={0.3} />
       </mesh>
 
       {/* Corner shadow enhancers for depth */}
