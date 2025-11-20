@@ -69,7 +69,8 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
   const { emotion, isSpeaking } = useNaraEmotionStore();
 
   // Load RPM animations (GLB format - official from GitHub)
-  const talkingAnim1 = useGLTF("/animations/F_Talking_Variations_001_official.glb");
+  // Using variant 002 for more natural hand poses
+  const talkingAnim1 = useGLTF("/animations/F_Talking_Variations_002.glb");
 
   // Combine model animations with RPM talking animation
   const animations = React.useMemo(() => {
@@ -182,12 +183,13 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
         const talkingKey = Object.keys(actions).find(key =>
           key.includes('alk') || key.includes('Talking')
         );
-        const talkingAction = actions["F_Talking_Variations_001"] ||
+        const talkingAction = actions["F_Talking_Variations_002"] ||
+                             actions["F_Talking_Variations_001"] ||
                              actions["mixamo.com"] ||
                              (talkingKey ? actions[talkingKey] : null);
 
         if (talkingAction) {
-          console.log('✅ Playing RPM talking animation:', talkingKey || 'F_Talking_Variations_001');
+          console.log('✅ Playing RPM talking animation:', talkingKey || 'Auto-detected');
           talkingAction.reset().fadeIn(0.3).play();
           talkingAction.setLoop(THREE.LoopRepeat, Infinity);
 
@@ -312,4 +314,4 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
 
 // Preload the model and animations for faster initial render
 useGLTF.preload("/models/nara/nara-rpm.glb");
-useGLTF.preload("/animations/F_Talking_Variations_001_official.glb");
+useGLTF.preload("/animations/F_Talking_Variations_002.glb");
