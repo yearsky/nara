@@ -45,6 +45,12 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
     if (scene) {
       let skinnedMeshCount = 0;
       scene.traverse((child) => {
+        // Enable shadow casting for all meshes
+        if (child instanceof THREE.Mesh || child instanceof THREE.SkinnedMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+
         if (child instanceof THREE.SkinnedMesh) {
           skinnedMeshCount++;
           console.log('✅ Found SkinnedMesh:', child.name, {
@@ -261,11 +267,11 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
     }
   });
 
-  // Camera settings: aggressive zoom out for full body view
+  // Camera settings: optimized for grounded perspective and mobile chat UI
   const cameraSettings = fullScreen
     ? isMobile
-      ? { position: [0, 0.5, 5.5] as [number, number, number], fov: 60 } // Mobile fullscreen - much wider view
-      : { position: [0, 0.8, 5] as [number, number, number], fov: 55 }   // Desktop fullscreen - wider view
+      ? { position: [0, 0.6, 3.8] as [number, number, number], fov: 45 } // Mobile fullscreen - zoomed in for chat UI, focus on upper body
+      : { position: [0, 0.2, 5.2] as [number, number, number], fov: 50 }   // Desktop fullscreen - lower angle for ground contact
     : isMobile
       ? { position: [0, 0.2, 5] as [number, number, number], fov: 55 }   // Mobile circular
       : { position: [0, 0.5, 4] as [number, number, number], fov: 50 };  // Desktop circular
@@ -275,22 +281,245 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       {/* Camera Setup */}
       <PerspectiveCamera makeDefault position={cameraSettings.position} fov={cameraSettings.fov} />
 
-      {/* Lighting - warm and inviting */}
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[5, 5, 5]} intensity={0.9} castShadow />
-      <spotLight
-        position={[0, 10, 0]}
-        angle={0.3}
-        penumbra={1}
-        intensity={0.6}
+      {/* Realistic Studio Lighting Setup */}
+      {/* Ambient fill light - softer for realism */}
+      <ambientLight intensity={0.5} color="#fffaed" />
+
+      {/* Key light - main directional with high-quality shadows */}
+      <directionalLight
+        position={[6, 8, 6]}
+        intensity={1.4}
+        color="#fff8e7"
         castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={50}
+        shadow-camera-left={-10}
+        shadow-camera-right={10}
+        shadow-camera-top={10}
+        shadow-camera-bottom={-10}
+        shadow-bias={-0.0005}
+        shadow-radius={4}
       />
 
-      {/* Rim light for depth */}
-      <pointLight position={[-5, 2, -5]} intensity={0.5} color="#ff9966" />
+      {/* Fill light from opposite side */}
+      <directionalLight
+        position={[-4, 6, 4]}
+        intensity={0.6}
+        color="#ffeaa7"
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+      />
 
-      {/* Environment for realistic reflections */}
+      {/* Ceiling spotlight for dramatic effect */}
+      <spotLight
+        position={[0, 8, -2]}
+        angle={0.5}
+        penumbra={0.8}
+        intensity={1.0}
+        color="#ffeb99"
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+      />
+
+      {/* Rim lights for separation and depth */}
+      <pointLight position={[-6, 3, -3]} intensity={0.6} color="#ffd700" castShadow />
+      <pointLight position={[6, 2, -3]} intensity={0.5} color="#ffdd66" />
+
+      {/* Subtle floor bounce light */}
+      <pointLight position={[0, -1, 0]} intensity={0.3} color="#f5deb3" />
+
+      {/* Wall accent lights */}
+      <pointLight position={[0, 3, -4.5]} intensity={0.4} color="#fffacd" distance={5} />
+
+      {/* Warm sunny environment */}
       <Environment preset="sunset" />
+
+      {/* ========== REALISTIC 3D ROOM STRUCTURE ========== */}
+
+      {/* FLOOR - Multi-layered realistic floor */}
+      {/* Main floor surface */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
+        <planeGeometry args={[15, 12]} />
+        <meshStandardMaterial
+          color="#f5deb3"
+          roughness={0.75}
+          metalness={0.05}
+        />
+      </mesh>
+
+      {/* Floor planks/tiles pattern for realism */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <mesh
+          key={`floor-line-${i}`}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[-6 + i * 1.7, -1.48, 0]}
+        >
+          <planeGeometry args={[0.05, 12]} />
+          <meshStandardMaterial color="#daa520" opacity={0.3} transparent />
+        </mesh>
+      ))}
+
+      {/* Floor center accent */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.48, -1]}>
+        <circleGeometry args={[2.5, 64]} />
+        <meshStandardMaterial
+          color="#ffd700"
+          roughness={0.6}
+          metalness={0.15}
+          opacity={0.2}
+          transparent
+        />
+      </mesh>
+
+      {/* BACK WALL - Main wall with gradient effect */}
+      {/* Upper wall - lighter yellow */}
+      <mesh position={[0, 3.5, -5]} receiveShadow castShadow>
+        <planeGeometry args={[15, 5]} />
+        <meshStandardMaterial
+          color="#fef9c3"
+          roughness={0.95}
+          metalness={0.02}
+        />
+      </mesh>
+
+      {/* Middle wall - medium yellow */}
+      <mesh position={[0, 0.5, -4.98]}>
+        <planeGeometry args={[15, 4]} />
+        <meshStandardMaterial
+          color="#fde68a"
+          roughness={0.92}
+          metalness={0.03}
+        />
+      </mesh>
+
+      {/* Wall wainscoting (panel bawah dinding) - darker yellow */}
+      <mesh position={[0, -0.8, -4.95]}>
+        <planeGeometry args={[15, 2.8]} />
+        <meshStandardMaterial
+          color="#fcd34d"
+          roughness={0.85}
+        />
+      </mesh>
+
+      {/* Wall vertical panel lines - matching floor style */}
+      {Array.from({ length: 10 }).map((_, i) => (
+        <mesh
+          key={`wall-line-${i}`}
+          position={[-6.5 + i * 1.4, 1.5, -4.92]}
+        >
+          <boxGeometry args={[0.06, 12, 0.02]} />
+          <meshStandardMaterial color="#d97706" opacity={0.25} transparent />
+        </mesh>
+      ))}
+
+      {/* Wall chair rail (pembatas panel) */}
+      <mesh position={[0, 0.9, -4.9]}>
+        <boxGeometry args={[15, 0.08, 0.12]} />
+        <meshStandardMaterial color="#d97706" />
+      </mesh>
+
+      {/* CORNER WALLS - Left and Right for depth */}
+      {/* Left wall */}
+      <mesh position={[-7.5, 1.5, -0.5]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[9, 12]} />
+        <meshStandardMaterial
+          color="#fde68a"
+          roughness={0.95}
+          metalness={0.02}
+        />
+      </mesh>
+
+      {/* Right wall */}
+      <mesh position={[7.5, 1.5, -0.5]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[9, 12]} />
+        <meshStandardMaterial
+          color="#fde68a"
+          roughness={0.95}
+          metalness={0.02}
+        />
+      </mesh>
+
+      {/* BASEBOARDS - Floor trim */}
+      {/* Back wall baseboard */}
+      <mesh position={[0, -1.35, -4.9]}>
+        <boxGeometry args={[15, 0.15, 0.15]} />
+        <meshStandardMaterial color="#cd853f" />
+      </mesh>
+
+      {/* Left wall baseboard */}
+      <mesh position={[-7.4, -1.35, -0.5]} rotation={[0, Math.PI / 2, 0]}>
+        <boxGeometry args={[9, 0.15, 0.15]} />
+        <meshStandardMaterial color="#cd853f" />
+      </mesh>
+
+      {/* Right wall baseboard */}
+      <mesh position={[7.4, -1.35, -0.5]} rotation={[0, -Math.PI / 2, 0]}>
+        <boxGeometry args={[9, 0.15, 0.15]} />
+        <meshStandardMaterial color="#cd853f" />
+      </mesh>
+
+      {/* CEILING - Realistic ceiling with details */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 5.5, -0.5]} receiveShadow>
+        <planeGeometry args={[15, 12]} />
+        <meshStandardMaterial
+          color="#fef3c7"
+          roughness={0.98}
+          side={2}
+        />
+      </mesh>
+
+      {/* Ceiling crown molding */}
+      {/* Back wall crown */}
+      <mesh position={[0, 5.3, -4.85]}>
+        <boxGeometry args={[15, 0.2, 0.2]} />
+        <meshStandardMaterial color="#fbbf24" />
+      </mesh>
+
+      {/* Left wall crown */}
+      <mesh position={[-7.4, 5.3, -0.5]} rotation={[0, Math.PI / 2, 0]}>
+        <boxGeometry args={[9, 0.2, 0.2]} />
+        <meshStandardMaterial color="#fbbf24" />
+      </mesh>
+
+      {/* Right wall crown */}
+      <mesh position={[7.4, 5.3, -0.5]} rotation={[0, -Math.PI / 2, 0]}>
+        <boxGeometry args={[9, 0.2, 0.2]} />
+        <meshStandardMaterial color="#fbbf24" />
+      </mesh>
+
+      {/* DECORATIVE ELEMENTS */}
+      {/* Wall decorative stripe/accent */}
+      <mesh position={[0, 3, -4.92]}>
+        <boxGeometry args={[10, 0.08, 0.06]} />
+        <meshStandardMaterial color="#f59e0b" metalness={0.3} />
+      </mesh>
+
+      {/* Corner shadow enhancers for depth */}
+      <mesh position={[-7.3, 1.5, -4.8]} rotation={[0, Math.PI / 4, 0]}>
+        <boxGeometry args={[0.3, 12, 0.3]} />
+        <meshStandardMaterial color="#8b7355" opacity={0.3} transparent />
+      </mesh>
+
+      <mesh position={[7.3, 1.5, -4.8]} rotation={[0, -Math.PI / 4, 0]}>
+        <boxGeometry args={[0.3, 12, 0.3]} />
+        <meshStandardMaterial color="#8b7355" opacity={0.3} transparent />
+      </mesh>
+
+      {/* Contact Shadow - directly under character for grounding */}
+      {/* Outer soft shadow */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.475, 0]}>
+        <circleGeometry args={[1.2, 32]} />
+        <meshBasicMaterial color="#000000" opacity={0.15} transparent />
+      </mesh>
+
+      {/* Inner darker shadow for feet contact */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.47, 0]}>
+        <circleGeometry args={[0.6, 32]} />
+        <meshBasicMaterial color="#000000" opacity={0.5} transparent />
+      </mesh>
 
       {/* Character Model - responsive positioning */}
       <group
@@ -298,13 +527,13 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
         position={[
           0,
           fullScreen
-            ? isMobile ? -1.2 : -0.8  // Fullscreen: much lower to show head
-            : isMobile ? -0.7 : -0.5, // Circular: lower on mobile
+            ? isMobile ? -0.9 : -1.42  // Mobile: higher position for upper body focus, Desktop: feet on floor
+            : isMobile ? -0.7 : -0.5,   // Circular: lower on mobile
           0
         ]}
         scale={
           fullScreen
-            ? isMobile ? 1.0 : 1.2  // Fullscreen: smaller scale for full body view
+            ? isMobile ? 1.35 : 1.2  // Mobile: larger scale for close-up, Desktop: standard scale
             : isMobile ? 1.1 : 1.2  // Circular: smaller on mobile
         }
       >
