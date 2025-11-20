@@ -505,7 +505,7 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
         position={[
           0,
           fullScreen
-            ? isMobile ? -1.45 : -1.35  // Fullscreen: positioned on floor
+            ? isMobile ? -1.48 : -1.42  // Fullscreen: feet firmly on floor
             : isMobile ? -0.7 : -0.5,   // Circular: lower on mobile
           0
         ]}
