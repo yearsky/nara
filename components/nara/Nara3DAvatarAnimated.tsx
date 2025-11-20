@@ -45,6 +45,12 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
     if (scene) {
       let skinnedMeshCount = 0;
       scene.traverse((child) => {
+        // Enable shadow casting for all meshes
+        if (child instanceof THREE.Mesh || child instanceof THREE.SkinnedMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+
         if (child instanceof THREE.SkinnedMesh) {
           skinnedMeshCount++;
           console.log('✅ Found SkinnedMesh:', child.name, {
@@ -275,22 +281,32 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       {/* Camera Setup */}
       <PerspectiveCamera makeDefault position={cameraSettings.position} fov={cameraSettings.fov} />
 
-      {/* Lighting - warm and inviting */}
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[5, 5, 5]} intensity={0.9} castShadow />
+      {/* Lighting - subtle enhancement (HDRI provides main lighting) */}
+      <ambientLight intensity={0.3} />
+      <directionalLight position={[5, 5, 5]} intensity={0.5} castShadow />
       <spotLight
         position={[0, 10, 0]}
         angle={0.3}
         penumbra={1}
-        intensity={0.6}
+        intensity={0.3}
         castShadow
       />
 
       {/* Rim light for depth */}
-      <pointLight position={[-5, 2, -5]} intensity={0.5} color="#ff9966" />
+      <pointLight position={[-5, 2, -5]} intensity={0.3} color="#88cc88" />
 
-      {/* Environment for realistic reflections */}
-      <Environment preset="sunset" />
+      {/* HDRI Environment - Indonesian Rainforest Village Theme */}
+      <Environment
+        files="/hdri/rainforest_trail_4k.exr"
+        background
+        blur={0}
+      />
+
+      {/* Ground Plane - subtle shadow receiver */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
+        <planeGeometry args={[20, 20]} />
+        <shadowMaterial opacity={0.3} />
+      </mesh>
 
       {/* Character Model - responsive positioning */}
       <group
