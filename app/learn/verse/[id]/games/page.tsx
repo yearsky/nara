@@ -11,6 +11,7 @@ import {
   Trophy,
   Star,
   ArrowLeft,
+  Lightbulb,
 } from "lucide-react";
 import { getStoryById, StoryData } from "@/lib/storiesData";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
@@ -58,6 +59,7 @@ export default function GamesPage() {
   const [selectedScene, setSelectedScene] = useState<number | null>(null);
   const [sequencingComplete, setSequencingComplete] = useState(false);
   const [sequencingAttempts, setSequencingAttempts] = useState(0);
+  const [showCorrectOrder, setShowCorrectOrder] = useState(false);
 
   useEffect(() => {
     const storyData = getStoryById(storyId);
@@ -196,6 +198,12 @@ export default function GamesPage() {
     setSequencingComplete(false);
     setSequencingAttempts(0);
     setShowCelebration(false);
+    setShowCorrectOrder(false);
+  };
+
+  const handleGameSelection = (game: GameType) => {
+    setShowCelebration(false); // Reset celebration when switching games
+    setSelectedGame(game);
   };
 
   if (!story) {
@@ -240,7 +248,7 @@ export default function GamesPage() {
               <motion.button
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedGame("matching")}
+                onClick={() => handleGameSelection("matching")}
                 className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/50 text-left hover:shadow-2xl transition-all"
               >
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
@@ -263,7 +271,7 @@ export default function GamesPage() {
               <motion.button
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedGame("sequencing")}
+                onClick={() => handleGameSelection("sequencing")}
                 className="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/50 text-left hover:shadow-2xl transition-all"
               >
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
@@ -562,16 +570,57 @@ export default function GamesPage() {
                 ))}
               </div>
 
-              {/* Check Button */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={checkSequencingOrder}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2"
-              >
-                <Trophy className="w-5 h-5" />
-                Periksa Urutan
-              </motion.button>
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={checkSequencingOrder}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Trophy className="w-5 h-5" />
+                  Periksa Urutan
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowCorrectOrder(!showCorrectOrder)}
+                  className={`w-full font-semibold py-3 px-6 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 ${
+                    showCorrectOrder
+                      ? "bg-amber-500 text-white"
+                      : "bg-white/80 text-gray-700 hover:bg-white"
+                  }`}
+                >
+                  <Lightbulb className="w-5 h-5" />
+                  {showCorrectOrder ? "Sembunyikan Urutan" : "Lihat Urutan yang Benar"}
+                </motion.button>
+
+                {/* Show correct order hint */}
+                {showCorrectOrder && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 text-sm"
+                  >
+                    <p className="font-bold text-amber-900 mb-2 flex items-center gap-2">
+                      <Lightbulb className="w-4 h-4" />
+                      Urutan yang Benar:
+                    </p>
+                    <ol className="space-y-1 text-amber-800">
+                      {sceneCards
+                        .sort((a, b) => a.correctOrder - b.correctOrder)
+                        .map((scene, idx) => (
+                          <li key={scene.id} className="flex items-start gap-2">
+                            <span className="font-bold">{idx + 1}.</span>
+                            <span>{scene.title}</span>
+                          </li>
+                        ))}
+                    </ol>
+                  </motion.div>
+                )}
+              </div>
             </motion.div>
           ) : (
             /* Win Screen */
