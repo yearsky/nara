@@ -22,7 +22,34 @@ interface Nara3DAvatarAnimatedProps {
  */
 export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimatedProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const { scene, animations: modelAnimations } = useGLTF("/models/nara/nara-rpm.glb");
+  const gltf = useGLTF("/models/nara/nara-rpm.glb");
+
+  // Clone scene for proper instancing
+  const scene = React.useMemo(() => gltf.scene.clone(true), [gltf.scene]);
+  const modelAnimations = React.useMemo(() => gltf.animations, [gltf.animations]);
+
+  // Debug: Log model loading with detailed geometry info
+  React.useEffect(() => {
+    console.log('=== Model Debug Info ===');
+    console.log('Has scene:', !!scene);
+    console.log('Animations:', modelAnimations?.length || 0);
+    console.log('Scene children:', scene?.children?.length || 0);
+
+    // Check if scene has actual geometry
+    if (scene) {
+      scene.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          console.log('Found mesh:', mesh.name, {
+            hasGeometry: !!mesh.geometry,
+            hasMaterial: !!mesh.material,
+            visible: mesh.visible
+          });
+        }
+      });
+    }
+    console.log('========================');
+  }, [scene, modelAnimations]);
 
   // Get emotion state from Zustand store
   const { emotion, isSpeaking } = useNaraEmotionStore();
