@@ -13,6 +13,7 @@ import {
 import { motion } from "framer-motion";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import GlassFooter from "@/components/learn/GlassFooter";
+import QuizGamesFAB from "@/components/learn/QuizGamesFAB";
 import Image from "next/image";
 
 const patterns = [
@@ -282,6 +283,9 @@ export default function PolaPage() {
       </main>
 
       {/* Glass Footer */}
+      {/* Quiz & Games FAB */}
+      <QuizGamesFAB modulePath="/learn/pola" />
+
       <GlassFooter />
     </div>
   );

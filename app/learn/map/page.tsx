@@ -19,6 +19,7 @@ import MuseumFilter from '@/components/museum/MuseumFilter';
 import MuseumDetail from '@/components/museum/MuseumDetail';
 import SubmoduleHeader from '@/components/learn/SubmoduleHeader';
 import GlassFooter from '@/components/learn/GlassFooter';
+import QuizGamesFAB from '@/components/learn/QuizGamesFAB';
 import { MapPin, Map, List, Loader2, Search, SlidersHorizontal, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -350,6 +351,9 @@ export default function NaraMapPage() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Quiz & Games FAB */}
+      <QuizGamesFAB modulePath="/learn/map" />
 
       {/* Glass Footer */}
       <GlassFooter />
