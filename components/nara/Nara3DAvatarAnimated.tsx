@@ -71,8 +71,9 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
   // Load RPM animations (GLB format - official from GitHub)
   // Using variant 002 for more natural hand poses
   const talkingAnim1 = useGLTF("/animations/F_Talking_Variations_002.glb");
+  const idleAnim = useGLTF("/animations/F_Standing_Idle_001.glb");
 
-  // Combine model animations with RPM talking animation
+  // Combine model animations with RPM animations (talking + idle)
   const animations = React.useMemo(() => {
     const combinedAnims = [...(modelAnimations || [])];
 
@@ -82,8 +83,14 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       console.log('Loaded RPM talking animation:', talkingAnim1.animations.length, 'clips');
     }
 
+    // Add idle animation if loaded
+    if (idleAnim.animations && idleAnim.animations.length > 0) {
+      combinedAnims.push(...idleAnim.animations);
+      console.log('Loaded RPM idle animation:', idleAnim.animations.length, 'clips');
+    }
+
     return combinedAnims;
-  }, [modelAnimations, talkingAnim1]);
+  }, [modelAnimations, talkingAnim1, idleAnim]);
 
   // Setup animation mixer - CRITICAL: attach to scene ref, not group ref
   const { actions, mixer } = useAnimations(animations, sceneRef);
@@ -204,12 +211,18 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
           console.log('❌ No talking animation found, using procedural');
         }
       } else {
-        // Play idle or emotion-specific animation
-        const idleAction = actions["idle"] || actions["Idle"] || actions[Object.keys(actions)[0]];
+        // Play idle animation when not speaking
+        const idleAction = actions["F_Standing_Idle_001"] ||
+                          actions["idle"] ||
+                          actions["Idle"] ||
+                          actions[Object.keys(actions)[0]];
 
         if (idleAction) {
-          idleAction.reset().fadeIn(0.3).play();
+          console.log('✅ Playing idle animation');
+          idleAction.reset().fadeIn(0.5).play();
           idleAction.setLoop(THREE.LoopRepeat, Infinity);
+        } else {
+          console.log('⚠️ No idle animation found, using procedural');
         }
       }
       console.log('=========================');
@@ -222,40 +235,29 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
     }
   }, [isSpeaking, emotion, actions, mixer]);
 
-  // Procedural idle animation (works even without animation files)
+  // Subtle procedural animation (complement RPM animations)
   useFrame((state) => {
     if (groupRef.current) {
       const { rotationIntensity, floatIntensity, floatSpeed } = animationParams.current;
 
-      // Breathing/floating animation - intensity varies by emotion
-      const breathingSpeed = isSpeaking ? floatSpeed * 1.5 : floatSpeed;
-      groupRef.current.position.y += Math.sin(state.clock.elapsedTime * breathingSpeed) * floatIntensity * 0.001;
+      // Very subtle breathing - let RPM idle animation handle main movement
+      const breathingSpeed = floatSpeed * 0.5;
+      groupRef.current.position.y += Math.sin(state.clock.elapsedTime * breathingSpeed) * floatIntensity * 0.0005;
 
-      // Mouse follow - more reactive when speaking
+      // Mouse follow - subtle and smooth
       const { pointer } = state;
-      const followSpeed = isSpeaking ? 0.08 : 0.05;
+      const followSpeed = 0.03; // Slower for smoother movement
 
       groupRef.current.rotation.y = THREE.MathUtils.lerp(
         groupRef.current.rotation.y,
-        pointer.x * rotationIntensity,
+        pointer.x * rotationIntensity * 0.5, // Reduced intensity
         followSpeed
       );
       groupRef.current.rotation.x = THREE.MathUtils.lerp(
         groupRef.current.rotation.x,
-        pointer.y * (rotationIntensity * 0.5),
+        pointer.y * (rotationIntensity * 0.25), // Reduced intensity
         followSpeed
       );
-
-      // Speaking animation - procedural fallback if RPM not playing
-      if (isSpeaking) {
-        const hasTalkingAnim = Object.keys(actions).some(key =>
-          key.includes('alk') || key.includes('Talking')
-        );
-        if (!hasTalkingAnim) {
-          const speakingBob = Math.sin(state.clock.elapsedTime * 4) * 0.01;
-          groupRef.current.position.y += speakingBob;
-        }
-      }
     }
   });
 
@@ -315,3 +317,4 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
 // Preload the model and animations for faster initial render
 useGLTF.preload("/models/nara/nara-rpm.glb");
 useGLTF.preload("/animations/F_Talking_Variations_002.glb");
+useGLTF.preload("/animations/F_Standing_Idle_001.glb");
