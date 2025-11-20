@@ -267,11 +267,11 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
     }
   });
 
-  // Camera settings: aggressive zoom out for full body view
+  // Camera settings: optimized for grounded perspective
   const cameraSettings = fullScreen
     ? isMobile
-      ? { position: [0, 0.5, 5.5] as [number, number, number], fov: 60 } // Mobile fullscreen - much wider view
-      : { position: [0, 0.8, 5] as [number, number, number], fov: 55 }   // Desktop fullscreen - wider view
+      ? { position: [0, 0.3, 5.5] as [number, number, number], fov: 60 } // Mobile fullscreen
+      : { position: [0, 0.2, 5.2] as [number, number, number], fov: 50 }   // Desktop fullscreen - lower angle for ground contact
     : isMobile
       ? { position: [0, 0.2, 5] as [number, number, number], fov: 55 }   // Mobile circular
       : { position: [0, 0.5, 4] as [number, number, number], fov: 50 };  // Desktop circular
@@ -298,7 +298,8 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
         shadow-camera-right={10}
         shadow-camera-top={10}
         shadow-camera-bottom={-10}
-        shadow-bias={-0.0001}
+        shadow-bias={-0.0005}
+        shadow-radius={4}
       />
 
       {/* Fill light from opposite side */}
@@ -485,14 +486,27 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
         <meshStandardMaterial color="#8b7355" opacity={0.3} transparent />
       </mesh>
 
+      {/* Contact Shadow - directly under character for grounding */}
+      {/* Outer soft shadow */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.475, 0]}>
+        <circleGeometry args={[1.2, 32]} />
+        <meshBasicMaterial color="#000000" opacity={0.15} transparent />
+      </mesh>
+
+      {/* Inner darker shadow for feet contact */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.47, 0]}>
+        <circleGeometry args={[0.6, 32]} />
+        <meshBasicMaterial color="#000000" opacity={0.5} transparent />
+      </mesh>
+
       {/* Character Model - responsive positioning */}
       <group
         ref={groupRef}
         position={[
           0,
           fullScreen
-            ? isMobile ? -1.2 : -0.8  // Fullscreen: much lower to show head
-            : isMobile ? -0.7 : -0.5, // Circular: lower on mobile
+            ? isMobile ? -1.45 : -1.35  // Fullscreen: positioned on floor
+            : isMobile ? -0.7 : -0.5,   // Circular: lower on mobile
           0
         ]}
         scale={
