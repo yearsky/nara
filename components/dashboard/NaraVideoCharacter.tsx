@@ -5,11 +5,11 @@ import { Mic } from "lucide-react";
 import dynamic from "next/dynamic";
 import { CharacterSkeleton } from "@/components/skeletons";
 
-// Dynamic import for Video character
-const NaraVideoAvatar = dynamic(
-  () => import("@/components/nara/NaraVideoAvatar").then((mod) => ({ default: mod.NaraVideoAvatar })),
+// Dynamic import for 3D character
+const Nara3DCanvas = dynamic(
+  () => import("@/components/nara/Nara3DCanvas").then((mod) => ({ default: mod.Nara3DCanvas })),
   {
-    ssr: false,
+    ssr: false, // Important: Three.js only works client-side
     loading: () => <CharacterSkeleton />,
   }
 );
@@ -34,8 +34,8 @@ export default function NaraVideoCharacter({
       <div className="relative">
         {/* Character Circle Container */}
         <div className="w-60 h-60 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full overflow-hidden shadow-character bg-gradient-to-br from-[#FFD4BA] to-[#FFB88C]">
-          {/* Video Character */}
-          <NaraVideoAvatar className="w-full h-full" />
+          {/* 3D Character */}
+          <Nara3DCanvas className="w-full h-full" />
         </div>
 
         {/* Speech Bubble (Conditional) */}

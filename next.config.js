@@ -23,6 +23,7 @@ const nextConfig = {
       fs: false,
       path: false,
       crypto: false,
+      canvas: false,
     };
     return config;
   },
