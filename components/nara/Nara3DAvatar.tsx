@@ -32,8 +32,8 @@ export function Nara3DAvatar() {
 
   return (
     <>
-      {/* Camera Setup */}
-      <PerspectiveCamera makeDefault position={[0, 0.2, 2.5]} fov={45} />
+      {/* Camera Setup - zoomed out for full body view */}
+      <PerspectiveCamera makeDefault position={[0, 0.5, 4]} fov={50} />
 
       {/* Lighting */}
       <ambientLight intensity={0.6} />
@@ -49,8 +49,8 @@ export function Nara3DAvatar() {
       {/* Environment for realistic reflections */}
       <Environment preset="sunset" />
 
-      {/* Character Model */}
-      <group ref={groupRef} position={[0, -1, 0]} scale={1.8}>
+      {/* Character Model - adjusted for full body in circular frame */}
+      <group ref={groupRef} position={[0, -0.5, 0]} scale={1.2}>
         <primitive object={scene} />
       </group>
     </>
