@@ -38,20 +38,24 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
 
     // Check if scene has actual geometry and skeleton
     if (scene) {
+      let skinnedMeshCount = 0;
       scene.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const mesh = child as THREE.Mesh;
-          console.log('Found mesh:', mesh.name, {
-            hasGeometry: !!mesh.geometry,
-            hasMaterial: !!mesh.material,
-            visible: mesh.visible,
-            isSkinnedMesh: (child as any).isSkinnedMesh
+        if (child instanceof THREE.SkinnedMesh) {
+          skinnedMeshCount++;
+          console.log('✅ Found SkinnedMesh:', child.name, {
+            hasSkeleton: !!child.skeleton,
+            boneCount: child.skeleton?.bones?.length || 0,
+            hasGeometry: !!child.geometry,
+            hasMaterial: !!child.material
           });
+        } else if ((child as THREE.Mesh).isMesh) {
+          console.log('⚠️ Found regular Mesh (not skinned):', child.name);
         }
         if ((child as any).isBone) {
           console.log('Found bone:', child.name);
         }
       });
+      console.log(`Total SkinnedMeshes: ${skinnedMeshCount}`);
     }
     console.log('========================');
   }, [scene, modelAnimations]);
@@ -137,11 +141,34 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
     }
   }, [emotion]);
 
+  // Debug: Log mixer and actions state
+  useEffect(() => {
+    if (mixer && actions) {
+      console.log('=== Animation Mixer Debug ===');
+      console.log('Mixer root:', mixer.getRoot());
+      console.log('SceneRef current:', sceneRef.current);
+      console.log('Available actions:', Object.keys(actions));
+      console.log('============================');
+    }
+  }, [mixer, actions]);
+
   // Play animations based on state
   useEffect(() => {
-    if (!actions) return;
+    if (!actions) {
+      console.warn('⚠️ No actions available');
+      return;
+    }
+
+    if (!mixer) {
+      console.warn('⚠️ No mixer available');
+      return;
+    }
 
     try {
+      console.log('=== Animation Playback ===');
+      console.log('isSpeaking:', isSpeaking);
+      console.log('Available actions:', Object.keys(actions));
+
       // Stop all current animations
       Object.values(actions).forEach((action) => action?.stop());
 
@@ -155,11 +182,19 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
                              (talkingKey ? actions[talkingKey] : null);
 
         if (talkingAction) {
-          console.log('Playing RPM talking animation:', talkingKey || 'F_Talking_Variations_001');
+          console.log('✅ Playing RPM talking animation:', talkingKey || 'F_Talking_Variations_001');
           talkingAction.reset().fadeIn(0.3).play();
           talkingAction.setLoop(THREE.LoopRepeat, Infinity);
+
+          // Debug action state
+          console.log('Action state:', {
+            isRunning: talkingAction.isRunning(),
+            time: talkingAction.time,
+            timeScale: talkingAction.timeScale,
+            weight: talkingAction.getEffectiveWeight()
+          });
         } else {
-          console.log('No talking animation found, using procedural');
+          console.log('❌ No talking animation found, using procedural');
         }
       } else {
         // Play idle or emotion-specific animation
@@ -170,14 +205,15 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
           idleAction.setLoop(THREE.LoopRepeat, Infinity);
         }
       }
+      console.log('=========================');
 
       return () => {
         Object.values(actions).forEach((action) => action?.fadeOut(0.3));
       };
     } catch (error) {
-      console.warn('Animation playback error, using procedural fallback', error);
+      console.error('❌ Animation playback error:', error);
     }
-  }, [isSpeaking, emotion, actions]);
+  }, [isSpeaking, emotion, actions, mixer]);
 
   // Procedural idle animation (works even without animation files)
   useFrame((state) => {
