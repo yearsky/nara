@@ -310,10 +310,56 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       {/* Warm sunny environment */}
       <Environment preset="sunset" />
 
-      {/* Ground Plane - subtle shadow with warm tone */}
+      {/* 3D Room Structure */}
+      {/* Floor - visible solid floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
-        <planeGeometry args={[20, 20]} />
-        <shadowMaterial opacity={0.2} color="#ffa500" />
+        <planeGeometry args={[15, 15]} />
+        <meshStandardMaterial
+          color="#fde68a"
+          roughness={0.8}
+          metalness={0.1}
+        />
+      </mesh>
+
+      {/* Floor border/edge detail */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.49, 0]}>
+        <ringGeometry args={[6.8, 7, 64]} />
+        <meshStandardMaterial color="#f59e0b" roughness={0.9} />
+      </mesh>
+
+      {/* Back Wall - behind Nara */}
+      <mesh position={[0, 1, -4]} receiveShadow>
+        <planeGeometry args={[12, 10]} />
+        <meshStandardMaterial
+          color="#fef3c7"
+          roughness={0.9}
+          metalness={0.05}
+        />
+      </mesh>
+
+      {/* Wall decorative panel */}
+      <mesh position={[0, 1.5, -3.98]}>
+        <planeGeometry args={[8, 4]} />
+        <meshStandardMaterial
+          color="#fef9c3"
+          roughness={0.7}
+        />
+      </mesh>
+
+      {/* Ceiling/Roof */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 4, 0]}>
+        <planeGeometry args={[15, 15]} />
+        <meshStandardMaterial
+          color="#fffbeb"
+          roughness={0.95}
+          side={2}
+        />
+      </mesh>
+
+      {/* Ceiling molding detail */}
+      <mesh position={[0, 3.8, -3.5]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[12, 0.15, 0.15]} />
+        <meshStandardMaterial color="#fbbf24" />
       </mesh>
 
       {/* Character Model - responsive positioning */}
