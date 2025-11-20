@@ -188,8 +188,13 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       console.log('isSpeaking:', isSpeaking);
       console.log('Available actions:', Object.keys(actions));
 
-      // Stop all current animations
-      Object.values(actions).forEach((action) => action?.stop());
+      // Smooth transition: fadeOut current animations instead of abrupt stop
+      const fadeDuration = 0.5; // 500ms for smooth blending
+      Object.values(actions).forEach((action) => {
+        if (action && action.isRunning()) {
+          action.fadeOut(fadeDuration);
+        }
+      });
 
       if (isSpeaking) {
         // Try to play RPM talking animation first
@@ -203,7 +208,11 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
 
         if (talkingAction) {
           console.log('✅ Playing RPM talking animation:', talkingKey || 'Auto-detected');
-          talkingAction.reset().fadeIn(0.3).play();
+          // Smooth crossfade: reset, fadeIn, then play
+          talkingAction.reset();
+          talkingAction.setEffectiveWeight(0); // Start from zero weight
+          talkingAction.play();
+          talkingAction.fadeIn(fadeDuration); // Fade in while old animation fades out
           talkingAction.setLoop(THREE.LoopRepeat, Infinity);
 
           // Debug action state
@@ -225,7 +234,11 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
 
         if (idleAction) {
           console.log('✅ Playing idle animation');
-          idleAction.reset().fadeIn(0.5).play();
+          // Smooth crossfade: reset, fadeIn, then play
+          idleAction.reset();
+          idleAction.setEffectiveWeight(0); // Start from zero weight
+          idleAction.play();
+          idleAction.fadeIn(fadeDuration); // Fade in while old animation fades out
           idleAction.setLoop(THREE.LoopRepeat, Infinity);
         } else {
           console.log('⚠️ No idle animation found, using procedural');
@@ -234,7 +247,11 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       console.log('=========================');
 
       return () => {
-        Object.values(actions).forEach((action) => action?.fadeOut(0.3));
+        Object.values(actions).forEach((action) => {
+          if (action && action.isRunning()) {
+            action.fadeOut(fadeDuration);
+          }
+        });
       };
     } catch (error) {
       console.error('❌ Animation playback error:', error);
