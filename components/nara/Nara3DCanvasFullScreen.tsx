@@ -7,15 +7,11 @@ import { Nara3DLoader } from "./Nara3DLoader";
 import { NaraVideoAvatar } from "./NaraVideoAvatar";
 import { detectWebGLSupport } from "@/lib/webglDetection";
 
-interface Nara3DCanvasProps {
-  className?: string;
-}
-
 /**
- * Circular 3D Canvas for dashboard
+ * Full-screen 3D Canvas for video call/chat screen
  * With WebGL fallback to video
  */
-export function Nara3DCanvas({ className }: Nara3DCanvasProps) {
+export function Nara3DCanvasFullScreen() {
   const [hasWebGL, setHasWebGL] = useState<boolean | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -24,11 +20,11 @@ export function Nara3DCanvas({ className }: Nara3DCanvasProps) {
     setHasWebGL(detectWebGLSupport());
   }, []);
 
-  // Loading state during SSR/mount
-  if (!mounted || hasWebGL === null) {
+  // Show nothing during SSR
+  if (!mounted) {
     return (
-      <div className={`relative ${className} flex items-center justify-center bg-gradient-to-br from-[#FFD4BA] to-[#FFB88C]`}>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B4513]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#FFD4BA] to-[#FFB88C] flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -36,14 +32,23 @@ export function Nara3DCanvas({ className }: Nara3DCanvasProps) {
   // Fallback to video if WebGL not supported
   if (hasWebGL === false) {
     return (
-      <div className={`relative ${className}`}>
-        <NaraVideoAvatar className="w-full h-full" />
+      <div className="absolute inset-0 bg-black">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="/WhatsApp Video 2025-11-18 at 17.47.34.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/40" />
       </div>
     );
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className="absolute inset-0 bg-gradient-to-br from-[#1a1410] to-[#2d1810]">
       <Canvas
         className="w-full h-full"
         gl={{
@@ -54,8 +59,8 @@ export function Nara3DCanvas({ className }: Nara3DCanvasProps) {
         dpr={[1, 2]}
         shadows
       >
-        <Suspense fallback={<Nara3DLoader variant="circular" />}>
-          <Nara3DAvatarEnhanced fullScreen={false} />
+        <Suspense fallback={<Nara3DLoader variant="fullscreen" />}>
+          <Nara3DAvatarEnhanced fullScreen={true} />
         </Suspense>
       </Canvas>
     </div>
