@@ -22,6 +22,7 @@ interface Nara3DAvatarAnimatedProps {
  */
 export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimatedProps) {
   const groupRef = useRef<THREE.Group>(null);
+  const sceneRef = useRef<THREE.Group>(null);
   const gltf = useGLTF("/models/nara/nara-rpm.glb");
 
   // Clone scene for proper instancing
@@ -35,7 +36,7 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
     console.log('Animations:', modelAnimations?.length || 0);
     console.log('Scene children:', scene?.children?.length || 0);
 
-    // Check if scene has actual geometry
+    // Check if scene has actual geometry and skeleton
     if (scene) {
       scene.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
@@ -43,8 +44,12 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
           console.log('Found mesh:', mesh.name, {
             hasGeometry: !!mesh.geometry,
             hasMaterial: !!mesh.material,
-            visible: mesh.visible
+            visible: mesh.visible,
+            isSkinnedMesh: (child as any).isSkinnedMesh
           });
+        }
+        if ((child as any).isBone) {
+          console.log('Found bone:', child.name);
         }
       });
     }
@@ -54,8 +59,8 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
   // Get emotion state from Zustand store
   const { emotion, isSpeaking } = useNaraEmotionStore();
 
-  // Load RPM animations (GLB format - optimized for web)
-  const talkingAnim1 = useGLTF("/animations/F_Talking_Variations_001.glb");
+  // Load RPM animations (GLB format - official from GitHub)
+  const talkingAnim1 = useGLTF("/animations/F_Talking_Variations_001_official.glb");
 
   // Combine model animations with RPM talking animation
   const animations = React.useMemo(() => {
@@ -70,8 +75,8 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
     return combinedAnims;
   }, [modelAnimations, talkingAnim1]);
 
-  // Setup animation mixer
-  const { actions, mixer } = useAnimations(animations, groupRef);
+  // Setup animation mixer - CRITICAL: attach to scene ref, not group ref
+  const { actions, mixer } = useAnimations(animations, sceneRef);
 
   // Animation parameters based on emotion
   const animationParams = useRef({
@@ -258,7 +263,7 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
             : isMobile ? 1.1 : 1.2  // Circular: smaller on mobile
         }
       >
-        <primitive object={scene} />
+        <primitive ref={sceneRef} object={scene} />
       </group>
     </>
   );
@@ -266,4 +271,4 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
 
 // Preload the model and animations for faster initial render
 useGLTF.preload("/models/nara/nara-rpm.glb");
-useGLTF.preload("/animations/F_Talking_Variations_001.glb");
+useGLTF.preload("/animations/F_Talking_Variations_001_official.glb");
