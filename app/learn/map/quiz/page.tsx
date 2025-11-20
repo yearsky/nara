@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -34,7 +36,7 @@ type AnswerState = {
   showExplanation: boolean;
 };
 
-export default function MapQuizPage() {
+function MapQuizContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const quizId = parseInt(searchParams.get("id") || "1");
@@ -537,5 +539,17 @@ export default function MapQuizPage() {
         autoGreet={true}
       />
     </div>
+  );
+}
+
+export default function MapQuizPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-green-50/30 to-emerald-50/30 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+    }>
+      <MapQuizContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,7 +20,7 @@ import {
   getPolaQuizById,
   calculateScore,
   getGradeFromScore,
-  pola_Question,
+  PolaQuizQuestion,
 } from "@/lib/polaQuizData";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import NaraAssistant from "@/components/learn/NaraAssistant";
@@ -34,7 +36,7 @@ type AnswerState = {
   showExplanation: boolean;
 };
 
-export default function PolaQuizPage() {
+function PolaQuizContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const quizId = parseInt(searchParams.get("id") || "1");
@@ -53,7 +55,7 @@ export default function PolaQuizPage() {
     if (quizData) {
       setQuiz(quizData);
       setAnswers(
-        quizData.questions.map((q: pola_Question) => ({
+        quizData.questions.map((q: PolaQuizQuestion) => ({
           questionId: q.id,
           selectedAnswer: null,
           isCorrect: null,
@@ -116,7 +118,7 @@ export default function PolaQuizPage() {
   const handleRetakeQuiz = () => {
     setCurrentQuestionIndex(0);
     setAnswers(
-      quiz.questions.map((q: pola_Question) => ({
+      quiz.questions.map((q: PolaQuizQuestion) => ({
         questionId: q.id,
         selectedAnswer: null,
         isCorrect: null,
@@ -233,7 +235,7 @@ export default function PolaQuizPage() {
                 Review Jawaban
               </h3>
               <div className="space-y-3">
-                {quiz.questions.map((question: pola_Question, idx: number) => {
+                {quiz.questions.map((question: PolaQuizQuestion, idx: number) => {
                   const answer = answers[idx];
                   return (
                     <div
@@ -516,5 +518,17 @@ export default function PolaQuizPage() {
         autoGreet={true}
       />
     </div>
+  );
+}
+
+export default function PolaQuizPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-teal-50/30 to-cyan-50/30 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+      </div>
+    }>
+      <PolaQuizContent />
+    </Suspense>
   );
 }

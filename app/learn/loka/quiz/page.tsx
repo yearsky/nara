@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,7 +20,7 @@ import {
   getLokaQuizById,
   calculateScore,
   getGradeFromScore,
-  loka_Question,
+  LokaQuizQuestion,
 } from "@/lib/lokaQuizData";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import NaraAssistant from "@/components/learn/NaraAssistant";
@@ -34,7 +36,7 @@ type AnswerState = {
   showExplanation: boolean;
 };
 
-export default function LokaQuizPage() {
+function LokaQuizContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const quizId = parseInt(searchParams.get("id") || "1");
@@ -53,7 +55,7 @@ export default function LokaQuizPage() {
     if (quizData) {
       setQuiz(quizData);
       setAnswers(
-        quizData.questions.map((q: loka_Question) => ({
+        quizData.questions.map((q: LokaQuizQuestion) => ({
           questionId: q.id,
           selectedAnswer: null,
           isCorrect: null,
@@ -116,7 +118,7 @@ export default function LokaQuizPage() {
   const handleRetakeQuiz = () => {
     setCurrentQuestionIndex(0);
     setAnswers(
-      quiz.questions.map((q: loka_Question) => ({
+      quiz.questions.map((q: LokaQuizQuestion) => ({
         questionId: q.id,
         selectedAnswer: null,
         isCorrect: null,
@@ -233,7 +235,7 @@ export default function LokaQuizPage() {
                 Review Jawaban
               </h3>
               <div className="space-y-3">
-                {quiz.questions.map((question: loka_Question, idx: number) => {
+                {quiz.questions.map((question: LokaQuizQuestion, idx: number) => {
                   const answer = answers[idx];
                   return (
                     <div
@@ -516,5 +518,17 @@ export default function LokaQuizPage() {
         autoGreet={true}
       />
     </div>
+  );
+}
+
+export default function LokaQuizPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-orange-50/30 to-yellow-50/30 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      </div>
+    }>
+      <LokaQuizContent />
+    </Suspense>
   );
 }
