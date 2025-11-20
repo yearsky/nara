@@ -27,21 +27,41 @@ export default function SubmoduleHeader({
 }: SubmoduleHeaderProps) {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Detect scroll position
+  // Detect scroll position and direction
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const currentScrollY = window.scrollY;
+
+      // Compact header after scrolling down 50px
+      setIsScrolled(currentScrollY > 50);
+
+      // Hide header when scrolling down, show when scrolling up
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsHidden(true);
+      } else {
+        setIsHidden(false);
+      }
+
+      setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [lastScrollY]);
 
   return (
-    <header className="sticky top-4 z-40 px-4 md:px-6">
+    <header
+      className="sticky top-2 z-40 px-4 md:px-6 transition-all duration-300"
+      style={{
+        transform: isHidden ? "translateY(-120%)" : "translateY(0)",
+        transition: "transform 0.3s ease-in-out",
+      }}
+    >
       <div className="max-w-5xl mx-auto">
         {/* Glass morphism container */}
         <motion.div
@@ -50,7 +70,8 @@ export default function SubmoduleHeader({
             background: `linear-gradient(135deg, ${gradientFrom}15 0%, ${gradientTo}10 100%)`,
           }}
           animate={{
-            height: isScrolled ? "auto" : "auto"
+            height: isScrolled ? "auto" : "auto",
+            opacity: isHidden ? 0 : 1,
           }}
           transition={{ duration: 0.3 }}
         >

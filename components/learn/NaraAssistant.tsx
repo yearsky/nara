@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import {
   MessageCircle,
   X,
@@ -10,6 +10,7 @@ import {
   BookOpen,
   Sparkles,
   Volume2,
+  Move,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -39,6 +40,8 @@ export default function NaraAssistant({
   const [messages, setMessages] = useState<NaraMessage[]>([]);
   const [showBubble, setShowBubble] = useState(false);
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const constraintsRef = useRef<HTMLDivElement>(null);
 
   // Auto greet on mount
   useEffect(() => {
@@ -161,14 +164,65 @@ export default function NaraAssistant({
 
   const lastMessage = messages[messages.length - 1];
 
+  // Constraint to prevent middle placement
+  const handleDragEnd = (event: any, info: any) => {
+    if (typeof window === "undefined") return;
+
+    const { x, y } = info.point;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    // Define forbidden zone (center 30% of screen)
+    const forbiddenLeft = windowWidth * 0.35;
+    const forbiddenRight = windowWidth * 0.65;
+    const forbiddenTop = windowHeight * 0.35;
+    const forbiddenBottom = windowHeight * 0.65;
+
+    let newX = info.offset.x;
+    let newY = info.offset.y;
+
+    // Check if in forbidden zone (center area)
+    if (x > forbiddenLeft && x < forbiddenRight && y > forbiddenTop && y < forbiddenBottom) {
+      // Snap to nearest edge
+      const distanceToLeft = x - forbiddenLeft;
+      const distanceToRight = forbiddenRight - x;
+      const distanceToTop = y - forbiddenTop;
+      const distanceToBottom = forbiddenBottom - y;
+
+      const minDistance = Math.min(distanceToLeft, distanceToRight, distanceToTop, distanceToBottom);
+
+      if (minDistance === distanceToLeft) {
+        newX = info.offset.x - (x - forbiddenLeft) - 20;
+      } else if (minDistance === distanceToRight) {
+        newX = info.offset.x + (forbiddenRight - x) + 20;
+      } else if (minDistance === distanceToTop) {
+        newY = info.offset.y - (y - forbiddenTop) - 20;
+      } else {
+        newY = info.offset.y + (forbiddenBottom - y) + 20;
+      }
+    }
+
+    setPosition({ x: newX, y: newY });
+  };
+
   return (
     <>
+      {/* Drag Constraints Container */}
+      <div ref={constraintsRef} className="fixed inset-0 pointer-events-none" />
+
       {/* Floating Nara Button */}
       <motion.div
-        className="fixed bottom-24 right-4 z-40"
+        drag
+        dragConstraints={constraintsRef}
+        dragElastic={0.1}
+        dragMomentum={false}
+        onDragEnd={handleDragEnd}
+        style={{ x: position.x, y: position.y }}
+        className="fixed bottom-24 right-4 z-40 cursor-grab active:cursor-grabbing"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.5, type: "spring", stiffness: 260, damping: 20 }}
+        whileDrag={{ scale: 1.1, cursor: "grabbing" }}
       >
         {/* Chat Bubble Preview */}
         <AnimatePresence>
@@ -195,10 +249,13 @@ export default function NaraAssistant({
 
         {/* Nara Avatar Button */}
         <motion.button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="relative w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 shadow-2xl flex items-center justify-center border-4 border-white overflow-hidden group"
+          className="relative w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 shadow-2xl flex items-center justify-center border-4 border-white overflow-hidden group pointer-events-auto"
         >
           {/* Animated background pulse */}
           <motion.div
