@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Mic, MicOff, Video, VideoOff, Square } from 'lucide-react'
 import { useNaraChat } from '@/hooks/useNaraChat'
@@ -39,6 +39,45 @@ export default function BottomControlsBar({
 
   // Use Nara Chat hook for message orchestration
   const { handleSendMessage, getNaraResponse, isLoading, credits, isLowCredits, error, messages } = useNaraChat()
+
+  // Auto-hide TopicChips if there are existing messages (from localStorage)
+  useEffect(() => {
+    if (messages.length > 0) {
+      setHasInteracted(true)
+      setShowTopicChips(false)
+    }
+  }, [messages.length])
+
+  // Handle auto-send when silence is detected (5 seconds)
+  const handleAutoSend = useCallback(async (finalTranscript: string) => {
+    console.log('[BottomControlsBar] Auto-send triggered:', finalTranscript)
+
+    // Reset the current message ref
+    currentUserMessageIdRef.current = null
+
+    // Send to Nara
+    if (finalTranscript && finalTranscript.trim()) {
+      if (!hasInteracted) {
+        setHasInteracted(true)
+        setShowTopicChips(false)
+      }
+      await getNaraResponse(finalTranscript)
+    }
+  }, [hasInteracted, getNaraResponse])
+
+  // Use Live Transcription hook for real-time speech-to-text
+  // with 5-second silence detection for auto-send
+  const {
+    isListening,
+    transcript,
+    interimTranscript,
+    fullTranscript,
+    error: transcriptError,
+    isSupported,
+    startListening,
+    stopListening,
+    resetTranscript,
+  } = useLiveTranscription('id-ID', 5000, handleAutoSend)
 
   // Check microphone permission on mount and auto-start on grant
   useEffect(() => {
@@ -88,45 +127,6 @@ export default function BottomControlsBar({
 
     checkMicPermission()
   }, [isSupported, isListening, startListening, resetTranscript])
-
-  // Auto-hide TopicChips if there are existing messages (from localStorage)
-  useEffect(() => {
-    if (messages.length > 0) {
-      setHasInteracted(true)
-      setShowTopicChips(false)
-    }
-  }, []) // Run only on mount
-
-  // Handle auto-send when silence is detected (5 seconds)
-  const handleAutoSend = async (finalTranscript: string) => {
-    console.log('[BottomControlsBar] Auto-send triggered:', finalTranscript)
-
-    // Reset the current message ref
-    currentUserMessageIdRef.current = null
-
-    // Send to Nara
-    if (finalTranscript && finalTranscript.trim()) {
-      if (!hasInteracted) {
-        setHasInteracted(true)
-        setShowTopicChips(false)
-      }
-      await getNaraResponse(finalTranscript)
-    }
-  }
-
-  // Use Live Transcription hook for real-time speech-to-text
-  // with 5-second silence detection for auto-send
-  const {
-    isListening,
-    transcript,
-    interimTranscript,
-    fullTranscript,
-    error: transcriptError,
-    isSupported,
-    startListening,
-    stopListening,
-    resetTranscript,
-  } = useLiveTranscription('id-ID', 5000, handleAutoSend)
 
   // Access store directly for real-time updates
   const { addMessage, updateMessage } = useVoiceChatStore()
