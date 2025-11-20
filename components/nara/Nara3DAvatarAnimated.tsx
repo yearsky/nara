@@ -297,7 +297,7 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
 
       {/* HDRI Environment - Indonesian Rainforest Village Theme */}
       <Environment
-        files="/hdri/rainforest_trail_4k.exr"
+        files="/hdri/rainforest_trail_2k.exr"
         background
         blur={0}
       />
