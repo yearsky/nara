@@ -169,9 +169,14 @@ export default function NaraAssistant({
   const handleDragEnd = (event: any, info: any) => {
     if (typeof window === "undefined") return;
 
-    const { point } = info;
+    const { point, offset } = info;
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
+
+    // Calculate actual position (initial bottom-24 right-4 = bottom-96px right-16px)
+    // Position = initial position + offset
+    const actualX = windowWidth - 16 - 64 + offset.x; // right-4 (16px) + width (64px)
+    const actualY = windowHeight - 96 - 64 + offset.y; // bottom-24 (96px) + height (64px)
 
     // Define forbidden zone (center 40% of screen)
     const forbiddenLeft = windowWidth * 0.3;
@@ -179,47 +184,51 @@ export default function NaraAssistant({
     const forbiddenTop = windowHeight * 0.3;
     const forbiddenBottom = windowHeight * 0.7;
 
-    let finalX = point.x;
-    let finalY = point.y;
+    let newOffsetX = offset.x;
+    let newOffsetY = offset.y;
 
     // Check if in forbidden zone (center area)
-    if (point.x > forbiddenLeft && point.x < forbiddenRight && point.y > forbiddenTop && point.y < forbiddenBottom) {
+    if (actualX > forbiddenLeft && actualX < forbiddenRight && actualY > forbiddenTop && actualY < forbiddenBottom) {
       // Calculate distances to each edge
-      const distanceToLeft = point.x - forbiddenLeft;
-      const distanceToRight = forbiddenRight - point.x;
-      const distanceToTop = point.y - forbiddenTop;
-      const distanceToBottom = forbiddenBottom - point.y;
+      const distanceToLeft = actualX - forbiddenLeft;
+      const distanceToRight = forbiddenRight - actualX;
+      const distanceToTop = actualY - forbiddenTop;
+      const distanceToBottom = forbiddenBottom - actualY;
 
       const minDistance = Math.min(distanceToLeft, distanceToRight, distanceToTop, distanceToBottom);
 
-      // Snap to nearest edge
+      // Snap to nearest edge - calculate new target position
+      let targetX = actualX;
+      let targetY = actualY;
+
       if (minDistance === distanceToLeft) {
         // Snap to left edge
-        finalX = forbiddenLeft - 100;
+        targetX = forbiddenLeft - 80;
       } else if (minDistance === distanceToRight) {
         // Snap to right edge
-        finalX = forbiddenRight + 100;
+        targetX = forbiddenRight + 80;
       } else if (minDistance === distanceToTop) {
         // Snap to top edge
-        finalY = forbiddenTop - 100;
+        targetY = forbiddenTop - 80;
       } else {
         // Snap to bottom edge
-        finalY = forbiddenBottom + 100;
+        targetY = forbiddenBottom + 80;
       }
+
+      // Convert back to offset from initial position
+      newOffsetX = targetX - (windowWidth - 16 - 64);
+      newOffsetY = targetY - (windowHeight - 96 - 64);
     }
 
     // Determine bubble position based on horizontal location
+    const finalX = windowWidth - 16 - 64 + newOffsetX;
     if (finalX < windowWidth / 2) {
       setBubblePosition('right');
     } else {
       setBubblePosition('left');
     }
 
-    // Calculate offset from bottom-right corner (initial position)
-    const offsetX = finalX - windowWidth + 16 + 64; // 16px right padding + 64px button width
-    const offsetY = -(windowHeight - finalY - 96 - 64); // 96px bottom padding + 64px button height
-
-    setPosition({ x: offsetX, y: offsetY });
+    setPosition({ x: newOffsetX, y: newOffsetY });
   };
 
   return (

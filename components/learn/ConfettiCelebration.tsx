@@ -41,17 +41,21 @@ const ICONS = ["star", "heart", "sparkle", "trophy", "zap"] as const;
 export function ConfettiCelebration({
   show,
   onComplete,
-  duration = 4000,
+  duration = 3000,  // Changed from 4000 to 3000 (3 seconds)
   intensity = "high",
   message = "Luar Biasa! 🎉",
 }: ConfettiCelebrationProps) {
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (!show) {
       setConfetti([]);
+      setIsVisible(false);
       return;
     }
+
+    setIsVisible(true);
 
     // Determine number of confetti pieces based on intensity
     const count = intensity === "low" ? 30 : intensity === "medium" ? 50 : 80;
@@ -72,14 +76,21 @@ export function ConfettiCelebration({
     }
     setConfetti(pieces);
 
-    // Auto cleanup after duration
+    // Auto cleanup after duration (3 seconds)
     const timer = setTimeout(() => {
-      setConfetti([]);
-      if (onComplete) onComplete();
+      handleClose();
     }, duration);
 
     return () => clearTimeout(timer);
-  }, [show, duration, intensity, onComplete]);
+  }, [show, duration, intensity]);
+
+  const handleClose = () => {
+    setConfetti([]);
+    setIsVisible(false);
+    if (onComplete) onComplete();
+  };
+
+  if (!isVisible) return null;
 
   const getIcon = (iconType: string, size: number) => {
     const iconProps = {
@@ -103,15 +114,14 @@ export function ConfettiCelebration({
     }
   };
 
-  if (!show) return null;
-
   return (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] pointer-events-none overflow-hidden"
+        className="fixed inset-0 z-[100] overflow-hidden"
+        style={{ pointerEvents: 'none' }}
       >
         {/* Confetti pieces */}
         {confetti.map((piece) => (
@@ -152,7 +162,11 @@ export function ConfettiCelebration({
         ))}
 
         {/* Celebration Message */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-auto">
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ pointerEvents: 'auto' }}
+          onClick={handleClose}
+        >
           <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
@@ -162,9 +176,9 @@ export function ConfettiCelebration({
               stiffness: 200,
               damping: 15,
             }}
-            onClick={() => {
-              setConfetti([]);
-              if (onComplete) onComplete();
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClose();
             }}
             className="bg-white/95 backdrop-blur-md rounded-3xl px-8 py-6 shadow-2xl border-4 border-yellow-400 cursor-pointer hover:scale-105 transition-transform"
           >
@@ -183,7 +197,7 @@ export function ConfettiCelebration({
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
                   {message}
                 </h2>
-                <p className="text-xs text-gray-500 mt-2">Klik untuk menutup</p>
+                <p className="text-xs text-gray-500 mt-2">Klik untuk menutup (otomatis dalam 3 detik)</p>
               </div>
             </motion.div>
           </motion.div>
