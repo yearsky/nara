@@ -15,6 +15,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import GlassFooter from "@/components/learn/GlassFooter";
+import QuizGamesFAB from "@/components/learn/QuizGamesFAB";
 import Image from "next/image";
 
 type RecipeType = 'Makanan Utama' | 'Kudapan' | 'Minuman';
@@ -423,6 +424,9 @@ export default function LokaPage() {
       </AnimatePresence>
 
       {/* Glass Footer */}
+      {/* Quiz & Games FAB */}
+      <QuizGamesFAB modulePath="/learn/loka" />
+
       <GlassFooter />
     </div>
   );

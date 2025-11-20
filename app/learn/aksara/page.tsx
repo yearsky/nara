@@ -13,6 +13,7 @@ import {
 import { motion } from "framer-motion";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import GlassFooter from "@/components/learn/GlassFooter";
+import QuizGamesFAB from "@/components/learn/QuizGamesFAB";
 
 const lessons = [
   {
@@ -279,6 +280,9 @@ export default function AksaraPage() {
       </main>
 
       {/* Glass Footer */}
+      {/* Quiz & Games FAB */}
+      <QuizGamesFAB modulePath="/learn/aksara" />
+
       <GlassFooter />
     </div>
   );

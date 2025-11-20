@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface SubmoduleHeaderProps {
@@ -34,20 +34,28 @@ export default function SubmoduleHeader({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    let ticking = false;
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
 
-      // Compact header after scrolling down 50px
-      setIsScrolled(currentScrollY > 50);
+          // Compact header after scrolling down 50px
+          setIsScrolled(currentScrollY > 50);
 
-      // Hide header when scrolling down, show when scrolling up
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsHidden(true);
-      } else {
-        setIsHidden(false);
+          // Hide header when scrolling down, show when scrolling up
+          if (currentScrollY > lastScrollY && currentScrollY > 100) {
+            setIsHidden(true);
+          } else if (currentScrollY < lastScrollY) {
+            setIsHidden(false);
+          }
+
+          setLastScrollY(currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
       }
-
-      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -55,11 +63,14 @@ export default function SubmoduleHeader({
   }, [lastScrollY]);
 
   return (
-    <header
-      className="sticky top-2 z-40 px-4 md:px-6 transition-all duration-300"
-      style={{
-        transform: isHidden ? "translateY(-120%)" : "translateY(0)",
-        transition: "transform 0.3s ease-in-out",
+    <motion.header
+      className="sticky top-2 z-40 px-4 md:px-6"
+      animate={{
+        y: isHidden ? -120 : 0,
+      }}
+      transition={{
+        duration: 0.3,
+        ease: "easeInOut",
       }}
     >
       <div className="max-w-5xl mx-auto">
@@ -70,38 +81,53 @@ export default function SubmoduleHeader({
             background: `linear-gradient(135deg, ${gradientFrom}15 0%, ${gradientTo}10 100%)`,
           }}
           animate={{
-            height: isScrolled ? "auto" : "auto",
             opacity: isHidden ? 0 : 1,
           }}
-          transition={{ duration: 0.3 }}
+          transition={{
+            duration: 0.3,
+            ease: "easeInOut",
+          }}
         >
-          <div className={cn(
-            "transition-all duration-300",
-            isScrolled ? "p-3" : "p-4 md:p-5"
-          )}>
-            {/* Scrolled State - Compact */}
+          <AnimatePresence mode="wait">
             {isScrolled ? (
-              <div className="flex items-center gap-2">
-                {/* Back Button */}
-                <button
-                  onClick={() => router.push(backHref)}
-                  className="flex items-center justify-center text-stone-600 hover:text-stone-900 transition-colors group"
-                >
-                  <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all">
-                    <ArrowLeft className="w-4 h-4" />
-                  </div>
-                </button>
+              /* Scrolled State - Compact */
+              <motion.div
+                key="compact"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="p-3"
+              >
+                <div className="flex items-center gap-2">
+                  {/* Back Button */}
+                  <button
+                    onClick={() => router.push(backHref)}
+                    className="flex items-center justify-center text-stone-600 hover:text-stone-900 transition-colors group"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all">
+                      <ArrowLeft className="w-4 h-4" />
+                    </div>
+                  </button>
 
-                {/* Additional Content (Search, Stats, etc) */}
-                {children && (
-                  <div className="flex-1">
-                    {children}
-                  </div>
-                )}
-              </div>
+                  {/* Additional Content (Search, Stats, etc) */}
+                  {children && (
+                    <div className="flex-1">
+                      {children}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
             ) : (
               /* Default State - Full */
-              <>
+              <motion.div
+                key="full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="p-4 md:p-5"
+              >
                 {/* Top Row - Back button and Icon */}
                 <div className="flex items-center justify-between mb-3">
                   <button
@@ -141,11 +167,11 @@ export default function SubmoduleHeader({
 
                 {/* Additional Content */}
                 {children}
-              </>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </motion.div>
       </div>
-    </header>
+    </motion.header>
   );
 }
