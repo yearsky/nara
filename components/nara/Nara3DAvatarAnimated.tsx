@@ -6,6 +6,7 @@ import { useFrame } from "@react-three/fiber";
 import { useGLTF, useFBX, useAnimations, PerspectiveCamera, Environment } from "@react-three/drei";
 import { useNaraEmotionStore } from "@/stores/naraEmotionStore";
 import * as THREE from "three";
+import { SkeletonUtils } from "three-stdlib";
 
 interface Nara3DAvatarAnimatedProps {
   fullScreen?: boolean;
@@ -25,8 +26,12 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
   const sceneRef = useRef<THREE.Group>(null);
   const gltf = useGLTF("/models/nara/nara-rpm.glb");
 
-  // Clone scene for proper instancing
-  const scene = React.useMemo(() => gltf.scene.clone(true), [gltf.scene]);
+  // Use original scene directly (cloning breaks SkinnedMesh skeleton binding)
+  const scene = React.useMemo(() => {
+    // Clone scene with proper skeleton binding using SkeletonUtils
+    const cloned = SkeletonUtils.clone(gltf.scene);
+    return cloned;
+  }, [gltf.scene]);
   const modelAnimations = React.useMemo(() => gltf.animations, [gltf.animations]);
 
   // Debug: Log model loading with detailed geometry info
