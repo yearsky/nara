@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import { useChatHistoryStore } from '@/stores/chatHistoryStore'
 import { DISPOSAL_CONFIG } from '@/config/disposalConfig'
 
@@ -9,6 +9,21 @@ import { DISPOSAL_CONFIG } from '@/config/disposalConfig'
 export function useMessageDisposal() {
   const { visibleMessages, disposeOldMessages } = useChatHistoryStore()
   const disposalTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile/desktop based on Tailwind's md breakpoint (768px)
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)')
+
+    // Set initial value
+    setIsMobile(mediaQuery.matches)
+
+    // Listen for changes
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mediaQuery.addEventListener('change', handler)
+
+    return () => mediaQuery.removeEventListener('change', handler)
+  }, [])
 
   // Trigger haptic feedback on disposal (mobile only)
   const triggerHaptic = useCallback(() => {
@@ -30,17 +45,21 @@ export function useMessageDisposal() {
       clearTimeout(disposalTimeoutRef.current)
     }
 
+    // Use mobile or desktop limit based on screen size
+    const maxMessages = isMobile
+      ? DISPOSAL_CONFIG.MAX_VISIBLE_MESSAGES_MOBILE
+      : DISPOSAL_CONFIG.MAX_VISIBLE_MESSAGES
+
     // Schedule new disposal
     disposalTimeoutRef.current = setTimeout(() => {
-      const messagesToDispose =
-        visibleMessages.length - DISPOSAL_CONFIG.MAX_VISIBLE_MESSAGES
+      const messagesToDispose = visibleMessages.length - maxMessages
 
       if (messagesToDispose > 0) {
         triggerHaptic()
-        disposeOldMessages(DISPOSAL_CONFIG.MAX_VISIBLE_MESSAGES)
+        disposeOldMessages(maxMessages)
       }
     }, DISPOSAL_CONFIG.DISPOSAL_DELAY)
-  }, [visibleMessages.length, disposeOldMessages, triggerHaptic])
+  }, [visibleMessages.length, disposeOldMessages, triggerHaptic, isMobile])
 
   // Schedule disposal when new messages arrive
   useEffect(() => {
@@ -55,6 +74,9 @@ export function useMessageDisposal() {
 
   return {
     visibleMessages,
-    maxVisibleMessages: DISPOSAL_CONFIG.MAX_VISIBLE_MESSAGES,
+    maxVisibleMessages: isMobile
+      ? DISPOSAL_CONFIG.MAX_VISIBLE_MESSAGES_MOBILE
+      : DISPOSAL_CONFIG.MAX_VISIBLE_MESSAGES,
+    isMobile,
   }
 }
