@@ -24,6 +24,8 @@ export function useLiveTranscription(
   const lastSpeechTimeRef = useRef<number>(0)
   const isManualStopRef = useRef<boolean>(false)
   const shouldBeListeningRef = useRef<boolean>(false)
+  const restartAttemptsRef = useRef<number>(0)
+  const lastRestartTimeRef = useRef<number>(0)
 
   // Clear silence timer helper
   const clearSilenceTimer = useCallback(() => {
@@ -85,6 +87,8 @@ export function useLiveTranscription(
         console.log('[useLiveTranscription] Recognition started')
         setIsListening(true)
         setError(null)
+        // Reset restart counter on successful start
+        restartAttemptsRef.current = 0
       }
 
       recognitionRef.current.onresult = (event: any) => {
@@ -107,6 +111,9 @@ export function useLiveTranscription(
 
         // Update last speech time
         lastSpeechTimeRef.current = Date.now()
+
+        // Reset restart counter when we get successful results
+        restartAttemptsRef.current = 0
 
         if (final) {
           setTranscript((prev) => prev + final)
@@ -134,23 +141,29 @@ export function useLiveTranscription(
           console.error('[useLiveTranscription] Microphone not accessible')
           setError('Mikrofon tidak ditemukan atau tidak diizinkan.')
           setIsListening(false)
+          shouldBeListeningRef.current = false
         } else if (event.error === 'not-allowed') {
           console.error('[useLiveTranscription] Microphone permission denied')
           setError('Izin mikrofon ditolak. Mohon izinkan akses mikrofon.')
           setIsListening(false)
+          shouldBeListeningRef.current = false
         } else if (event.error === 'aborted') {
-          console.log('[useLiveTranscription] Recognition aborted by user')
-          // Don't show error for aborted (user stopped)
+          console.log('[useLiveTranscription] Recognition aborted')
+          // IMPORTANT: Stop restart loop on aborted error
           setError(null)
           setIsListening(false)
+          shouldBeListeningRef.current = false
+          isManualStopRef.current = false
         } else if (event.error === 'network') {
           console.error('[useLiveTranscription] Network error')
           setError('Kesalahan jaringan. Periksa koneksi internet.')
           setIsListening(false)
+          shouldBeListeningRef.current = false
         } else {
           console.error('[useLiveTranscription] Unknown error:', event.error)
           setError(`Error: ${event.error}`)
           setIsListening(false)
+          shouldBeListeningRef.current = false
         }
       }
 
@@ -167,12 +180,34 @@ export function useLiveTranscription(
           setIsListening(false)
           isManualStopRef.current = false
           shouldBeListeningRef.current = false
+          restartAttemptsRef.current = 0 // Reset restart counter
           return
         }
 
         // If recognition ended unexpectedly but we should still be listening, try to restart
         if (shouldBeListeningRef.current) {
-          console.log('[useLiveTranscription] Unexpected end, attempting to restart...')
+          // Check restart attempts and time window (max 3 restarts in 5 seconds)
+          const now = Date.now()
+          const timeSinceLastRestart = now - lastRestartTimeRef.current
+
+          if (timeSinceLastRestart > 5000) {
+            // Reset counter if more than 5 seconds passed
+            restartAttemptsRef.current = 0
+          }
+
+          if (restartAttemptsRef.current >= 3) {
+            console.error('[useLiveTranscription] Max restart attempts reached, stopping')
+            setIsListening(false)
+            shouldBeListeningRef.current = false
+            restartAttemptsRef.current = 0
+            setError('Mic terus terputus. Silakan coba lagi.')
+            return
+          }
+
+          console.log('[useLiveTranscription] Unexpected end, attempting to restart... (attempt', restartAttemptsRef.current + 1, '/ 3)')
+
+          restartAttemptsRef.current += 1
+          lastRestartTimeRef.current = now
 
           // Wait a bit before restarting to avoid rapid restart loops
           setTimeout(() => {
@@ -184,12 +219,14 @@ export function useLiveTranscription(
                 console.error('[useLiveTranscription] Failed to restart:', err)
                 setIsListening(false)
                 shouldBeListeningRef.current = false
+                restartAttemptsRef.current = 0
               }
             }
-          }, 200)
+          }, 300) // Increased delay to 300ms
         } else {
           // Normal end, update state
           setIsListening(false)
+          restartAttemptsRef.current = 0
         }
       }
 
