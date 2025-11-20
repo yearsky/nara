@@ -152,7 +152,7 @@ export default function QuizPage() {
 
   if (showResults) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50/30 to-pink-50/30 pb-32 pt-6">
+      <div className="min-h-screen bg-gradient-to-b from-purple-50/30 to-pink-50/30 pb-8 pt-6">
         <SubmoduleHeader
           title="Hasil Quiz"
           subtitle={story.title}
@@ -329,13 +329,13 @@ export default function QuizPage() {
           />
         ) : null}
 
-        <GlassFooter />
+        {/* GlassFooter removed for better quiz UX */}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50/30 to-pink-50/30 pb-32 pt-6">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50/30 to-pink-50/30 pb-8 pt-6">
       <SubmoduleHeader
         title={`Quiz: ${story.title}`}
         subtitle={`Pertanyaan ${currentQuestionIndex + 1} dari ${quiz.questions.length}`}
@@ -545,7 +545,7 @@ export default function QuizPage() {
         autoGreet={true}
       />
 
-      <GlassFooter />
+      {/* GlassFooter removed for better quiz UX */}
     </div>
   );
 }

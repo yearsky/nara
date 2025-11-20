@@ -41,6 +41,7 @@ export default function NaraAssistant({
   const [showBubble, setShowBubble] = useState(false);
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [bubblePosition, setBubblePosition] = useState<'left' | 'right'>('left');
   const constraintsRef = useRef<HTMLDivElement>(null);
 
   // Auto greet on mount
@@ -168,41 +169,57 @@ export default function NaraAssistant({
   const handleDragEnd = (event: any, info: any) => {
     if (typeof window === "undefined") return;
 
-    const { x, y } = info.point;
+    const { point } = info;
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    // Define forbidden zone (center 30% of screen)
-    const forbiddenLeft = windowWidth * 0.35;
-    const forbiddenRight = windowWidth * 0.65;
-    const forbiddenTop = windowHeight * 0.35;
-    const forbiddenBottom = windowHeight * 0.65;
+    // Define forbidden zone (center 40% of screen)
+    const forbiddenLeft = windowWidth * 0.3;
+    const forbiddenRight = windowWidth * 0.7;
+    const forbiddenTop = windowHeight * 0.3;
+    const forbiddenBottom = windowHeight * 0.7;
 
-    let newX = info.offset.x;
-    let newY = info.offset.y;
+    let finalX = point.x;
+    let finalY = point.y;
 
     // Check if in forbidden zone (center area)
-    if (x > forbiddenLeft && x < forbiddenRight && y > forbiddenTop && y < forbiddenBottom) {
-      // Snap to nearest edge
-      const distanceToLeft = x - forbiddenLeft;
-      const distanceToRight = forbiddenRight - x;
-      const distanceToTop = y - forbiddenTop;
-      const distanceToBottom = forbiddenBottom - y;
+    if (point.x > forbiddenLeft && point.x < forbiddenRight && point.y > forbiddenTop && point.y < forbiddenBottom) {
+      // Calculate distances to each edge
+      const distanceToLeft = point.x - forbiddenLeft;
+      const distanceToRight = forbiddenRight - point.x;
+      const distanceToTop = point.y - forbiddenTop;
+      const distanceToBottom = forbiddenBottom - point.y;
 
       const minDistance = Math.min(distanceToLeft, distanceToRight, distanceToTop, distanceToBottom);
 
+      // Snap to nearest edge
       if (minDistance === distanceToLeft) {
-        newX = info.offset.x - (x - forbiddenLeft) - 20;
+        // Snap to left edge
+        finalX = forbiddenLeft - 100;
       } else if (minDistance === distanceToRight) {
-        newX = info.offset.x + (forbiddenRight - x) + 20;
+        // Snap to right edge
+        finalX = forbiddenRight + 100;
       } else if (minDistance === distanceToTop) {
-        newY = info.offset.y - (y - forbiddenTop) - 20;
+        // Snap to top edge
+        finalY = forbiddenTop - 100;
       } else {
-        newY = info.offset.y + (forbiddenBottom - y) + 20;
+        // Snap to bottom edge
+        finalY = forbiddenBottom + 100;
       }
     }
 
-    setPosition({ x: newX, y: newY });
+    // Determine bubble position based on horizontal location
+    if (finalX < windowWidth / 2) {
+      setBubblePosition('right');
+    } else {
+      setBubblePosition('left');
+    }
+
+    // Calculate offset from bottom-right corner (initial position)
+    const offsetX = finalX - windowWidth + 16 + 64; // 16px right padding + 64px button width
+    const offsetY = -(windowHeight - finalY - 96 - 64); // 96px bottom padding + 64px button height
+
+    setPosition({ x: offsetX, y: offsetY });
   };
 
   return (
@@ -228,10 +245,12 @@ export default function NaraAssistant({
         <AnimatePresence>
           {showBubble && lastMessage && !isOpen && (
             <motion.div
-              initial={{ opacity: 0, x: 20, scale: 0.8 }}
+              initial={{ opacity: 0, x: bubblePosition === 'left' ? 20 : -20, scale: 0.8 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 20, scale: 0.8 }}
-              className="absolute bottom-full right-0 mb-3 mr-2 max-w-xs"
+              exit={{ opacity: 0, x: bubblePosition === 'left' ? 20 : -20, scale: 0.8 }}
+              className={`absolute bottom-full mb-3 max-w-xs ${
+                bubblePosition === 'left' ? 'right-0 mr-2' : 'left-0 ml-2'
+              }`}
             >
               <div className="bg-white rounded-2xl shadow-xl p-3 border-2 border-orange-200">
                 <div className="flex items-start gap-2">
@@ -240,8 +259,10 @@ export default function NaraAssistant({
                     {lastMessage.message}
                   </p>
                 </div>
-                {/* Arrow pointer */}
-                <div className="absolute -bottom-2 right-6 w-4 h-4 bg-white border-r-2 border-b-2 border-orange-200 transform rotate-45" />
+                {/* Arrow pointer - dynamic based on position */}
+                <div className={`absolute -bottom-2 w-4 h-4 bg-white border-r-2 border-b-2 border-orange-200 transform rotate-45 ${
+                  bubblePosition === 'left' ? 'right-6' : 'left-6'
+                }`} />
               </div>
             </motion.div>
           )}
