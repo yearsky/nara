@@ -208,11 +208,8 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
 
         if (talkingAction) {
           console.log('✅ Playing RPM talking animation:', talkingKey || 'Auto-detected');
-          // Smooth crossfade: reset, fadeIn, then play
-          talkingAction.reset();
-          talkingAction.setEffectiveWeight(0); // Start from zero weight
-          talkingAction.play();
-          talkingAction.fadeIn(fadeDuration); // Fade in while old animation fades out
+          // Smooth crossfade: method chaining for proper order
+          talkingAction.reset().fadeIn(fadeDuration).play();
           talkingAction.setLoop(THREE.LoopRepeat, Infinity);
 
           // Debug action state
@@ -234,11 +231,8 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
 
         if (idleAction) {
           console.log('✅ Playing idle animation');
-          // Smooth crossfade: reset, fadeIn, then play
-          idleAction.reset();
-          idleAction.setEffectiveWeight(0); // Start from zero weight
-          idleAction.play();
-          idleAction.fadeIn(fadeDuration); // Fade in while old animation fades out
+          // Smooth crossfade: method chaining for proper order
+          idleAction.reset().fadeIn(fadeDuration).play();
           idleAction.setLoop(THREE.LoopRepeat, Infinity);
         } else {
           console.log('⚠️ No idle animation found, using procedural');
