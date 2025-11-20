@@ -281,31 +281,39 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       {/* Camera Setup */}
       <PerspectiveCamera makeDefault position={cameraSettings.position} fov={cameraSettings.fov} />
 
-      {/* Lighting - subtle enhancement (HDRI provides main lighting) */}
-      <ambientLight intensity={0.3} />
-      <directionalLight position={[5, 5, 5]} intensity={0.5} castShadow />
+      {/* Bright, Fresh Yellow Theme Lighting */}
+      <ambientLight intensity={0.8} color="#fffaed" />
+      <directionalLight
+        position={[5, 8, 5]}
+        intensity={1.2}
+        color="#fff5e1"
+        castShadow
+      />
+      <directionalLight
+        position={[-3, 5, -3]}
+        intensity={0.6}
+        color="#ffd700"
+      />
       <spotLight
         position={[0, 10, 0]}
-        angle={0.3}
+        angle={0.4}
         penumbra={1}
-        intensity={0.3}
+        intensity={0.8}
+        color="#ffeb99"
         castShadow
       />
 
-      {/* Rim light for depth */}
-      <pointLight position={[-5, 2, -5]} intensity={0.3} color="#88cc88" />
+      {/* Accent lights for vibrant feel */}
+      <pointLight position={[-5, 3, -5]} intensity={0.5} color="#ffcc00" />
+      <pointLight position={[5, 2, 5]} intensity={0.4} color="#ffdd66" />
 
-      {/* HDRI Environment - Indonesian Rainforest Village Theme */}
-      <Environment
-        files="/hdri/rainforest_trail_2k.exr"
-        background
-        blur={0}
-      />
+      {/* Warm sunny environment */}
+      <Environment preset="sunset" />
 
-      {/* Ground Plane - subtle shadow receiver */}
+      {/* Ground Plane - subtle shadow with warm tone */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
         <planeGeometry args={[20, 20]} />
-        <shadowMaterial opacity={0.3} />
+        <shadowMaterial opacity={0.2} color="#ffa500" />
       </mesh>
 
       {/* Character Model - responsive positioning */}

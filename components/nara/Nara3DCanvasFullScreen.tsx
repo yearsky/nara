@@ -48,12 +48,12 @@ export function Nara3DCanvasFullScreen() {
   }
 
   return (
-    <div className="absolute inset-0 bg-black">
+    <div className="absolute inset-0 bg-gradient-to-br from-yellow-200 via-yellow-100 to-orange-100">
       <Canvas
         className="w-full h-full"
         gl={{
           antialias: true,
-          alpha: false,
+          alpha: true,
           powerPreference: "high-performance",
         }}
         dpr={[1, 2]}
