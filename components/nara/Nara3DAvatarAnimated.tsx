@@ -27,42 +27,21 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
   // Get emotion state from Zustand store
   const { emotion, isSpeaking } = useNaraEmotionStore();
 
-  // Load RPM animations with error handling
-  // Wrapped in try-catch to prevent crashes
-  const [animationsLoaded, setAnimationsLoaded] = React.useState(false);
-  const [loadError, setLoadError] = React.useState(false);
+  // Load RPM animations (GLB format - optimized for web)
+  const talkingAnim1 = useGLTF("/animations/F_Talking_Variations_001.glb");
 
-  let talkingAnim1: any = { animations: [] };
-  let talkingAnim2: any = { animations: [] };
-
-  try {
-    // Try to load animations, but don't crash if they fail
-    if (typeof window !== 'undefined' && !loadError) {
-      // Only load on client-side and if no previous errors
-      // These are optional - fallback to procedural if not available
-      // talkingAnim1 = useFBX("/animations/F_Talking_Variations_001.fbx");
-      // talkingAnim2 = useFBX("/animations/F_Talking_Variations_002.fbx");
-    }
-  } catch (error) {
-    console.warn('FBX animations not loaded, using procedural fallback', error);
-    setLoadError(true);
-  }
-
-  // Combine model animations (no external FBX for now to prevent crashes)
+  // Combine model animations with RPM talking animation
   const animations = React.useMemo(() => {
     const combinedAnims = [...(modelAnimations || [])];
 
-    // Temporarily disabled to prevent black screen
-    // Will re-enable after debugging
-    // if (talkingAnim1.animations?.length > 0) {
-    //   combinedAnims.push(...talkingAnim1.animations);
-    // }
-    // if (talkingAnim2.animations?.length > 0) {
-    //   combinedAnims.push(...talkingAnim2.animations);
-    // }
+    // Add talking animation if loaded
+    if (talkingAnim1.animations && talkingAnim1.animations.length > 0) {
+      combinedAnims.push(...talkingAnim1.animations);
+      console.log('Loaded RPM talking animation:', talkingAnim1.animations.length, 'clips');
+    }
 
     return combinedAnims;
-  }, [modelAnimations]);
+  }, [modelAnimations, talkingAnim1]);
 
   // Setup animation mixer
   const { actions, mixer } = useAnimations(animations, groupRef);
@@ -135,15 +114,20 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       Object.values(actions).forEach((action) => action?.stop());
 
       if (isSpeaking) {
-        // For now, RPM animations disabled - using procedural fallback
-        // This prevents the black screen issue
-        // Will re-enable after fixing FBX loading
+        // Try to play RPM talking animation first
+        const talkingKey = Object.keys(actions).find(key =>
+          key.includes('alk') || key.includes('Talking')
+        );
+        const talkingAction = actions["F_Talking_Variations_001"] ||
+                             actions["mixamo.com"] ||
+                             (talkingKey ? actions[talkingKey] : null);
 
-        // Try to play model animations if available
-        const idleAction = actions["idle"] || actions["Idle"] || actions[Object.keys(actions)[0]];
-        if (idleAction) {
-          idleAction.reset().fadeIn(0.3).play();
-          idleAction.setLoop(THREE.LoopRepeat, Infinity);
+        if (talkingAction) {
+          console.log('Playing RPM talking animation:', talkingKey || 'F_Talking_Variations_001');
+          talkingAction.reset().fadeIn(0.3).play();
+          talkingAction.setLoop(THREE.LoopRepeat, Infinity);
+        } else {
+          console.log('No talking animation found, using procedural');
         }
       } else {
         // Play idle or emotion-specific animation
@@ -187,10 +171,15 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
         followSpeed
       );
 
-      // Speaking animation - subtle head bob (always active for now)
+      // Speaking animation - procedural fallback if RPM not playing
       if (isSpeaking) {
-        const speakingBob = Math.sin(state.clock.elapsedTime * 4) * 0.01;
-        groupRef.current.position.y += speakingBob;
+        const hasTalkingAnim = Object.keys(actions).some(key =>
+          key.includes('alk') || key.includes('Talking')
+        );
+        if (!hasTalkingAnim) {
+          const speakingBob = Math.sin(state.clock.elapsedTime * 4) * 0.01;
+          groupRef.current.position.y += speakingBob;
+        }
       }
     }
   });
@@ -248,5 +237,6 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
   );
 }
 
-// Preload the model for faster initial render
+// Preload the model and animations for faster initial render
 useGLTF.preload("/models/nara/nara-rpm.glb");
+useGLTF.preload("/animations/F_Talking_Variations_001.glb");
