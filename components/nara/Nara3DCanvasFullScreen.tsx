@@ -2,7 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useState, useEffect } from "react";
-import { Nara3DAvatarEnhanced } from "./Nara3DAvatarEnhanced";
+import { Nara3DAvatarAnimated } from "./Nara3DAvatarAnimated";
 import { Nara3DLoader } from "./Nara3DLoader";
 import { NaraVideoAvatar } from "./NaraVideoAvatar";
 import { detectWebGLSupport } from "@/lib/webglDetection";
@@ -60,7 +60,7 @@ export function Nara3DCanvasFullScreen() {
         shadows
       >
         <Suspense fallback={<Nara3DLoader variant="fullscreen" />}>
-          <Nara3DAvatarEnhanced fullScreen={true} />
+          <Nara3DAvatarAnimated fullScreen={true} />
         </Suspense>
       </Canvas>
     </div>

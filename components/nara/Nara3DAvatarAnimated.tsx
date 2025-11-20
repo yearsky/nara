@@ -171,14 +171,14 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
     }
   });
 
-  // Camera settings: mobile needs lower camera and more zoom out
+  // Camera settings: aggressive zoom out for full body view
   const cameraSettings = fullScreen
     ? isMobile
-      ? { position: [0, -0.2, 4.5] as [number, number, number], fov: 55 } // Mobile fullscreen
-      : { position: [0, 0.3, 3.5] as [number, number, number], fov: 50 }  // Desktop fullscreen
+      ? { position: [0, 0.5, 5.5] as [number, number, number], fov: 60 } // Mobile fullscreen - much wider view
+      : { position: [0, 0.8, 5] as [number, number, number], fov: 55 }   // Desktop fullscreen - wider view
     : isMobile
-      ? { position: [0, 0, 4.5] as [number, number, number], fov: 52 }    // Mobile circular
-      : { position: [0, 0.5, 4] as [number, number, number], fov: 50 };   // Desktop circular
+      ? { position: [0, 0.2, 5] as [number, number, number], fov: 55 }   // Mobile circular
+      : { position: [0, 0.5, 4] as [number, number, number], fov: 50 };  // Desktop circular
 
   return (
     <>
@@ -208,13 +208,13 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
         position={[
           0,
           fullScreen
-            ? isMobile ? -0.8 : -0.3  // Fullscreen: lower on mobile
+            ? isMobile ? -1.2 : -0.8  // Fullscreen: much lower to show head
             : isMobile ? -0.7 : -0.5, // Circular: lower on mobile
           0
         ]}
         scale={
           fullScreen
-            ? isMobile ? 1.2 : 1.4  // Fullscreen: smaller on mobile
+            ? isMobile ? 1.0 : 1.2  // Fullscreen: smaller scale for full body view
             : isMobile ? 1.1 : 1.2  // Circular: smaller on mobile
         }
       >
