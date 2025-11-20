@@ -15,75 +15,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import GlassFooter from "@/components/learn/GlassFooter";
 import Image from "next/image";
+import { getAllStorySummaries } from "@/lib/storiesData";
 
-const stories = [
-  {
-    id: 1,
-    title: "Malin Kundang",
-    region: "Sumatera Barat",
-    category: "Legenda",
-    readTime: "8 menit",
-    thumbnail: "https://picsum.photos/seed/malin/400/300",
-    views: 1240,
-    likes: 89,
-    isNew: true,
-  },
-  {
-    id: 2,
-    title: "Roro Jonggrang",
-    region: "Jawa Tengah",
-    category: "Legenda",
-    readTime: "12 menit",
-    thumbnail: "https://picsum.photos/seed/roro/400/300",
-    views: 2180,
-    likes: 156,
-    isNew: false,
-  },
-  {
-    id: 3,
-    title: "Timun Mas",
-    region: "Jawa Tengah",
-    category: "Dongeng",
-    readTime: "6 menit",
-    thumbnail: "https://picsum.photos/seed/timun/400/300",
-    views: 980,
-    likes: 72,
-    isNew: true,
-  },
-  {
-    id: 4,
-    title: "Sangkuriang",
-    region: "Jawa Barat",
-    category: "Legenda",
-    readTime: "10 menit",
-    thumbnail: "https://picsum.photos/seed/sangkuriang/400/300",
-    views: 1650,
-    likes: 124,
-    isNew: false,
-  },
-  {
-    id: 5,
-    title: "Bawang Merah Bawang Putih",
-    region: "Jawa Timur",
-    category: "Dongeng",
-    readTime: "9 menit",
-    thumbnail: "https://picsum.photos/seed/bawang/400/300",
-    views: 1420,
-    likes: 98,
-    isNew: false,
-  },
-  {
-    id: 6,
-    title: "Calon Arang",
-    region: "Bali",
-    category: "Mitologi",
-    readTime: "15 menit",
-    thumbnail: "https://picsum.photos/seed/calon/400/300",
-    views: 856,
-    likes: 64,
-    isNew: true,
-  },
-];
+const stories = getAllStorySummaries();
 
 const categoryTabs = [
   { id: 'semua', label: 'Semua', icon: '📚' },
@@ -170,6 +104,7 @@ export default function VersePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
+              onClick={() => router.push(`/learn/verse/${story.id}`)}
               className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden cursor-pointer"
             >
               {/* Thumbnail */}
