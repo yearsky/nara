@@ -284,8 +284,8 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
       ? { position: [0, 0.6, 3.8] as [number, number, number], fov: 45 } // Mobile fullscreen - zoomed in for chat UI, focus on upper body
       : { position: [0, 0.2, 5.2] as [number, number, number], fov: 50 }   // Desktop fullscreen - lower angle for ground contact
     : isMobile
-      ? { position: [0, 0.2, 5] as [number, number, number], fov: 55 }   // Mobile circular
-      : { position: [0, 0.5, 4] as [number, number, number], fov: 50 };  // Desktop circular
+      ? { position: [0, -0.1, 5] as [number, number, number], fov: 55 }   // Mobile circular - lower camera for grounded look
+      : { position: [0, 0.1, 4] as [number, number, number], fov: 50 };  // Desktop circular - lower camera for grounded look
 
   return (
     <>
@@ -539,7 +539,7 @@ export function Nara3DAvatarAnimated({ fullScreen = false }: Nara3DAvatarAnimate
           0,
           fullScreen
             ? isMobile ? -0.9 : -1.42  // Mobile: higher position for upper body focus, Desktop: feet on floor
-            : isMobile ? -0.7 : -0.5,   // Circular: lower on mobile
+            : isMobile ? -1.2 : -1.3,   // Circular: feet on floor for grounded look
           0
         ]}
         scale={
