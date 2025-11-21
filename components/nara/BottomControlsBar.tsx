@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Mic, MicOff, Video, VideoOff, Square } from 'lucide-react'
 import { useNaraChat } from '@/hooks/useNaraChat'
@@ -33,6 +33,7 @@ export default function BottomControlsBar({
   const [input, setInput] = useState('')
   const [showTopicChips, setShowTopicChips] = useState(true)
   const [hasInteracted, setHasInteracted] = useState(false)
+  const [micPermissionStatus, setMicPermissionStatus] = useState<'granted' | 'denied' | 'prompt' | 'checking'>('checking')
   const inputRef = useRef<HTMLInputElement>(null)
   const currentUserMessageIdRef = useRef<string | null>(null)
 
@@ -45,9 +46,27 @@ export default function BottomControlsBar({
       setHasInteracted(true)
       setShowTopicChips(false)
     }
-  }, []) // Run only on mount
+  }, [messages.length])
+
+  // Handle auto-send when silence is detected (5 seconds)
+  const handleAutoSend = useCallback(async (finalTranscript: string) => {
+    console.log('[BottomControlsBar] Auto-send triggered:', finalTranscript)
+
+    // Reset the current message ref
+    currentUserMessageIdRef.current = null
+
+    // Send to Nara
+    if (finalTranscript && finalTranscript.trim()) {
+      if (!hasInteracted) {
+        setHasInteracted(true)
+        setShowTopicChips(false)
+      }
+      await getNaraResponse(finalTranscript)
+    }
+  }, [hasInteracted, getNaraResponse])
 
   // Use Live Transcription hook for real-time speech-to-text
+  // with 5-second silence detection for auto-send
   const {
     isListening,
     transcript,
@@ -58,22 +77,78 @@ export default function BottomControlsBar({
     startListening,
     stopListening,
     resetTranscript,
-  } = useLiveTranscription('id-ID')
+  } = useLiveTranscription('id-ID', 5000, handleAutoSend)
+
+  // Check microphone permission on mount and auto-start on grant
+  useEffect(() => {
+    let previousPermission: 'granted' | 'denied' | 'prompt' | 'checking' = 'checking'
+
+    const checkMicPermission = async () => {
+      try {
+        if (navigator.permissions) {
+          const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+          const currentState = result.state as 'granted' | 'denied' | 'prompt'
+
+          console.log('[BottomControlsBar] Microphone permission:', currentState)
+          setMicPermissionStatus(currentState)
+          previousPermission = currentState
+
+          // Listen for permission changes
+          result.onchange = () => {
+            const newState = result.state as 'granted' | 'denied' | 'prompt'
+            console.log('[BottomControlsBar] Microphone permission changed:', previousPermission, '→', newState)
+
+            setMicPermissionStatus(newState)
+
+            // AUTO-START: If permission just changed from 'prompt' to 'granted', auto-start listening
+            if (previousPermission === 'prompt' && newState === 'granted') {
+              console.log('[BottomControlsBar] Permission granted! Auto-starting mic...')
+              setTimeout(() => {
+                if (isSupported && !isListening) {
+                  console.log('[BottomControlsBar] Triggering auto-start listening')
+                  resetTranscript()
+                  currentUserMessageIdRef.current = null
+                  startListening()
+                }
+              }, 300) // Small delay to ensure everything is ready
+            }
+
+            previousPermission = newState
+          }
+        } else {
+          // Fallback: assume prompt if Permissions API not available
+          setMicPermissionStatus('prompt')
+        }
+      } catch (err) {
+        console.error('[BottomControlsBar] Error checking mic permission:', err)
+        setMicPermissionStatus('prompt')
+      }
+    }
+
+    checkMicPermission()
+  }, [isSupported, isListening, startListening, resetTranscript])
 
   // Access store directly for real-time updates
   const { addMessage, updateMessage } = useVoiceChatStore()
 
-  // Real-time transcript update: Update user message as they speak
+  // Real-time transcript update: Update user message as they speak (FOR MOBILE - appears in bubble)
   useEffect(() => {
-    if (!isListening) return
+    // Only update bubble on mobile mode (not desktop)
+    if (!isListening || isDesktopMode) {
+      return
+    }
 
     const transcriptText = (transcript + ' ' + interimTranscript).trim()
+
+    console.log('[BottomControlsBar] Updating bubble transcript:', transcriptText)
 
     if (transcriptText) {
       if (!currentUserMessageIdRef.current) {
         // Create new user message
-        const messageId = `user-${Date.now()}`
+        const messageId = `user-voice-${Date.now()}`
         currentUserMessageIdRef.current = messageId
+
+        console.log('[BottomControlsBar] Creating new bubble message:', messageId)
 
         addMessage({
           id: messageId,
@@ -83,10 +158,11 @@ export default function BottomControlsBar({
         })
       } else {
         // Update existing user message
+        console.log('[BottomControlsBar] Updating existing bubble:', currentUserMessageIdRef.current)
         updateMessage(currentUserMessageIdRef.current, transcriptText)
       }
     }
-  }, [transcript, interimTranscript, isListening, addMessage, updateMessage])
+  }, [transcript, interimTranscript, isListening, isDesktopMode, addMessage, updateMessage])
 
   // Handle text message send
   const handleSend = async () => {
@@ -109,9 +185,17 @@ export default function BottomControlsBar({
   }
 
   // Handle voice/mic toggle - now uses live transcription with real-time chat bubbles
-  const handleMicClick = async () => {
+  // Auto-send akan triggered setelah 5 detik silence
+  const handleMicClick = async (e: React.MouseEvent | React.TouchEvent) => {
+    // Prevent event bubbling to parent containers (fixes mobile auto-cancel bug)
+    e.stopPropagation()
+    e.preventDefault()
+
+    console.log('[BottomControlsBar] Mic button clicked, isListening:', isListening)
+
     if (isListening) {
-      // Stop listening
+      // Manual stop listening (user clicks stop button)
+      console.log('[BottomControlsBar] User manually stopped listening')
       stopListening()
 
       const finalTranscript = fullTranscript.trim()
@@ -119,21 +203,20 @@ export default function BottomControlsBar({
       // Reset the current message ref
       currentUserMessageIdRef.current = null
 
-      // Send to Gemini after delay (800ms) - user message already added in real-time
+      // Send to Nara immediately if there's content (manual stop)
       if (finalTranscript) {
         if (!hasInteracted) {
           setHasInteracted(true)
-          setShowTopicChips(false) // Hide topic chips after first voice interaction
+          setShowTopicChips(false)
         }
-        setTimeout(async () => {
-          await getNaraResponse(finalTranscript)
-          resetTranscript()
-        }, 800)
-      } else {
-        resetTranscript()
+        console.log('[BottomControlsBar] Sending transcript (manual stop):', finalTranscript)
+        await getNaraResponse(finalTranscript)
       }
+
+      resetTranscript()
     } else {
       // Start listening - reset transcript and message ref
+      console.log('[BottomControlsBar] Starting to listen...')
       resetTranscript()
       currentUserMessageIdRef.current = null
       startListening()
@@ -162,27 +245,52 @@ export default function BottomControlsBar({
       <div
         className={isDesktopMode ? "relative w-full z-50 pointer-events-auto" : "absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 z-50 pointer-events-auto"}
         style={isDesktopMode ? {} : { paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 md:gap-4 max-w-4xl mx-auto">
           {/* Voice/Mic Control - 1/3 (Live Transcription) */}
           <motion.button
             onClick={handleMicClick}
-            disabled={isLoading || !isSupported}
-            className={`flex-1 h-14 md:h-16 rounded-full flex items-center justify-center gap-2 transition-all duration-200 backdrop-blur-xl shadow-lg ${
+            onTouchEnd={handleMicClick}
+            disabled={isLoading || !isSupported || micPermissionStatus === 'denied'}
+            className={`flex-1 h-14 md:h-16 rounded-full flex items-center justify-center gap-2 transition-all duration-200 backdrop-blur-xl shadow-lg relative overflow-hidden pointer-events-auto ${
               isListening
-                ? 'bg-red-500/80 hover:bg-red-600/80 animate-pulse'
-                : 'bg-white/30 hover:bg-white/40'
-            } ${isLoading || !isSupported ? 'opacity-50 cursor-not-allowed' : ''}`}
-            whileHover={{ scale: isLoading || !isSupported ? 1 : 1.05 }}
-            whileTap={{ scale: isLoading || !isSupported ? 1 : 0.95 }}
-            aria-label={isListening ? 'Stop Listening' : 'Start Voice Input'}
-            title={!isSupported ? 'Speech recognition not supported in this browser' : ''}
+                ? 'bg-red-500/90 hover:bg-red-600/90 active:bg-red-700/90'
+                : micPermissionStatus === 'denied'
+                ? 'bg-gray-500/50'
+                : 'bg-white/30 hover:bg-white/40 active:bg-white/50'
+            } ${isLoading || !isSupported || micPermissionStatus === 'denied' ? 'opacity-50 cursor-not-allowed' : ''}`}
+            whileHover={{ scale: isLoading || !isSupported || micPermissionStatus === 'denied' ? 1 : 1.05 }}
+            whileTap={{ scale: isLoading || !isSupported || micPermissionStatus === 'denied' ? 1 : 0.95 }}
+            aria-label={isListening ? 'Stop Listening (atau otomatis kirim setelah 5 detik diam)' : 'Start Voice Input'}
+            title={
+              !isSupported
+                ? 'Speech recognition tidak didukung browser ini. Gunakan Chrome/Edge/Safari.'
+                : micPermissionStatus === 'denied'
+                ? 'Izin mikrofon ditolak. Mohon izinkan di pengaturan browser.'
+                : isListening
+                ? 'Klik untuk stop, atau otomatis kirim setelah 5 detik diam'
+                : 'Klik untuk mulai bicara'
+            }
           >
+            {/* Pulsing animation for listening state */}
+            {isListening && (
+              <motion.div
+                className="absolute inset-0 bg-red-400/30 rounded-full"
+                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            )}
+
             {isListening ? (
               <>
-                <Square className="w-4 h-4 md:w-5 md:h-5 text-white fill-white" />
-                <span className="text-xs text-white font-medium">Listening...</span>
+                <Square className="w-4 h-4 md:w-5 md:h-5 text-white fill-white z-10" />
+                <span className="text-xs text-white font-medium z-10">Mendengarkan...</span>
               </>
+            ) : micPermissionStatus === 'denied' ? (
+              <MicOff className="w-5 h-5 md:w-6 md:h-6 text-white" />
             ) : (
               <Mic className="w-5 h-5 md:w-6 md:h-6 text-white" />
             )}
@@ -233,28 +341,46 @@ export default function BottomControlsBar({
           </motion.div>
         </div>
 
-        {/* Live Transcript Display (Google Meet style) */}
-        <AnimatePresence>
-          {isListening && (transcript || interimTranscript) && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="mt-3 max-w-4xl mx-auto"
-            >
-              <div className="bg-black/60 backdrop-blur-md rounded-2xl px-4 py-3 border border-white/10">
-                <p className="text-sm text-white leading-relaxed">
-                  {/* Final transcript (confirmed) */}
-                  {transcript && <span className="text-white">{transcript}</span>}
-                  {/* Interim transcript (being spoken, lighter color) */}
-                  {interimTranscript && (
-                    <span className="text-white/60 italic">{interimTranscript}</span>
-                  )}
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Live Transcript Display (Google Meet style) with Auto-send indicator */}
+        {/* Only show on DESKTOP mode - on mobile, transcript appears directly in chat bubbles */}
+        {isDesktopMode && (
+          <AnimatePresence>
+            {isListening && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="mt-3 max-w-4xl mx-auto space-y-2"
+              >
+                {/* Transcript display */}
+                {(transcript || interimTranscript) && (
+                  <div className="bg-black/60 backdrop-blur-md rounded-2xl px-4 py-3 border border-white/10">
+                    <p className="text-sm text-white leading-relaxed">
+                      {/* Final transcript (confirmed) */}
+                      {transcript && <span className="text-white">{transcript}</span>}
+                      {/* Interim transcript (being spoken, lighter color) */}
+                      {interimTranscript && (
+                        <span className="text-white/60 italic"> {interimTranscript}</span>
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                {/* Auto-send hint */}
+                <div className="flex items-center justify-center gap-2">
+                  <motion.div
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    className="w-2 h-2 rounded-full bg-red-400"
+                  />
+                  <span className="text-xs text-white/70">
+                    Otomatis kirim setelah 5 detik diam atau klik Stop
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
 
         {/* Credit indicator & Error messages */}
         {(isLowCredits || error || transcriptError) && (
