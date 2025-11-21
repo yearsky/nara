@@ -76,7 +76,7 @@ export default function SubmoduleHeader({
       <div className="max-w-5xl mx-auto">
         {/* Glass morphism container */}
         <motion.div
-          className="backdrop-blur-xl bg-white/70 rounded-3xl shadow-xl border border-white/30 overflow-hidden"
+          className="backdrop-blur-xl bg-white/90 rounded-3xl shadow-xl border border-white/30 overflow-hidden"
           style={{
             background: `linear-gradient(135deg, ${gradientFrom}15 0%, ${gradientTo}10 100%)`,
           }}
