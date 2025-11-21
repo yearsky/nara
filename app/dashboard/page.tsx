@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, User, Home, Mic } from "lucide-react";
+import { Bell, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -10,6 +10,7 @@ import ProgressCard from "@/components/dashboard/ProgressCard";
 import QuickAccessBar from "@/components/dashboard/QuickAccessBar";
 import ModuleGrid from "@/components/dashboard/ModuleGrid";
 import GlassFooter from "@/components/learn/GlassFooter";
+import NaraVideoCharacter from "@/components/dashboard/NaraVideoCharacter";
 import {
   ProgressSkeleton,
   ModuleGridSkeleton,
@@ -197,43 +198,13 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
-        {/* Nara Video Character */}
-        <section className="flex justify-center my-8 md:my-12">
-          <div className="relative">
-            {/* Video Container */}
-            <div className="w-60 h-60 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full overflow-hidden shadow-2xl bg-gradient-to-br from-orange-100 to-amber-100 border-4 border-white/50">
-              <video
-                className="w-full h-full object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-              >
-                <source src="/WhatsApp Video 2025-11-18 at 17.47.34.mp4" type="video/mp4" />
-                {/* Fallback placeholder */}
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-200 to-amber-200">
-                  <span className="text-6xl">👋</span>
-                </div>
-              </video>
-            </div>
-
-            {/* Speech Bubble */}
-            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 backdrop-blur-xl bg-white/70 px-6 py-3 rounded-full shadow-lg border border-white/30 whitespace-nowrap max-w-[280px] md:max-w-none">
-              <p className="text-sm font-medium text-stone-700 truncate">
-                Mau belajar apa hari ini?
-              </p>
-            </div>
-
-            {/* Voice Button */}
-            <button
-              onClick={handleVoiceClick}
-              className="absolute bottom-4 right-4 w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center group active:scale-95"
-              aria-label="Aktifkan voice assistant"
-            >
-              <Mic className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
-            </button>
-          </div>
-        </section>
+        {/* Nara 3D Character */}
+        <NaraVideoCharacter
+          showSpeech={true}
+          speechText="Mau belajar apa hari ini?"
+          onVoiceClick={handleVoiceClick}
+          isListening={false}
+        />
 
         {/* Progress Card with Suspense */}
         <Suspense fallback={<ProgressSkeleton />}>
