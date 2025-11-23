@@ -199,7 +199,7 @@ export default function NaraMapPage() {
       </SubmoduleHeader>
 
       {/* Main Content */}
-      <main className="max-w-screen-xl mx-auto px-4 py-6">
+      <main className="max-w-screen-xl mx-auto px-4 py-6 mt-6">
         {/* Lessons Section */}
         <div className="mb-8 space-y-3">
           <h2 className="text-xl font-bold text-stone-900 mb-4">
@@ -304,7 +304,7 @@ export default function NaraMapPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6"
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden mb-6 p-4"
           >
             <div className="h-[500px] md:h-[600px]">
               <MuseumMap
@@ -322,7 +322,7 @@ export default function NaraMapPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-white rounded-2xl shadow-lg p-4"
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-4"
           >
             <MuseumList
               museums={filteredMuseums}

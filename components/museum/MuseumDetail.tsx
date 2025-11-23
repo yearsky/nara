@@ -82,12 +82,12 @@ export default function MuseumDetail({ museum, isOpen, onClose }: MuseumDetailPr
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 pointer-events-none">
         <div
           className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden pointer-events-auto animate-in fade-in zoom-in duration-300"
           onClick={(e) => e.stopPropagation()}
