@@ -20,6 +20,7 @@ import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import GlassFooter from "@/components/learn/GlassFooter";
 import QuizGamesFAB from "@/components/learn/QuizGamesFAB";
 import Image from "next/image";
+import { LokaTour } from "@/components/learn/tours/LokaTour";
 
 type RecipeType = 'Makanan Utama' | 'Kudapan' | 'Minuman';
 type Difficulty = 'Mudah' | 'Sedang' | 'Sulit' | 'Semua';
