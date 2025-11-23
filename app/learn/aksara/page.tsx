@@ -123,7 +123,7 @@ export default function AksaraPage() {
 
       {/* Header */}
       <SubmoduleHeader
-        title="Aksara Nusantara"
+        title="Aksara Nusantara 🔒"
         subtitle="Pelajari 8+ aksara tradisional Indonesia"
         icon={BookOpen}
         gradientFrom="#3B82F6"
@@ -186,13 +186,64 @@ export default function AksaraPage() {
           </div>
         </motion.div>
 
-        {/* Lessons List */}
-        <div className="space-y-3 lessons-list">
-          <h2 className="text-xl font-bold text-stone-900 mb-4">
-            Daftar Pelajaran
-          </h2>
+        {/* Lock Notice */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-blue-100 border-2 border-blue-300 rounded-2xl p-6 mb-6"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+              <BookOpen className="w-6 h-6 text-blue-700" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-blue-900 mb-2">
+                Modul Terkunci 🔒
+              </h3>
+              <p className="text-blue-800 mb-4">
+                Modul Aksara Nusantara akan segera hadir! Nantikan pembelajaran interaktif
+                tentang aksara Jawa, Bali, Sunda, dan aksara tradisional lainnya.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => router.push("/learn")}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full font-semibold transition-all shadow-md"
+                >
+                  Kembali ke Daftar Modul
+                </button>
+                <button
+                  onClick={() => router.push("/dashboard")}
+                  className="bg-white text-blue-700 px-6 py-2.5 rounded-full font-semibold border-2 border-blue-300 hover:bg-blue-50 transition-all">
+                  Lihat Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
 
-          {lessons.map((lesson, index) => (
+        {/* Lessons List */}
+        <div className="relative">
+          {/* Blurred overlay */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/40 z-10 rounded-2xl flex items-center justify-center">
+            <div className="text-center p-6">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <BookOpen className="w-10 h-10 text-blue-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Segera Hadir!
+              </h3>
+              <p className="text-gray-700 mb-4">
+                Pelajaran aksara tradisional akan segera tersedia
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 opacity-50 pointer-events-none select-none">
+            <h2 className="text-xl font-bold text-stone-900 mb-4">
+              Daftar Pelajaran
+            </h2>
+
+            {lessons.map((lesson, index) => (
             <motion.div
               key={lesson.id}
               initial={{ opacity: 0, x: -20 }}
@@ -264,6 +315,7 @@ export default function AksaraPage() {
               </button>
             </motion.div>
           ))}
+          </div>
         </div>
 
         {/* Unlock Info */}

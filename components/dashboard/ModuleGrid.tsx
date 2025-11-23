@@ -28,7 +28,7 @@ const modules: Module[] = [
     href: "/learn/aksara",
     progress: 37,
     isNew: false,
-    isLocked: false,
+    isLocked: true,
   },
   {
     id: "verse",
@@ -53,7 +53,7 @@ const modules: Module[] = [
     href: "/learn/symphony",
     progress: 0,
     isNew: false,
-    isLocked: false,
+    isLocked: true,
   },
   {
     id: "map",
@@ -90,7 +90,7 @@ const modules: Module[] = [
     href: "/learn/pola",
     progress: 0,
     isNew: false,
-    isLocked: false,
+    isLocked: true,
   },
 ];
 
