@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Users, TrendingUp, Star, MessageCircle, Heart, Sparkles } from 'lucide-react';
+import { Users, TrendingUp, Star, MessageCircle, Heart, Sparkles, BookOpen, Clock, Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const avatarColors = [
@@ -16,14 +16,14 @@ export function SocialProofCard() {
   const { t } = useLanguage();
 
   const stats = [
-    { icon: Users, key: 'stats.activeUsers', value: '10K+', color: 'from-blue-500 to-cyan-500' },
+    { icon: BookOpen, key: 'stats.culturalContent', value: '100+', color: 'from-blue-500 to-cyan-500' },
     {
-      icon: MessageCircle,
-      key: 'stats.conversations',
-      value: '50K+',
+      icon: Clock,
+      key: 'stats.aiAvailable',
+      value: '24/7',
       color: 'from-purple-500 to-pink-500',
     },
-    { icon: Star, key: 'stats.satisfaction', value: '95%', color: 'from-amber-500 to-orange-500' },
+    { icon: Check, key: 'stats.openSource', value: '✓', color: 'from-green-500 to-emerald-500' },
   ];
   return (
     <motion.div
