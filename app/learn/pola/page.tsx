@@ -9,6 +9,9 @@ import {
   Eye,
   Filter,
   Search,
+  Play,
+  CheckCircle,
+  Lock,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
@@ -91,6 +94,27 @@ const patterns = [
   },
 ];
 
+const lessons = [
+  {
+    id: 1,
+    title: "Filosofi Batik Parang",
+    description: "Memahami makna dan sejarah motif Parang",
+    duration: "15 menit",
+    isCompleted: false,
+    isLocked: false,
+    xp: 80,
+  },
+  {
+    id: 2,
+    title: "Tenun Ikat Nusantara",
+    description: "Teknik dan ragam tenun dari berbagai daerah",
+    duration: "18 menit",
+    isCompleted: false,
+    isLocked: true,
+    xp: 100,
+  },
+];
+
 export default function PolaPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -135,6 +159,88 @@ export default function PolaPage() {
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
+        {/* Lessons Section */}
+        <div className="mb-8 space-y-3">
+          <h2 className="text-xl font-bold text-stone-900 mb-4">
+            Daftar Pelajaran
+          </h2>
+
+          {lessons.map((lesson, index) => (
+            <motion.div
+              key={lesson.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <button
+                disabled={lesson.isLocked}
+                onClick={() => {
+                  if (!lesson.isLocked) {
+                    router.push(`/learn/pola/lesson/${lesson.id}`);
+                  }
+                }}
+                className={`w-full bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-5 text-left ${
+                  lesson.isLocked
+                    ? "opacity-60 cursor-not-allowed"
+                    : "hover:scale-[1.02]"
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold ${
+                      lesson.isCompleted
+                        ? "bg-green-100 text-green-600"
+                        : lesson.isLocked
+                        ? "bg-gray-100 text-gray-400"
+                        : "bg-teal-100 text-teal-600"
+                    }`}
+                  >
+                    {lesson.isCompleted ? (
+                      <CheckCircle className="w-6 h-6" />
+                    ) : lesson.isLocked ? (
+                      <Lock className="w-6 h-6" />
+                    ) : (
+                      <span className="text-lg">{lesson.id}</span>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-stone-900 mb-1">
+                      {lesson.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {lesson.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span>⏱️ {lesson.duration}</span>
+                      <span>⭐ {lesson.xp} XP</span>
+                    </div>
+                  </div>
+
+                  {!lesson.isLocked && (
+                    <div className="flex-shrink-0">
+                      {lesson.isCompleted ? (
+                        <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                          <CheckCircle className="w-5 h-5 text-white" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                          <Play className="w-5 h-5 text-white ml-0.5" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </button>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Pattern Gallery Section */}
+        <h2 className="text-xl font-bold text-stone-900 mb-4">
+          Galeri Motif
+        </h2>
+
         {/* Category Filter */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

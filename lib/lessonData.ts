@@ -372,23 +372,193 @@ export const aksaraLessons: Record<number, LessonContent> = {
   },
 };
 
+// Symphony Lessons
+export const symphonyLessons: Record<number, LessonContent> = {
+  1: {
+    id: 1,
+    moduleId: "symphony",
+    title: "Pengenalan Gamelan",
+    description: "Mengenal gamelan dan perannya dalam budaya Jawa",
+    duration: "12 menit",
+    xp: 75,
+    sections: [
+      {
+        id: "intro",
+        type: "text",
+        title: "Apa itu Gamelan?",
+        content:
+          "Gamelan adalah ansambel musik tradisional Indonesia yang terdiri dari berbagai instrumen seperti gong, kendang, saron, dan bonang. Musik gamelan memiliki harmoni unik yang mencerminkan keindahan budaya Nusantara.",
+      },
+      {
+        id: "instruments",
+        type: "text",
+        title: "Instrumen Gamelan",
+        content:
+          "Gamelan terdiri dari berbagai instrumen:\n\n• Gong: Instrumen besar yang memberikan nada rendah\n• Kendang: Drum yang mengatur tempo\n• Saron: Metalofon dengan bilah perunggu\n• Bonang: Deretan gong kecil yang dimainkan dengan pemukul\n• Gender: Metalofon dengan resonator bambu",
+      },
+    ],
+    vocabulary: [
+      { word: "Gamelan", meaning: "Ansambel musik tradisional Jawa" },
+      { word: "Gong", meaning: "Instrumen perkusi besar dari perunggu" },
+      { word: "Kendang", meaning: "Drum pengatur tempo dalam gamelan" },
+    ],
+    keyTakeaways: [
+      "Gamelan adalah ansambel musik tradisional Indonesia",
+      "Terdiri dari berbagai instrumen perkusi dan metalofon",
+      "Memiliki peran penting dalam upacara dan pertunjukan",
+    ],
+  },
+};
+
+// Map Lessons
+export const mapLessons: Record<number, LessonContent> = {
+  1: {
+    id: 1,
+    moduleId: "map",
+    title: "Museum Nasional Indonesia",
+    description: "Mengenal Museum Gajah, museum tertua di Indonesia",
+    duration: "10 menit",
+    xp: 60,
+    sections: [
+      {
+        id: "intro",
+        type: "text",
+        title: "Sejarah Museum Nasional",
+        content:
+          "Museum Nasional Indonesia, atau dikenal sebagai Museum Gajah, didirikan pada tahun 1778. Museum ini menyimpan lebih dari 190.000 koleksi artefak bersejarah dari seluruh Nusantara.",
+      },
+      {
+        id: "collections",
+        type: "text",
+        title: "Koleksi Utama",
+        content:
+          "Museum ini memiliki koleksi yang sangat beragam:\n\n• Prasasti kuno dari berbagai kerajaan\n• Arca dan patung Hindu-Buddha\n• Keramik dari berbagai dinasti\n• Tekstil dan batik tradisional\n• Etnografi dari seluruh Indonesia",
+      },
+    ],
+    vocabulary: [
+      { word: "Museum", meaning: "Tempat penyimpanan benda bersejarah" },
+      { word: "Artefak", meaning: "Benda peninggalan sejarah" },
+      { word: "Prasasti", meaning: "Tulisan kuno pada batu atau logam" },
+    ],
+    keyTakeaways: [
+      "Museum Nasional adalah museum tertua di Indonesia",
+      "Menyimpan 190.000+ koleksi dari seluruh Nusantara",
+      "Memiliki koleksi prasasti, arca, dan etnografi yang lengkap",
+    ],
+  },
+};
+
+// Pola Lessons
+export const polaLessons: Record<number, LessonContent> = {
+  1: {
+    id: 1,
+    moduleId: "pola",
+    title: "Filosofi Batik Parang",
+    description: "Memahami makna dan sejarah motif Parang",
+    duration: "15 menit",
+    xp: 80,
+    sections: [
+      {
+        id: "intro",
+        type: "text",
+        title: "Motif Parang",
+        content:
+          "Batik Parang adalah salah satu motif batik klasik yang berasal dari Keraton Yogyakarta dan Solo. Motif ini memiliki makna filosofis yang dalam tentang kekuatan dan keteguhan.",
+      },
+      {
+        id: "meaning",
+        type: "text",
+        title: "Makna Filosofis",
+        content:
+          "Motif Parang melambangkan:\n\n• Kekuatan dan keteguhan hati\n• Perjuangan tanpa henti seperti ombak laut\n• Keberanian menghadapi tantangan\n• Kesucian dan keluhuran budi\n\nDahulu, motif Parang hanya boleh dikenakan oleh keluarga keraton.",
+      },
+    ],
+    vocabulary: [
+      { word: "Parang", meaning: "Motif batik berbentuk diagonal seperti ombak" },
+      { word: "Motif", meaning: "Pola atau corak pada kain" },
+      { word: "Keraton", meaning: "Istana raja" },
+    ],
+    keyTakeaways: [
+      "Parang adalah motif batik klasik dari keraton",
+      "Melambangkan kekuatan dan keteguhan",
+      "Dahulu eksklusif untuk keluarga keraton",
+    ],
+  },
+};
+
+// Loka Lessons
+export const lokaLessons: Record<number, LessonContent> = {
+  1: {
+    id: 1,
+    moduleId: "loka",
+    title: "Rendang: Masakan Terbaik Dunia",
+    description: "Sejarah dan filosofi di balik rendang",
+    duration: "12 menit",
+    xp: 70,
+    sections: [
+      {
+        id: "intro",
+        type: "text",
+        title: "Asal Usul Rendang",
+        content:
+          "Rendang adalah masakan tradisional Minangkabau yang telah diakui sebagai salah satu makanan terlezat di dunia oleh CNN. Proses pembuatan rendang membutuhkan kesabaran dan ketelatenan.",
+      },
+      {
+        id: "philosophy",
+        type: "text",
+        title: "Filosofi Rendang",
+        content:
+          "Rendang melambangkan filosofi masyarakat Minangkabau:\n\n• Daging: Niniak Mamak (pemimpin adat)\n• Santan: Cadiak Pandai (cendekiawan)\n• Cabai: Alim Ulama (pemuka agama)\n• Rempah: Seluruh masyarakat\n\nSemua bahan harus menyatu untuk menciptakan harmoni yang sempurna.",
+      },
+    ],
+    vocabulary: [
+      { word: "Rendang", meaning: "Masakan daging dengan santan dan rempah" },
+      { word: "Minangkabau", meaning: "Suku di Sumatera Barat" },
+      { word: "Niniak Mamak", meaning: "Pemimpin adat Minangkabau" },
+    ],
+    keyTakeaways: [
+      "Rendang berasal dari Minangkabau",
+      "Memiliki filosofi tentang keharmonisan masyarakat",
+      "Diakui sebagai makanan terlezat di dunia",
+    ],
+  },
+};
+
 // Function to get lesson by module and lesson ID
 export function getLessonContent(
   moduleId: string,
   lessonId: number
 ): LessonContent | null {
-  if (moduleId === "aksara") {
-    return aksaraLessons[lessonId] || null;
+  switch (moduleId) {
+    case "aksara":
+      return aksaraLessons[lessonId] || null;
+    case "symphony":
+      return symphonyLessons[lessonId] || null;
+    case "map":
+      return mapLessons[lessonId] || null;
+    case "pola":
+      return polaLessons[lessonId] || null;
+    case "loka":
+      return lokaLessons[lessonId] || null;
+    default:
+      return null;
   }
-  // Add other modules here as needed
-  return null;
 }
 
 // Function to get all lessons for a module
 export function getModuleLessons(moduleId: string): LessonContent[] {
-  if (moduleId === "aksara") {
-    return Object.values(aksaraLessons);
+  switch (moduleId) {
+    case "aksara":
+      return Object.values(aksaraLessons);
+    case "symphony":
+      return Object.values(symphonyLessons);
+    case "map":
+      return Object.values(mapLessons);
+    case "pola":
+      return Object.values(polaLessons);
+    case "loka":
+      return Object.values(lokaLessons);
+    default:
+      return [];
   }
-  // Add other modules here
-  return [];
 }

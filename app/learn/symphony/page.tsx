@@ -9,6 +9,9 @@ import {
   Volume2,
   Heart,
   Share2,
+  CheckCircle,
+  Lock,
+  Star,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
@@ -97,9 +100,44 @@ const popularTracks = [
   },
 ];
 
+const lessons = [
+  {
+    id: 1,
+    title: "Pengenalan Gamelan",
+    description: "Mengenal gamelan dan perannya dalam budaya Jawa",
+    duration: "12 menit",
+    isCompleted: false,
+    isLocked: false,
+    xp: 75,
+  },
+  {
+    id: 2,
+    title: "Instrumen Gamelan",
+    description: "Jenis-jenis instrumen dalam ansambel gamelan",
+    duration: "15 menit",
+    isCompleted: false,
+    isLocked: true,
+    xp: 100,
+  },
+  {
+    id: 3,
+    title: "Angklung Sunda",
+    description: "Alat musik bambu khas Jawa Barat",
+    duration: "10 menit",
+    isCompleted: false,
+    isLocked: true,
+    xp: 80,
+  },
+];
+
 export default function SymphonyPage() {
   const router = useRouter();
   const [playingTrack, setPlayingTrack] = useState<number | null>(null);
+
+  const completedLessons = lessons.filter((l) => l.isCompleted).length;
+  const totalLessons = lessons.length;
+  const progress = Math.round((completedLessons / totalLessons) * 100);
+  const totalXP = lessons.filter((l) => l.isCompleted).reduce((sum, l) => sum + l.xp, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50/30 to-rose-50/30 pb-32 pt-6">
@@ -110,10 +148,117 @@ export default function SymphonyPage() {
         icon={Music}
         gradientFrom="#EC4899"
         gradientTo="#F43F5E"
-      />
+      >
+        {/* Progress Stats */}
+        <div className="grid grid-cols-3 gap-3 mt-4">
+          <div className="backdrop-blur-sm bg-white/50 rounded-2xl p-3 text-center border border-white/30">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Music className="w-3.5 h-3.5 text-pink-600" />
+              <span className="text-xs text-stone-600">Progress</span>
+            </div>
+            <p className="text-xl font-bold text-stone-900">{progress}%</p>
+          </div>
+          <div className="backdrop-blur-sm bg-white/50 rounded-2xl p-3 text-center border border-white/30">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+              <span className="text-xs text-stone-600">Selesai</span>
+            </div>
+            <p className="text-xl font-bold text-stone-900">
+              {completedLessons}/{totalLessons}
+            </p>
+          </div>
+          <div className="backdrop-blur-sm bg-white/50 rounded-2xl p-3 text-center border border-white/30">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Star className="w-3.5 h-3.5 text-yellow-500" />
+              <span className="text-xs text-stone-600">Total XP</span>
+            </div>
+            <p className="text-xl font-bold text-stone-900">{totalXP}</p>
+          </div>
+        </div>
+      </SubmoduleHeader>
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6 space-y-8">
+        {/* Lessons List */}
+        <div className="space-y-3">
+          <h2 className="text-xl font-bold text-stone-900 mb-4">
+            Daftar Pelajaran
+          </h2>
+
+          {lessons.map((lesson, index) => (
+            <motion.div
+              key={lesson.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <button
+                disabled={lesson.isLocked}
+                onClick={() => {
+                  if (!lesson.isLocked) {
+                    router.push(`/learn/symphony/lesson/${lesson.id}`);
+                  }
+                }}
+                className={`w-full bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-5 text-left ${
+                  lesson.isLocked
+                    ? "opacity-60 cursor-not-allowed"
+                    : "hover:scale-[1.02]"
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  {/* Lesson Number / Status Icon */}
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold ${
+                      lesson.isCompleted
+                        ? "bg-green-100 text-green-600"
+                        : lesson.isLocked
+                        ? "bg-gray-100 text-gray-400"
+                        : "bg-pink-100 text-pink-600"
+                    }`}
+                  >
+                    {lesson.isCompleted ? (
+                      <CheckCircle className="w-6 h-6" />
+                    ) : lesson.isLocked ? (
+                      <Lock className="w-6 h-6" />
+                    ) : (
+                      <span className="text-lg">{lesson.id}</span>
+                    )}
+                  </div>
+
+                  {/* Lesson Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-stone-900 mb-1">
+                      {lesson.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {lesson.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span>⏱️ {lesson.duration}</span>
+                      <span>⭐ {lesson.xp} XP</span>
+                    </div>
+                  </div>
+
+                  {/* Action Icon */}
+                  {!lesson.isLocked && (
+                    <div className="flex-shrink-0">
+                      {lesson.isCompleted ? (
+                        <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                          <CheckCircle className="w-5 h-5 text-white" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg">
+                          <Play className="w-5 h-5 text-white ml-0.5" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </button>
+            </motion.div>
+          ))}
+        </div>
+
         {/* Popular Tracks */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
