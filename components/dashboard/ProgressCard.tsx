@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import InfoTooltip from "@/components/shared/InfoTooltip";
 
 interface ProgressCardProps {
   streakDays: number;
@@ -28,7 +29,7 @@ export default function ProgressCard({
               🔥
             </span>
             <div>
-              <p className="text-sm font-semibold text-stone-900">
+              <p className="text-sm font-semibold text-stone-900 flex items-center gap-1">
                 <motion.span
                   key={streakDays}
                   initial={{ scale: 1.2, color: "#F59E0B" }}
@@ -37,6 +38,10 @@ export default function ProgressCard({
                 >
                   Streak {streakDays} hari!
                 </motion.span>
+                <InfoTooltip
+                  title="Streak Belajar"
+                  content="Belajar setiap hari untuk mempertahankan streak. Semakin panjang streak, semakin besar bonus XP yang kamu dapatkan!"
+                />
               </p>
               <p className="text-xs text-stone-600">Pertahankan!</p>
             </div>
@@ -44,8 +49,20 @@ export default function ProgressCard({
 
           {/* XP Section */}
           <div className="text-right">
-            <p className="text-lg font-bold text-brand-primary">{xpPoints} XP</p>
-            <p className="text-xs text-stone-600">Level {userLevel}</p>
+            <p className="text-lg font-bold text-brand-primary flex items-center gap-1 justify-end">
+              {xpPoints} XP
+              <InfoTooltip
+                title="XP (Experience Points)"
+                content="Dapatkan XP setiap kali menyelesaikan pelajaran, quiz, atau challenge. Kumpulkan 500 XP untuk naik 1 level!"
+              />
+            </p>
+            <p className="text-xs text-stone-600 flex items-center gap-1 justify-end">
+              Level {userLevel}
+              <InfoTooltip
+                title="Level"
+                content="Level menunjukkan progres belajarmu secara keseluruhan. Setiap naik level, kamu akan mendapatkan badge spesial dan unlock konten baru!"
+              />
+            </p>
           </div>
         </div>
 

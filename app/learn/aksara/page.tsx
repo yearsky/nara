@@ -197,6 +197,11 @@ export default function AksaraPage() {
             >
               <button
                 disabled={lesson.isLocked}
+                onClick={() => {
+                  if (!lesson.isLocked) {
+                    router.push(`/learn/aksara/lesson/${lesson.id}`);
+                  }
+                }}
                 className={`w-full bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-5 text-left ${
                   lesson.isLocked
                     ? "opacity-60 cursor-not-allowed"
