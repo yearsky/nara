@@ -4,6 +4,7 @@ import { HomeHeader } from '@/components/homepage/HomeHeader';
 import { HeadlineBlock } from '@/components/homepage/HeadlineBlock';
 import { PhoneMockupLive } from '@/components/homepage/PhoneMockupLive';
 import { SocialProofCard } from '@/components/homepage/SocialProofCard';
+import { LandingPageTour } from '@/components/homepage/LandingPageTour';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 export default function HomePage() {
@@ -13,23 +14,26 @@ export default function HomePage() {
         {/* Header */}
         <HomeHeader />
 
+        {/* Landing Page Tour */}
+        <LandingPageTour />
+
         {/* Main Content - Single Page, No Scroll */}
         <div className="min-h-screen flex items-center justify-center pt-20">
           <div className="container mx-auto px-6 lg:px-12 max-w-7xl">
             {/* Three-Column Grid Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-8 lg:gap-16 items-center">
               {/* Left Column: Headline + CTA */}
-              <div className="order-1 lg:order-1">
+              <div className="order-1 lg:order-1 headline-block">
                 <HeadlineBlock />
               </div>
 
               {/* Center Column: iPhone Mockup */}
-              <div className="order-2 lg:order-2 flex justify-center">
+              <div className="order-2 lg:order-2 flex justify-center phone-mockup">
                 <PhoneMockupLive />
               </div>
 
               {/* Right Column: Social Proof */}
-              <div className="order-3 lg:order-3">
+              <div className="order-3 lg:order-3 social-proof">
                 <SocialProofCard />
               </div>
             </div>

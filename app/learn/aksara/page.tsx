@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import GlassFooter from "@/components/learn/GlassFooter";
 import QuizGamesFAB from "@/components/learn/QuizGamesFAB";
+import { AksaraTour } from "@/components/learn/tours/AksaraTour";
 
 const lessons = [
   {
@@ -117,6 +118,9 @@ export default function AksaraPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/30 to-indigo-50/30 pb-32 pt-6">
+      {/* Tour */}
+      <AksaraTour />
+
       {/* Header */}
       <SubmoduleHeader
         title="Aksara Nusantara"
@@ -126,7 +130,7 @@ export default function AksaraPage() {
         gradientTo="#4F46E5"
       >
         {/* Progress Stats */}
-        <div className="grid grid-cols-3 gap-3 mt-4">
+        <div className="grid grid-cols-3 gap-3 mt-4 progress-stats">
           <div className="backdrop-blur-sm bg-white/50 rounded-2xl p-3 text-center border border-white/30">
             <div className="flex items-center justify-center gap-1 mb-1">
               <BookOpen className="w-3.5 h-3.5 text-blue-600" />
@@ -183,7 +187,7 @@ export default function AksaraPage() {
         </motion.div>
 
         {/* Lessons List */}
-        <div className="space-y-3">
+        <div className="space-y-3 lessons-list">
           <h2 className="text-xl font-bold text-stone-900 mb-4">
             Daftar Pelajaran
           </h2>
@@ -286,7 +290,9 @@ export default function AksaraPage() {
 
       {/* Glass Footer */}
       {/* Quiz & Games FAB */}
-      <QuizGamesFAB modulePath="/learn/aksara" />
+      <div className="quiz-games-fab">
+        <QuizGamesFAB modulePath="/learn/aksara" />
+      </div>
 
       <GlassFooter />
     </div>

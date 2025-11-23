@@ -18,6 +18,7 @@ import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import GlassFooter from "@/components/learn/GlassFooter";
 import QuizGamesFAB from "@/components/learn/QuizGamesFAB";
 import Image from "next/image";
+import { SymphonyTour } from "@/components/learn/tours/SymphonyTour";
 
 const musicCategories = [
   {

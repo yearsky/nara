@@ -18,6 +18,7 @@ import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import GlassFooter from "@/components/learn/GlassFooter";
 import QuizGamesFAB from "@/components/learn/QuizGamesFAB";
 import Image from "next/image";
+import { PolaTour } from "@/components/learn/tours/PolaTour";
 
 const patterns = [
   {
@@ -136,6 +137,9 @@ export default function PolaPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-50/30 to-cyan-50/30 pb-32 pt-6">
+      {/* Tour */}
+      <PolaTour />
+
       {/* Header */}
       <SubmoduleHeader
         title="Nara Pola"
@@ -145,7 +149,7 @@ export default function PolaPage() {
         gradientTo="#06B6D4"
       >
         {/* Search Bar */}
-        <div className="relative mt-4">
+        <div className="relative mt-4 search-bar">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
           <input
             type="text"
@@ -160,7 +164,7 @@ export default function PolaPage() {
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
         {/* Lessons Section */}
-        <div className="mb-8 space-y-3">
+        <div className="mb-8 space-y-3 lessons-list">
           <h2 className="text-xl font-bold text-stone-900 mb-4">
             Daftar Pelajaran
           </h2>
@@ -269,7 +273,7 @@ export default function PolaPage() {
         </motion.div>
 
         {/* Patterns Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pattern-gallery">
           {filteredPatterns.map((pattern, index) => (
             <motion.div
               key={pattern.id}

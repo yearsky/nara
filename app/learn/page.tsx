@@ -21,6 +21,7 @@ import LearningModuleCard from "@/components/learn/LearningModuleCard";
 import ContinueLearningCard from "@/components/learn/ContinueLearningCard";
 import AchievementsCard from "@/components/learn/AchievementsCard";
 import FilterPanel from "@/components/learn/FilterPanel";
+import { LearnPageTour } from "@/components/learn/tours/LearnPageTour";
 
 // Learning modules data
 const learningModules = [
@@ -222,12 +223,15 @@ export default function LearnPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50/30 to-amber-50/30 pb-32 pt-6">
+      {/* Tour */}
+      <LearnPageTour />
+
       {/* Header - Sticky Glass Morphism */}
       <header className="sticky top-4 z-40 px-4 md:px-6">
         <div className="max-w-5xl mx-auto">
           {/* Glass morphism container */}
           <motion.div
-            className="backdrop-blur-xl bg-white/90 rounded-3xl shadow-xl border border-white/30 overflow-hidden"
+            className="backdrop-blur-xl bg-white/90 rounded-3xl shadow-xl border border-white/30 overflow-hidden search-modules"
             animate={{
               height: isScrolled ? "auto" : "auto"
             }}
@@ -386,7 +390,7 @@ export default function LearnPage() {
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
         {/* Stats Row - Streak and Achievements */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 streak-stats">
           {/* Streak Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -446,7 +450,9 @@ export default function LearnPage() {
 
         {/* Continue Learning Section */}
         {continueModule && !searchQuery && activeFiltersCount === 0 && (
-          <ContinueLearningCard module={continueModule} />
+          <div className="continue-learning-card">
+            <ContinueLearningCard module={continueModule} />
+          </div>
         )}
 
         {/* Daily Achievements */}
@@ -470,7 +476,7 @@ export default function LearnPage() {
 
           {/* Module Cards Grid */}
           {filteredModules.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 learning-modules-grid">
               {filteredModules.map((module, index) => (
                 <LearningModuleCard
                   key={module.id}

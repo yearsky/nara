@@ -16,6 +16,7 @@ import SubmoduleHeader from "@/components/learn/SubmoduleHeader";
 import GlassFooter from "@/components/learn/GlassFooter";
 import Image from "next/image";
 import { getAllStorySummaries } from "@/lib/storiesData";
+import { VerseTour } from "@/components/learn/tours/VerseTour";
 
 const stories = getAllStorySummaries();
 

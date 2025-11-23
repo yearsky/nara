@@ -22,6 +22,7 @@ import GlassFooter from '@/components/learn/GlassFooter';
 import QuizGamesFAB from '@/components/learn/QuizGamesFAB';
 import { MapPin, Map, List, Loader2, Search, SlidersHorizontal, X, Play, CheckCircle, Lock, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MapTour } from '@/components/learn/tours/MapTour';
 
 // Dynamic import for MuseumMap to avoid SSR issues with Leaflet
 const MuseumMap = dynamic(() => import('@/components/museum/MuseumMap'), {
