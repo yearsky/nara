@@ -5,7 +5,6 @@ import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
 
 export function LearnPageTour() {
   const [runTour, setRunTour] = useState(false);
-  const [stepIndex, setStepIndex] = useState(0);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -112,7 +111,6 @@ export function LearnPageTour() {
       continuous
       showProgress
       showSkipButton
-      stepIndex={stepIndex}
       callback={handleJoyrideCallback}
       styles={{
         options: {

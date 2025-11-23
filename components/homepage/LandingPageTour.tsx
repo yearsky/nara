@@ -7,7 +7,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 export function LandingPageTour() {
   const { t } = useLanguage();
   const [runTour, setRunTour] = useState(false);
-  const [stepIndex, setStepIndex] = useState(0);
 
   useEffect(() => {
     // Check if user has seen the tour before
@@ -98,7 +97,7 @@ export function LandingPageTour() {
   ];
 
   const handleJoyrideCallback = (data: CallBackProps) => {
-    const { status, index, type } = data;
+    const { status } = data;
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
     if (finishedStatuses.includes(status)) {
@@ -107,11 +106,6 @@ export function LandingPageTour() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('nara-tour-completed', 'true');
       }
-    }
-
-    // Update step index for custom styling
-    if (type === 'step:after') {
-      setStepIndex(index + 1);
     }
   };
 
@@ -122,7 +116,6 @@ export function LandingPageTour() {
       continuous
       showProgress
       showSkipButton
-      stepIndex={stepIndex}
       callback={handleJoyrideCallback}
       styles={{
         options: {
