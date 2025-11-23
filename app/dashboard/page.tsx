@@ -11,6 +11,9 @@ import QuickAccessBar from "@/components/dashboard/QuickAccessBar";
 import ModuleGrid from "@/components/dashboard/ModuleGrid";
 import GlassFooter from "@/components/learn/GlassFooter";
 import NaraVideoCharacter from "@/components/dashboard/NaraVideoCharacter";
+import DailyAksaraModal from "@/components/dashboard/DailyAksaraModal";
+import DailyChallengeModal from "@/components/dashboard/DailyChallengeModal";
+import GettingStartedCard from "@/components/dashboard/GettingStartedCard";
 import {
   ProgressSkeleton,
   ModuleGridSkeleton,
@@ -21,6 +24,16 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, stats } = useUserStore();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showDailyAksara, setShowDailyAksara] = useState(false);
+  const [showDailyChallenge, setShowDailyChallenge] = useState(false);
+  const [showGettingStarted, setShowGettingStarted] = useState(true);
+
+  // Check if user is new (no completed lessons)
+  const isNewUser =
+    typeof window !== "undefined" &&
+    (!localStorage.getItem("completed-lessons") ||
+      Object.keys(JSON.parse(localStorage.getItem("completed-lessons") || "{}"))
+        .length === 0);
 
   // Detect scroll position
   useEffect(() => {
@@ -51,19 +64,33 @@ export default function DashboardPage() {
     switch (action) {
       case "continue":
         // Navigate to last learning session
+        if (typeof window !== "undefined") {
+          // Check localStorage for last active lesson
+          const lastLesson = localStorage.getItem("last-active-lesson");
+          if (lastLesson) {
+            const { moduleId, lessonId } = JSON.parse(lastLesson);
+            router.push(`/learn/${moduleId}/lesson/${lessonId}`);
+          } else {
+            // Default to first aksara lesson if no history
+            router.push("/learn/aksara/lesson/1");
+          }
+        }
         break;
       case "askNara":
         // Navigate to chat with general context
         router.push("/chat");
         break;
       case "daily":
-        // Show daily aksara
+        // Show daily aksara modal
+        setShowDailyAksara(true);
         break;
       case "popular":
-        // Show popular stories
+        // Navigate to popular stories
+        router.push("/learn/verse?sort=popular");
         break;
       case "challenge":
-        // Show daily challenge
+        // Show daily challenge modal
+        setShowDailyChallenge(true);
         break;
     }
   };
@@ -206,6 +233,11 @@ export default function DashboardPage() {
           isListening={false}
         />
 
+        {/* Getting Started Guide - Show for new users */}
+        {isNewUser && showGettingStarted && (
+          <GettingStartedCard onDismiss={() => setShowGettingStarted(false)} />
+        )}
+
         {/* Progress Card with Suspense */}
         <Suspense fallback={<ProgressSkeleton />}>
           <ProgressCard
@@ -228,6 +260,16 @@ export default function DashboardPage() {
 
       {/* Glass Footer */}
       <GlassFooter />
+
+      {/* Modals */}
+      <DailyAksaraModal
+        isOpen={showDailyAksara}
+        onClose={() => setShowDailyAksara(false)}
+      />
+      <DailyChallengeModal
+        isOpen={showDailyChallenge}
+        onClose={() => setShowDailyChallenge(false)}
+      />
     </div>
   );
 }

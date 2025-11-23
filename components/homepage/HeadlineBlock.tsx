@@ -10,7 +10,19 @@ export function HeadlineBlock() {
   const { t } = useLanguage();
 
   const handleCTA = () => {
-    router.push('/chat');
+    // Check if user has completed onboarding
+    if (typeof window !== "undefined") {
+      const hasCompletedOnboarding = localStorage.getItem(
+        "nara-onboarding-completed"
+      );
+      if (hasCompletedOnboarding) {
+        router.push("/dashboard");
+      } else {
+        router.push("/onboarding");
+      }
+    } else {
+      router.push("/onboarding");
+    }
   };
 
   return (

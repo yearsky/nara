@@ -20,7 +20,7 @@ import MuseumDetail from '@/components/museum/MuseumDetail';
 import SubmoduleHeader from '@/components/learn/SubmoduleHeader';
 import GlassFooter from '@/components/learn/GlassFooter';
 import QuizGamesFAB from '@/components/learn/QuizGamesFAB';
-import { MapPin, Map, List, Loader2, Search, SlidersHorizontal, X } from 'lucide-react';
+import { MapPin, Map, List, Loader2, Search, SlidersHorizontal, X, Play, CheckCircle, Lock, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Dynamic import for MuseumMap to avoid SSR issues with Leaflet
@@ -53,6 +53,27 @@ const regionTabs: { id: MuseumRegion; label: string }[] = [
   { id: 'Sulawesi', label: 'Sulawesi' },
   { id: 'Bali-Nusa Tenggara', label: 'Bali & Nusa Tenggara' },
   { id: 'Papua-Maluku', label: 'Papua & Maluku' },
+];
+
+const lessons = [
+  {
+    id: 1,
+    title: "Museum Nasional Indonesia",
+    description: "Mengenal Museum Gajah, museum tertua di Indonesia",
+    duration: "10 menit",
+    isCompleted: false,
+    isLocked: false,
+    xp: 60,
+  },
+  {
+    id: 2,
+    title: "Candi Borobudur",
+    description: "Keajaiban arsitektur Buddha terbesar di dunia",
+    duration: "15 menit",
+    isCompleted: false,
+    isLocked: true,
+    xp: 100,
+  },
 ];
 
 export default function NaraMapPage() {
@@ -178,6 +199,88 @@ export default function NaraMapPage() {
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
+        {/* Lessons Section */}
+        <div className="mb-8 space-y-3">
+          <h2 className="text-xl font-bold text-stone-900 mb-4">
+            Daftar Pelajaran
+          </h2>
+
+          {lessons.map((lesson, index) => (
+            <motion.div
+              key={lesson.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <button
+                disabled={lesson.isLocked}
+                onClick={() => {
+                  if (!lesson.isLocked) {
+                    router.push(`/learn/map/lesson/${lesson.id}`);
+                  }
+                }}
+                className={`w-full bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-5 text-left ${
+                  lesson.isLocked
+                    ? "opacity-60 cursor-not-allowed"
+                    : "hover:scale-[1.02]"
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold ${
+                      lesson.isCompleted
+                        ? "bg-green-100 text-green-600"
+                        : lesson.isLocked
+                        ? "bg-gray-100 text-gray-400"
+                        : "bg-green-100 text-green-600"
+                    }`}
+                  >
+                    {lesson.isCompleted ? (
+                      <CheckCircle className="w-6 h-6" />
+                    ) : lesson.isLocked ? (
+                      <Lock className="w-6 h-6" />
+                    ) : (
+                      <span className="text-lg">{lesson.id}</span>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-stone-900 mb-1">
+                      {lesson.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {lesson.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span>⏱️ {lesson.duration}</span>
+                      <span>⭐ {lesson.xp} XP</span>
+                    </div>
+                  </div>
+
+                  {!lesson.isLocked && (
+                    <div className="flex-shrink-0">
+                      {lesson.isCompleted ? (
+                        <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                          <CheckCircle className="w-5 h-5 text-white" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                          <Play className="w-5 h-5 text-white ml-0.5" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </button>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Museum Explorer Section */}
+        <h2 className="text-xl font-bold text-stone-900 mb-4">
+          Jelajahi Museum & Heritage
+        </h2>
+
         {/* Results Count & Filter Button */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-gray-700">
