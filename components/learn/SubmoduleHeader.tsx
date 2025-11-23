@@ -64,7 +64,7 @@ export default function SubmoduleHeader({
 
   return (
     <motion.header
-      className="sticky top-2 z-40 px-4 md:px-6"
+      className="sticky top-0 z-40 px-4 md:px-6 pt-2"
       animate={{
         y: isHidden ? -120 : 0,
       }}
