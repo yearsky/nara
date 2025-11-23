@@ -40,9 +40,9 @@ const translations = {
     'feature.users': 'pengguna',
 
     // Stats
-    'stats.activeUsers': 'Pengguna Aktif',
-    'stats.conversations': 'Percakapan Harian',
-    'stats.satisfaction': 'Tingkat Kepuasan',
+    'stats.culturalContent': 'Materi Budaya',
+    'stats.aiAvailable': 'AI Companion 24/7',
+    'stats.openSource': 'Gratis & Open Source',
     'stats.rated': 'Dinilai sangat baik oleh komunitas kami',
     'stats.learning': 'orang sedang belajar sekarang',
 
@@ -86,9 +86,9 @@ const translations = {
     'feature.users': 'users',
 
     // Stats
-    'stats.activeUsers': 'Active Users',
-    'stats.conversations': 'Daily Conversations',
-    'stats.satisfaction': 'Satisfaction Rate',
+    'stats.culturalContent': 'Cultural Topics',
+    'stats.aiAvailable': 'AI Companion 24/7',
+    'stats.openSource': 'Free & Open Source',
     'stats.rated': 'Rated excellent by our community',
     'stats.learning': 'people are learning right now',
 
