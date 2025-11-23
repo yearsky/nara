@@ -142,7 +142,7 @@ export default function PolaPage() {
 
       {/* Header */}
       <SubmoduleHeader
-        title="Nara Pola"
+        title="Nara Pola 🔒"
         subtitle="Jelajahi batik, tenun, dan motif tradisional nusantara"
         icon={Grid3x3}
         gradientFrom="#14B8A6"
@@ -163,11 +163,62 @@ export default function PolaPage() {
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6">
+        {/* Lock Notice */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-teal-100 border-2 border-teal-300 rounded-2xl p-6 mb-8"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-teal-200 rounded-full flex items-center justify-center flex-shrink-0">
+              <Grid3x3 className="w-6 h-6 text-teal-700" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-teal-900 mb-2">
+                Modul Terkunci 🔒
+              </h3>
+              <p className="text-teal-800 mb-4">
+                Modul Nara Pola akan segera hadir! Nantikan pembelajaran interaktif
+                tentang batik, tenun, songket, dan motif tradisional nusantara lainnya.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => router.push("/learn")}
+                  className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2.5 rounded-full font-semibold transition-all shadow-md"
+                >
+                  Kembali ke Daftar Modul
+                </button>
+                <button
+                  onClick={() => router.push("/dashboard")}
+                  className="bg-white text-teal-700 px-6 py-2.5 rounded-full font-semibold border-2 border-teal-300 hover:bg-teal-50 transition-all">
+                  Lihat Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Lessons Section */}
-        <div className="mb-8 space-y-3 lessons-list">
-          <h2 className="text-xl font-bold text-stone-900 mb-4">
-            Daftar Pelajaran
-          </h2>
+        <div className="relative mb-8">
+          {/* Blurred overlay */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/40 z-10 rounded-2xl flex items-center justify-center">
+            <div className="text-center p-6">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Grid3x3 className="w-10 h-10 text-teal-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Segera Hadir!
+              </h3>
+              <p className="text-gray-700 mb-4">
+                Pelajaran tentang motif tradisional akan segera tersedia
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 opacity-50 pointer-events-none select-none">
+            <h2 className="text-xl font-bold text-stone-900 mb-4">
+              Daftar Pelajaran
+            </h2>
 
           {lessons.map((lesson, index) => (
             <motion.div
@@ -238,12 +289,18 @@ export default function PolaPage() {
               </button>
             </motion.div>
           ))}
+          </div>
         </div>
 
         {/* Pattern Gallery Section */}
-        <h2 className="text-xl font-bold text-stone-900 mb-4">
-          Galeri Motif
-        </h2>
+        <div className="relative">
+          {/* Blurred overlay */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/40 z-10 rounded-2xl" />
+
+          <div className="opacity-50 pointer-events-none select-none">
+            <h2 className="text-xl font-bold text-stone-900 mb-4">
+              Galeri Motif
+            </h2>
 
         {/* Category Filter */}
         <motion.div
@@ -356,23 +413,29 @@ export default function PolaPage() {
               </div>
             </motion.div>
           ))}
+          </div>
+
+          {filteredPatterns.length === 0 && (
+            <div className="text-center py-16">
+              <Grid3x3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-600">Tidak ada motif yang ditemukan</p>
+            </div>
+          )}
+          </div>
         </div>
 
-        {filteredPatterns.length === 0 && (
-          <div className="text-center py-16">
-            <Grid3x3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-600">Tidak ada motif yang ditemukan</p>
-          </div>
-        )}
-
         {/* Info Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mt-8 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-2xl shadow-lg p-6 text-white"
-        >
-          <div className="flex items-start gap-4">
+        <div className="relative">
+          {/* Blurred overlay */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/40 z-10 rounded-2xl" />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-2xl shadow-lg p-6 text-white opacity-50 pointer-events-none select-none"
+          >
+            <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
               <Grid3x3 className="w-6 h-6" />
             </div>
@@ -388,8 +451,9 @@ export default function PolaPage() {
                 Mulai Belajar
               </button>
             </div>
-          </div>
-        </motion.div>
+            </div>
+          </motion.div>
+        </div>
       </main>
 
       {/* Glass Footer */}

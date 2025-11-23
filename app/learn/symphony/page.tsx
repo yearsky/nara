@@ -144,7 +144,7 @@ export default function SymphonyPage() {
     <div className="min-h-screen bg-gradient-to-b from-pink-50/30 to-rose-50/30 pb-32 pt-6">
       {/* Header */}
       <SubmoduleHeader
-        title="Nara Symphony"
+        title="Nara Symphony 🔒"
         subtitle="Dengarkan dan pelajari musik tradisional nusantara"
         icon={Music}
         gradientFrom="#EC4899"
@@ -180,11 +180,62 @@ export default function SymphonyPage() {
 
       {/* Main Content */}
       <main className="max-w-screen-xl mx-auto px-4 py-6 space-y-8">
+        {/* Lock Notice */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-pink-100 border-2 border-pink-300 rounded-2xl p-6"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-pink-200 rounded-full flex items-center justify-center flex-shrink-0">
+              <Music className="w-6 h-6 text-pink-700" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-pink-900 mb-2">
+                Modul Terkunci 🔒
+              </h3>
+              <p className="text-pink-800 mb-4">
+                Modul Nara Symphony akan segera hadir! Nantikan pembelajaran interaktif
+                tentang gamelan, angklung, dan alat musik tradisional nusantara lainnya.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => router.push("/learn")}
+                  className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-full font-semibold transition-all shadow-md"
+                >
+                  Kembali ke Daftar Modul
+                </button>
+                <button
+                  onClick={() => router.push("/dashboard")}
+                  className="bg-white text-pink-700 px-6 py-2.5 rounded-full font-semibold border-2 border-pink-300 hover:bg-pink-50 transition-all">
+                  Lihat Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Lessons List */}
-        <div className="space-y-3">
-          <h2 className="text-xl font-bold text-stone-900 mb-4">
-            Daftar Pelajaran
-          </h2>
+        <div className="relative">
+          {/* Blurred overlay */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/40 z-10 rounded-2xl flex items-center justify-center">
+            <div className="text-center p-6">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Music className="w-10 h-10 text-pink-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Segera Hadir!
+              </h3>
+              <p className="text-gray-700 mb-4">
+                Pelajaran musik tradisional akan segera tersedia
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 opacity-50 pointer-events-none select-none">
+            <h2 className="text-xl font-bold text-stone-900 mb-4">
+              Daftar Pelajaran
+            </h2>
 
           {lessons.map((lesson, index) => (
             <motion.div
@@ -258,16 +309,22 @@ export default function SymphonyPage() {
               </button>
             </motion.div>
           ))}
+          </div>
         </div>
 
         {/* Popular Tracks */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h2 className="text-xl font-bold text-stone-900 mb-4">
-            🔥 Sedang Populer
-          </h2>
+        <div className="relative">
+          {/* Blurred overlay */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/40 z-10 rounded-2xl" />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="opacity-50 pointer-events-none select-none"
+          >
+            <h2 className="text-xl font-bold text-stone-900 mb-4">
+              🔥 Sedang Populer
+            </h2>
           <div className="bg-white rounded-2xl shadow-md p-5 space-y-3">
             {popularTracks.map((track, index) => (
               <div
@@ -310,13 +367,18 @@ export default function SymphonyPage() {
               </div>
             ))}
           </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
         {/* Music Categories */}
-        <div>
-          <h2 className="text-xl font-bold text-stone-900 mb-4">
-            Jelajahi Alat Musik
-          </h2>
+        <div className="relative">
+          {/* Blurred overlay */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/40 z-10 rounded-2xl" />
+
+          <div className="opacity-50 pointer-events-none select-none">
+            <h2 className="text-xl font-bold text-stone-900 mb-4">
+              Jelajahi Alat Musik
+            </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {musicCategories.map((category, index) => (
               <motion.div
@@ -371,15 +433,20 @@ export default function SymphonyPage() {
               </motion.div>
             ))}
           </div>
+          </div>
         </div>
 
         {/* Learning Resources */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl shadow-lg p-6 text-white"
-        >
+        <div className="relative">
+          {/* Blurred overlay */}
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/40 z-10 rounded-2xl" />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl shadow-lg p-6 text-white opacity-50 pointer-events-none select-none"
+          >
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
               <Music className="w-6 h-6" />
@@ -397,7 +464,8 @@ export default function SymphonyPage() {
               </button>
             </div>
           </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </main>
 
       {/* Glass Footer */}
